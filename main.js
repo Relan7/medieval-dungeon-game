@@ -52,6 +52,8 @@ function startGame() {
         weaponName = data.weaponName;
         weaponLevel = data.weaponLevel;
         updateCharacterMenu();
+      } else {
+        resetGame();
       }
     });
     document.getElementById('nicknameMenu').style.display = 'none';
@@ -286,10 +288,8 @@ function resetGame() {
   weaponPower = 10;
   weaponName = 'Кулаки';
   weaponLevel = 0;
-  nickname = '';
-  document.getElementById('nicknameMenu').style.display = 'block';
-  document.getElementById('gameCanvas').style.display = 'none';
-  document.getElementById('bottomMenu').style.display = 'none';
+  updateCharacterMenu();
+  updateStatusBar();
 }
 
 canvas.addEventListener('click', function(event) {

@@ -14,6 +14,7 @@ function loadProgress(nickname) {
       return snapshot.val();
     } else {
       console.log("No data available");
+      return null;
     }
   }).catch((error) => {
     console.error(error);
@@ -31,6 +32,7 @@ function displayTopPlayers() {
       return snapshot.val();
     } else {
       console.log("No data available");
+      return {};
     }
   }).catch((error) => {
     console.error(error);
