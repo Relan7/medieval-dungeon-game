@@ -318,6 +318,8 @@
             }
         }
 
+        window.buyWeapon = buyWeapon;  // Make buyWeapon available globally
+
         function upgradeWeapon(type, costPerLevel) {
             if (gold >= costPerLevel && weaponName === 'Меч') {
                 weaponPower += 15;
@@ -336,6 +338,8 @@
             }
         }
 
+        window.upgradeWeapon = upgradeWeapon;  // Make upgradeWeapon available globally
+
         function continueGame() {
             document.getElementById('shopMenu').style.display = 'none';
             if (currentLevel < 100) {
@@ -347,6 +351,8 @@
             }
             updateTopPlayers(nickname, { nickname, level: currentLevel });
         }
+
+        window.continueGame = continueGame;  // Make continueGame available globally
 
         function hitMonster() {
             monsterHealth -= weaponPower;
@@ -372,6 +378,8 @@
                 }, 2000);
             }
         }
+
+        window.hitMonster = hitMonster;  // Make hitMonster available globally
 
         function drawMenu() {
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
@@ -472,11 +480,15 @@
             }
         }
 
+        window.changeScreen = changeScreen;  // Make changeScreen available globally
+
         function toggleCharacterMenu() {
             const menu = document.getElementById('characterMenu');
             menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
             updateCharacterMenu();
         }
+
+        window.toggleCharacterMenu = toggleCharacterMenu;  // Make toggleCharacterMenu available globally
 
         function updateCharacterMenu() {
             document.getElementById('weapon').textContent = weaponName;
@@ -511,6 +523,8 @@
             }
         }
 
+        window.toggleTopPlayers = toggleTopPlayers;  // Make toggleTopPlayers available globally
+
         function resetGame() {
             currentLevel = 1;
             gold = 0;
@@ -521,6 +535,8 @@
             updateCharacterMenu();
             updateStatusBar();
         }
+
+        window.resetGame = resetGame;  // Make resetGame available globally
 
         canvas.addEventListener('click', function(event) {
             const rect = canvas.getBoundingClientRect();
