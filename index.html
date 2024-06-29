@@ -294,6 +294,8 @@
             }
         }
 
+        window.startGame = startGame;  // Make startGame available globally
+
         function buyWeapon(type, power, cost) {
             if (gold >= cost) {
                 weaponPower = power;
