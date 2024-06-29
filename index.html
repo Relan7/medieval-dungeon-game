@@ -265,6 +265,18 @@
             }
         }
 
+        function drawShop() {
+            // Add shop drawing logic here
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+            ctx.font = '30px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Магазин', canvas.width / 2, 50);
+            // You can add more detailed drawing logic as needed
+        }
+
         function startGame() {
             const input = document.getElementById('nicknameInput').value;
             console.log(`Nickname entered: ${input}`);  // Logging nickname
@@ -461,11 +473,6 @@
 
         function updateShop() {
             document.getElementById('shopGold').textContent = gold;
-        }
-
-        function drawShop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // Тут вы можете добавить отрисовку магазина, если нужно
         }
 
         function changeScreen(screen) {
