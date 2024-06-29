@@ -259,6 +259,12 @@
             drawLevelMap();
         };
 
+        function drawStars(x, y, count) {
+            for (let i = 0; i < count; i++) {
+                ctx.drawImage(starImage, x + i * 30, y, 20, 20);
+            }
+        }
+
         function startGame() {
             const input = document.getElementById('nicknameInput').value;
             console.log(`Nickname entered: ${input}`);  // Logging nickname
