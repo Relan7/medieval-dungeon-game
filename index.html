@@ -366,28 +366,40 @@
 
         window.continueGame = continueGame;  // Make continueGame available globally
 
-        function hitMonster() {
-            monsterHealth -= weaponPower;
-            hits += 1;
-            if (monsterHealth <= 0) {
-                monsterHealth = 0;
-                gold += 10;
-                levels[currentLevel - 1].completed = true;
-                saveProgress(nickname, {
-                    currentLevel,
-                    gold,
-                    playerHealth,
-                    weaponPower,
-                    weaponName,
-                    weaponLevel
-                });
-                showVictoryMessage();
-                currentScreen = 'shop';
-                setTimeout(() => {
-                    document.getElementById('victoryMessage').style.display = 'none';
-                    document.getElementById('shopMenu').style.display = 'block';
-                    updateShop();
-                }, 2000);
+        function hitMonster(event) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+            const monsterX = canvas.width / 2 - monsterImage.width / 2;
+            const monsterY = canvas.height / 2 - monsterImage.height / 2;
+            if (
+                mouseX >= monsterX &&
+                mouseX <= monsterX + monsterImage.width &&
+                mouseY >= monsterY &&
+                mouseY <= monsterY + monsterImage.height
+            ) {
+                monsterHealth -= weaponPower;
+                hits += 1;
+                if (monsterHealth <= 0) {
+                    monsterHealth = 0;
+                    gold += 10;
+                    levels[currentLevel - 1].completed = true;
+                    saveProgress(nickname, {
+                        currentLevel,
+                        gold,
+                        playerHealth,
+                        weaponPower,
+                        weaponName,
+                        weaponLevel
+                    });
+                    showVictoryMessage();
+                    currentScreen = 'shop';
+                    setTimeout(() => {
+                        document.getElementById('victoryMessage').style.display = 'none';
+                        document.getElementById('shopMenu').style.display = 'block';
+                        updateShop();
+                    }, 2000);
+                }
             }
         }
 
@@ -567,6 +579,8 @@
                     currentScreen = 'battle';
                     drawBattle();
                 }
+            } else if (currentScreen === 'battle') {
+                hitMonster(event);
             }
         });
 
