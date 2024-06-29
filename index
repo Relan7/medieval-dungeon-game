@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Средневековое Подземелье</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            background: #000;
+        }
+        #bottomMenu {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            background: #333;
+            color: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 18px;
+        }
+        #characterMenu {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            font-size: 16px;
+            text-align: center;
+        }
+        #shopMenu {
+            position: fixed;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        #shopMenu p {
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        #shopMenu p:hover {
+            text-decoration: underline;
+        }
+        .status-bar {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .status-bar p {
+            margin: 5px 0;
+        }
+        .health-bar {
+            background: #555;
+            border-radius: 5px;
+            overflow: hidden;
+            width: 200px;
+            height: 20px;
+            margin-bottom: 10px;
+        }
+        .health-bar-inner {
+            height: 100%;
+            background: #0f0;
+        }
+        .victory-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        #characterImage {
+            width: 100px;
+            height: 100px;
+        }
+        #nicknameMenu {
+            display: block;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #topPlayersMenu {
+            display: none;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <div id="nicknameMenu">
+        <h2>Введите свой никнейм</h2>
+        <input type="text" id="nicknameInput" placeholder="Ваш никнейм">
+        <button onclick="startGame()">Начать игру</button>
+    </div>
+    <canvas id="gameCanvas" style="display:none;"></canvas>
+    <div id="bottomMenu" style="display:none;">
+        <div onclick="changeScreen('arena')">Арена</div>
+        <div onclick="changeScreen('dungeon')">Подземелье</div>
+        <div onclick="changeScreen('raid')">Рейд</div>
+        <div onclick="changeScreen('castle')">Замок</div>
+        <div onclick="changeScreen('shop')">Магазин</div>
+        <div onclick="toggleCharacterMenu()">Персонаж</div>
+        <div onclick="toggleTopPlayers()">Топ игроки</div>
+        <div onclick="resetGame()">Начать заново</div>
+    </div>
+    <div id="characterMenu">
+        <img id="characterImage" src="peasant.png" alt="Character">
+        <p>Оружие: <span id="weapon"></span></p>
+        <p>Здоровье: <span id="health"></span></p>
+        <p>Урон: <span id="damage"></span></p>
+        <p>Золото: <span id="gold"></span></p>
+        <p>Уровень: <span id="level"></span></p>
+    </div>
+    <div id="shopMenu" style="display:none;">
+        <h2>Магазин</h2>
+        <p>Золото: <span id="shopGold"></span></p>
+        <p onclick="buyWeapon('sword', 10, 50)">Меч (+10 сила) - 50 золота</p>
+        <p onclick="upgradeWeapon('sword', 20)">Улучшить Меч (+15 сила) - 20 золота за уровень</p>
+        <button onclick="continueGame()">Продолжить</button>
+    </div>
+    <div id="topPlayersMenu">
+        <button onclick="toggleTopPlayers()">Закрыть</button>
+    </div>
+    <div class="status-bar" id="statusBar" style="display:none;">
+        <div class="health-bar">
+            <div class="health-bar-inner" id="playerHealthBar"></div>
+        </div>
+        <p>Золото: <span id="statusGold"></span></p>
+        <p>Уровень: <span id="statusLevel"></span></p>
+    </div>
+    <div class="victory-message" id="victoryMessage">
+        <p>Shap в печали, что вы его бьете :(</p>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let currentScreen = 'menu';
+        let playerHealth = 100;
+        let monsterHealth = 100;
+        let hits = 0;
+        let gold = 0;
+        let weaponPower = 10;
+        let weaponName = 'Кулаки';
+        let weaponLevel = 0; // уровень улучшения оружия
+        let baseMonsterHealth = 100;
+        let currentLevel = 1;
+        let levels = new Array(100).fill().map((_, i) => ({ number: i + 1, stars: 0, completed: false }));
+
+        const backgroundImage = new Image();
+        backgroundImage.src = 'background.png';
+        const dungeonGateImage = new Image();
+        dungeonGateImage.src = 'dung.png';
+        const monsterImage = new Image();
+        monsterImage.src = 'mob.png';
+        const mapImage = new Image();
+        mapImage.src = 'карта.png';
+        const starImage = new Image();
+        starImage.src = 'star.png';
+
+        const peasantImage = 'peasant.png';
+        const peasantWithSwordImage = 'peasant_with_sword.png';
+
+        starImage.onload = function() {
+            drawLevelMap();
+        };
+
+        let nickname = '';
+
+        function startGame() {
+            const input = document.getElementById('nicknameInput').value;
+            if (input) {
+                nickname = input;
+                document.getElementById('nicknameMenu').style.display = 'none';
+                document.getElementById('gameCanvas').style.display = 'block';
+                document.getElementById('bottomMenu').style.display = 'flex';
+                currentScreen = 'menu';
+                drawMenu();
+            } else {
+                alert('Пожалуйста, введите никнейм.');
+            }
+        }
+
+        let topPlayers = [];
+
+        function updateTopPlayers() {
+            topPlayers.push({ nickname, level: currentLevel });
+            topPlayers.sort((a, b) => b.level - a.level);
+            if (topPlayers.length > 10) topPlayers.pop();
+        }
+
+        function displayTopPlayers() {
+            let topListHTML = '<h2>Топ игроки</h2>';
+            topPlayers.forEach((player, index) => {
+                topListHTML += `<p>${index + 1}. ${player.nickname} - Уровень ${player.level}</p>`;
+            });
+            document.getElementById('topPlayersMenu').innerHTML = topListHTML;
+        }
+
+        function toggleTopPlayers() {
+            const menu = document.getElementById('topPlayersMenu');
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+            } else {
+                displayTopPlayers();
+                menu.style.display = 'block';
+            }
+        }
+
+        function resetGame() {
+            currentLevel = 1;
+            gold = 0;
+            playerHealth = 100;
+            weaponPower = 10;
+            weaponName = 'Кулаки';
+            weaponLevel = 0;
+            nickname = '';
+            document.getElementById('nicknameMenu').style.display = 'block';
+            document.getElementById('gameCanvas').style.display = 'none';
+            document.getElementById('bottomMenu').style.display = 'none';
+        }
+
+        function saveProgress() {
+            localStorage.setItem('currentLevel', currentLevel.toString());
+            localStorage.setItem('gold', gold.toString());
+        }
+
+        function loadProgress() {
+            let savedLevel = localStorage.getItem('currentLevel');
+            let savedGold = localStorage.getItem('gold');
+            if (savedLevel) {
+                currentLevel = parseInt(savedLevel);
+            }
+            if (savedGold) {
+                gold = parseInt(savedGold);
+            }
+        }
+
+        loadProgress();
+
+        function hitMonster() {
+            monsterHealth -= weaponPower;
+            hits += 1;
+            if (monsterHealth <= 0) {
+                monsterHealth = 0;
+                gold += 10;
+                levels[currentLevel - 1].completed = true;
+                saveProgress();
+                updateTopPlayers();
+                showVictoryMessage();
+                currentScreen = 'shop';
+                setTimeout(() => {
+                    document.getElementById('victoryMessage').style.display = 'none';
+                    document.getElementById('shopMenu').style.display = 'block';
+                    updateShop();
+                }, 2000); // Показать сообщение на 2 секунды
+            }
+        }
+
+        function drawMenu() {
+            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+        }
+
+        function drawDungeonEntrance() {
+            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(dungeonGateImage, canvas.width / 2 - dungeonGateImage.width / 2, canvas.height / 2 - dungeonGateImage.height / 2);
+        }
+
+        function drawVictoryScreen() {
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+            ctx.font = '50px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Вы победили!', canvas.width / 2, canvas.height / 2);
+        }
+
+        function showVictoryMessage() {
+            const victoryMessage = document.getElementById('victoryMessage');
+            victoryMessage.style.display = 'block';
+        }
+
+        monsterImage.onload = function() {
+            const monsterX = canvas.width / 2 - monsterImage.width / 2;
+            const monsterY = canvas.height / 2 - monsterImage.height / 2;
+            
+            canvas.addEventListener('click', function(event) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = event.clientX - rect.left;
+                const mouseY = event.clientY - rect.top;
+
+                if (currentScreen === 'battle') {
+                    if (mouseX > monsterX && mouseX < monsterX + monsterImage.width &&
+                        mouseY > monsterY && mouseY < monsterY + monsterImage.height) {
+                        hitMonster();
+                    }
+                }
+            });
+        };
+
+        function startLevel(levelNumber) {
+            currentLevel = levelNumber;
+            monsterHealth = baseMonsterHealth * Math.pow(1.1, levelNumber - 1);
+            console.log("Уровень " + levelNumber + " начинается! Здоровье монстра: " + monsterHealth);
+            currentScreen = 'battle';
+            drawBattle();
+        }
+
+        function drawLevelMap() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(mapImage, 0, 0, canvas.width, canvas.height);
+
+            levels.forEach((level, index) => {
+                const { x, y } = getLevelPosition(index);
+
+                ctx.fillStyle = level.completed ? 'gold' : 'silver';
+                ctx.beginPath();
+                ctx.arc(x, y, 25, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = 'white';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(level.number, x, y + 8);
+
+                drawStars(x - 30, y + 35, level.stars);
+            });
+        }
+
+        function getLevelPosition(index) {
+            const perRow = 5;
+            const spacing = 80;
+            const offsetX = (canvas.width - perRow * spacing) / 2;
+            const offsetY = 100;
+
+            const x = offsetX + (index % perRow) * spacing;
+            const y = offsetY + Math.floor(index / perRow) * spacing;
+            return { x, y };
+        }
+
+        function drawBattle() {
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(monsterImage, canvas.width / 2 - monsterImage.width / 2, canvas.height / 2 - monsterImage.height / 2);
+            drawHealthBar(playerHealth, 10, 10, 200, 20, 'green');
+            drawHealthBar(monsterHealth, canvas.width - 210, 10, 200, 20, 'red');
+            updateStatusBar();
+        }
+
+        function drawHealthBar(health, x, y, width, height, color) {
+            ctx.fillStyle = 'grey';
+            ctx.fillRect(x, y, width, height);
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, width * health / 100, height);
+        }
+
+        function updateShop() {
+            document.getElementById('shopGold').textContent = gold;
+        }
+
+        function buyWeapon(type, power, cost) {
+            if (gold >= cost) {
+                weaponPower = power;
+                gold -= cost;
+                weaponLevel = 1; // Начальный уровень улучшения меча
+                if (type === 'sword') {
+                    weaponName = 'Меч';
+                    document.getElementById('characterImage').src = peasantWithSwordImage;
+                }
+                updateCharacterMenu();
+                updateShop();
+            }
+        }
+
+        function upgradeWeapon(type, costPerLevel) {
+            if (gold >= costPerLevel && weaponName === 'Меч') {
+                weaponPower += 15;
+                gold -= costPerLevel;
+                weaponLevel++;
+                updateCharacterMenu();
+                updateShop();
+            }
+        }
+
+        function continueGame() {
+            document.getElementById('shopMenu').style.display = 'none';
+            if (currentLevel < 100) {
+                currentLevel++;
+                startLevel(currentLevel);
+            } else {
+                currentScreen = 'victory';
+                drawVictoryScreen();
+            }
+        }
+
+        function drawShop() {
+            document.getElementById('shopMenu').style.display = 'block';
+            updateShop();
+        }
+
+        function changeScreen(screen) {
+            currentScreen = screen;
+            document.getElementById('shopMenu').style.display = 'none';
+            document.getElementById('statusBar').style.display = 'none';
+            if (screen === 'arena' || screen === 'raid' || screen === 'castle') {
+                drawMenu();
+            } else if (screen === 'dungeon') {
+                drawDungeonEntrance();
+            } else if (screen === 'shop') {
+                drawShop();
+            } else if (screen === 'battle') {
+                document.getElementById('statusBar').style.display = 'block';
+                updateStatusBar();
+                drawBattle();
+            }
+        }
+
+        function toggleCharacterMenu() {
+            const menu = document.getElementById('characterMenu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            updateCharacterMenu();
+        }
+
+        function updateCharacterMenu() {
+            document.getElementById('weapon').textContent = weaponName;
+            document.getElementById('health').textContent = playerHealth;
+            document.getElementById('damage').textContent = weaponPower;
+            document.getElementById('gold').textContent = gold;
+            document.getElementById('level').textContent = currentLevel;
+        }
+
+        function updateStatusBar() {
+            document.getElementById('statusGold').textContent = gold;
+            document.getElementById('statusLevel').textContent = currentLevel;
+            document.getElementById('playerHealthBar').style.width = playerHealth + '%';
+        }
+
+        canvas.addEventListener('click', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+
+            if (currentScreen === 'menu') {
+                currentScreen = 'dungeon';
+                drawDungeonEntrance();
+            } else if (currentScreen === 'dungeon') {
+                const gateCenterX = canvas.width / 2;
+                const gateCenterY = canvas.height / 2;
+                if (mouseX > gateCenterX - dungeonGateImage.width / 2 &&
+                    mouseX < gateCenterX + dungeonGateImage.width / 2 &&
+                    mouseY > gateCenterY - dungeonGateImage.height / 2) {
+                    currentScreen = 'battle';
+                    drawBattle();
+                }
+            }
+        });
+
+        canvas.addEventListener('click', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+
+            levels.forEach((level, index) => {
+                const { x, y } = getLevelPosition(index);
+                const radius = 25;
+
+                if (Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2) < radius) {
+                    if (levels[index].completed || index === currentLevel - 1) {
+                        startLevel(level.number);
+                    }
+                }
+            });
+        });
+
+        function gameLoop() {
+            requestAnimationFrame(gameLoop);
+            if (currentScreen === 'menu') {
+                drawMenu();
+            } else if (currentScreen === 'dungeon') {
+                drawDungeonEntrance();
+            } else if (currentScreen === 'battle') {
+                drawBattle();
+            } else if (currentScreen === 'levelMap') {
+                drawLevelMap();
+            } else if (currentScreen === 'victory') {
+                drawVictoryScreen();
+            } else if (currentScreen === 'shop') {
+                drawShop();
+            }
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
