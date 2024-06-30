@@ -278,9 +278,10 @@
         });
 
         function showHitAnimation() {
-            crosshair.style.transform = 'scale(0.8)';
+            crosshair.style.transition = 'transform 0.1s ease-in-out'; // добавьте transition сюда
+            crosshair.style.transform = 'translate(-50%, -50%) scale(0.8)';
             setTimeout(() => {
-                crosshair.style.transform = 'scale(1)';
+                crosshair.style.transform = 'translate(-50%, -50%) scale(1)';
             }, 100);
         }
 
