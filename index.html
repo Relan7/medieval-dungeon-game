@@ -235,6 +235,8 @@
         <div onclick="changeScreen('dungeon')">Подземелье</div>
         <div onclick="changeScreen('raid')">Рейд</div>
         <div onclick="changeScreen('castle')">Замок</div>
+        <div onclick="changeScreen('levels')">Уровни</div>
+
         <div onclick="toggleShop()">Магазин</div>
         <div onclick="toggleTopPlayers()">Топ игроки</div>
     </div>
@@ -339,12 +341,16 @@
     });
 }
 
-
 function loadProgress(nickname) {
     const dbRef = ref(database);
     return get(child(dbRef, `players/${nickname}`)).then((snapshot) => {
         if (snapshot.exists()) {
-            return snapshot.val();
+            const data = snapshot.val();
+            // Восстановление прогресса уровней
+            if (data.levels) {
+                levels = data.levels;
+            }
+            return data;
         } else {
             console.log("No data available");
             return null;
@@ -353,6 +359,7 @@ function loadProgress(nickname) {
         console.error(error);
     });
 }
+
 
 
         function updateTopPlayers(nickname, playerData) {
@@ -459,12 +466,13 @@ function loadProgress(nickname) {
             }, 500);
         }
         window.showMonsterMessage = showMonsterMessage;
-
+      
         function drawStars(x, y, count) {
-            for (let i = 0; i < count; i++) {
-                ctx.drawImage(starImage, x + i * 30, y, 20, 20);
-            }
-        }
+    console.log(`Drawing ${count} stars at (${x}, ${y})`);
+    for (let i = 0; i < count; i++) {
+        ctx.drawImage(starImage, x + i * 30, y, 20, 20);
+    }
+}
         window.drawStars = drawStars;
 
         function toggleShop() {
@@ -581,6 +589,7 @@ function startGame() {
                 weaponName = data.weaponName;
                 weaponLevel = data.weaponLevel;
                 inventory = data.inventory || inventory; // Восстановление инвентаря
+                levels = data.levels || levels; // Восстановление прогресса уровней
                 updateCharacterMenu();
             } else {
                 resetGame();
@@ -595,6 +604,7 @@ function startGame() {
         alert('Пожалуйста, введите никнейм.');
     }
 }
+
 
 
         window.startGame = startGame;
@@ -757,11 +767,26 @@ window.hitMonster = hitMonster;
             ctx.textAlign = 'center';
             ctx.fillText('Вы победили!', canvas.width / 2, canvas.height / 2);
         }
-
+        
         function showVictoryMessage() {
-            const victoryMessage = document.getElementById('victoryMessage');
-            victoryMessage.style.display = 'block';
-        }
+    const victoryMessage = document.getElementById('victoryMessage');
+    victoryMessage.style.display = 'block';
+
+    const starsEarned = calculateStars(); // Расчет количества заработанных звезд
+    completeLevel(currentLevel, starsEarned); // Обновление данных уровня
+}
+
+function calculateStars() {
+    // Логика расчета количества звезд, например, на основе оставшегося здоровья игрока или времени
+    if (playerHealth > 80) {
+        return 3;
+    } else if (playerHealth > 50) {
+        return 2;
+    } else {
+        return 1;
+    }
+}
+
 
         function startLevel(levelNumber) {
             currentLevel = levelNumber;
@@ -771,7 +796,59 @@ window.hitMonster = hitMonster;
             updateMonsterHealthDisplay(); // Обновление отображения здоровья при начале уровня
         }
 
+        function completeLevel(levelNumber, stars) {
+    console.log(`Completing level ${levelNumber} with ${stars} stars`);
+    if (levels[levelNumber - 1]) {
+        levels[levelNumber - 1].completed = true;
+        levels[levelNumber - 1].stars = stars;  // Устанавливаем количество звезд
+        saveProgress(nickname, {
+            currentLevel,
+            gold,
+            playerHealth,
+            weaponPower,
+            weaponName,
+            weaponLevel,
+            inventory,
+            levels // Сохраняем прогресс уровней
+        });
+        drawLevelMap();  // Обновляем отображение карты уровней
+    }
+}
+
+
+function drawLevelsScreen() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = 'white';
+    ctx.font = '30px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Уровни и Звезды', canvas.width / 2, 50);
+
+    levels.forEach((level, index) => {
+        const { x, y } = getLevelPosition(index);
+
+        ctx.fillStyle = level.completed ? 'gold' : 'silver';
+        ctx.beginPath();
+        ctx.arc(x, y, 25, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Arial';
+        ctx.fillText(level.number, x, y + 8);
+
+        drawStars(x - 30, y + 35, level.stars);
+    });
+}
+
+
+
+
+
         function drawLevelMap() {
+            console.log(levels);  // Вывод данных уровней в консоль
+            console.log('Drawing level map');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(mapImage, 0, 0, canvas.width, canvas.height);
 
@@ -824,22 +901,25 @@ window.hitMonster = hitMonster;
         }
 
         function changeScreen(screen) {
-            currentScreen = screen;
-            document.getElementById('shopMenu').style.display = 'none';
-            document.getElementById('statusBar').style.display = 'none';
-            crosshair.style.display = (screen === 'battle') ? 'block' : 'none';
-            if (screen === 'arena' || screen === 'raid' || screen === 'castle') {
-                drawMenu();
-            } else if (screen === 'dungeon') {
-                drawDungeonEntrance();
-            } else if (screen === 'shop') {
-                drawShop();
-            } else if (screen === 'battle') {
-                document.getElementById('statusBar').style.display = 'block';
-                updateStatusBar();
-                drawBattle();
-            }
-        }
+    currentScreen = screen;
+    document.getElementById('shopMenu').style.display = 'none';
+    document.getElementById('statusBar').style.display = 'none';
+    crosshair.style.display = (screen === 'battle') ? 'block' : 'none';
+    if (screen === 'arena' || screen === 'raid' || screen === 'castle') {
+        drawMenu();
+    } else if (screen === 'dungeon') {
+        drawDungeonEntrance();
+    } else if (screen === 'shop') {
+        drawShop();
+    } else if (screen === 'battle') {
+        document.getElementById('statusBar').style.display = 'block';
+        updateStatusBar();
+        drawBattle();
+    } else if (screen === 'levels') {
+        drawLevelsScreen();  // Вызов функции для отрисовки экрана уровней
+    }
+}
+
 
         window.changeScreen = changeScreen;
 
