@@ -23,6 +23,7 @@
             pointer-events: none;
             transform: translate(-50%, -50%);
             transition: transform 0.1s ease-in-out;
+            display: none; /* Изначально скрыто */
         }
         #bottomMenu {
             position: fixed;
@@ -269,7 +270,7 @@
         starImage.onload = function() {
             drawLevelMap();
         };
-
+        
         // Crosshair logic
         const crosshair = document.getElementById('crosshair');
         document.addEventListener('mousemove', (event) => {
@@ -394,6 +395,7 @@
         window.continueGame = continueGame;  // Make continueGame available globally
 
         function hitMonster(event) {
+            if (currentScreen !== 'battle') return; // Проверка, что удар возможен только в режиме "battle"
             const rect = canvas.getBoundingClientRect();
             const mouseX = event.clientX - rect.left;
             const mouseY = event.clientY - rect.top;
@@ -526,6 +528,7 @@
             currentScreen = screen;
             document.getElementById('shopMenu').style.display = 'none';
             document.getElementById('statusBar').style.display = 'none';
+            crosshair.style.display = (screen === 'battle') ? 'block' : 'none'; // Показать прицел только на экране боя
             if (screen === 'arena' || screen === 'raid' || screen === 'castle') {
                 drawMenu();
             } else if (screen === 'dungeon') {
