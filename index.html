@@ -237,17 +237,17 @@
             <div class="shop-item" onclick="showItemDetail('crossbow.png', 'Арбалет (+12 сила)', 60)">
                 <img src="crossbow_thumb.png" alt="Арбалет">
                 <p>Арбалет</p>
-                <p>60 золота</п>
+                <p>60 золота</p>
             </div>
             <div class="shop-item" onclick="showItemDetail('armor.png', 'Броня (+15 защита)', 70)">
                 <img src="armor_thumb.png" alt="Броня">
                 <p>Броня</p>
-                <п>70 золота</п>
+                <p>70 золота</p>
             </div>
             <div class="shop-item" onclick="showItemDetail('helmet.png', 'Шлем (+5 защита)', 30)">
                 <img src="helmet_thumb.png" alt="Шлем">
-                <п>Шлем</п>
-                <п>30 золота</п>
+                <p>Шлем</p>
+                <p>30 золота</p>
             </div>
         </div>
         <button onclick="continueGame()">Продолжить</button>
@@ -259,22 +259,22 @@
         <div class="health-bar">
             <div class="health-bar-inner" id="playerHealthBar"></div>
         </div>
-        <п>Золото: <span id="statusGold"></span></п>
-        <п>Уровень: <span id="statusLevel"></span></п>
+        <p>Золото: <span id="statusGold"></span></p>
+        <p>Уровень: <span id="statusLevel"></span></p>
     </div>
     <div class="victory-message" id="victoryMessage">
-        <п>Shap в печали, что вы его бьете :(</п>
+        <p>Shap в печали, что вы его бьете :(</p>
     </div>
     <div class="crosshair" id="crosshair"></div>
     <div id="itemDetail">
         <img id="itemDetailImage" src="" alt="Item Detail">
-        <п id="itemDetailName"></п>
+        <п id="itemDetailName"></p>
         <button onclick="buyItem()">Купить</button>
         <button onclick="closeItemDetail()">Закрыть</button>
     </div>
     <div id="continuePrompt">
-        <п>Shap в печали, что вы его бьете :(</п>
-        <п>Вы хотите продолжить унижать Shap и убить следующего монстра?</п>
+        <p>Shap в печали, что вы его бьете :(</p>
+        <p>Вы хотите продолжить унижать Shap и убить следующего монстра?</p>
         <button onclick="continueToNextLevel()">Да</button>
         <button onclick="goToCastle()">Нет</button>
     </div>
@@ -721,7 +721,7 @@
                     for (const key in topPlayers) {
                         if (topPlayers.hasOwnProperty(key)) {
                             const player = topPlayers[key];
-                            topListHTML += `<п>${player.nickname} - Уровень ${player.level}</п>`;
+                            topListHTML += `<p>${player.nickname} - Уровень ${player.level}</p>`;
                         }
                     }
                     document.getElementById('topPlayersMenu').innerHTML = topListHTML;
