@@ -362,6 +362,7 @@
                 drawVictoryScreen();
             }
             updateTopPlayers(nickname, { nickname, level: currentLevel });
+            drawLevelMap();
         }
 
         window.continueGame = continueGame;  // Make continueGame available globally
@@ -398,6 +399,13 @@
                         document.getElementById('victoryMessage').style.display = 'none';
                         document.getElementById('shopMenu').style.display = 'block';
                         updateShop();
+                        if (currentLevel < levels.length) {
+                            currentLevel++;
+                            drawLevelMap();
+                        } else {
+                            currentScreen = 'victory';
+                            drawVictoryScreen();
+                        }
                     }, 2000);
                 }
             }
