@@ -273,10 +273,13 @@
         
         // Crosshair logic
         const crosshair = document.getElementById('crosshair');
-        document.addEventListener('mousemove', (event) => {
-            crosshair.style.left = `${event.clientX}px`;
-            crosshair.style.top = `${event.clientY}px`;
-        });
+document.addEventListener('mousemove', (event) => {
+    if (currentScreen === 'battle') {
+        crosshair.style.left = `${event.clientX}px`;
+        crosshair.style.top = `${event.clientY}px`;
+    }
+});
+
 
         function showHitAnimation() {
             crosshair.style.transition = 'transform 0.1s ease-in-out'; // добавьте transition сюда
@@ -525,22 +528,23 @@
         }
 
         function changeScreen(screen) {
-            currentScreen = screen;
-            document.getElementById('shopMenu').style.display = 'none';
-            document.getElementById('statusBar').style.display = 'none';
-            crosshair.style.display = (screen === 'battle') ? 'block' : 'none'; // Показать прицел только на экране боя
-            if (screen === 'arena' || screen === 'raid' || screen === 'castle') {
-                drawMenu();
-            } else if (screen === 'dungeon') {
-                drawDungeonEntrance();
-            } else if (screen === 'shop') {
-                drawShop();
-            } else if (screen === 'battle') {
-                document.getElementById('statusBar').style.display = 'block';
-                updateStatusBar();
-                drawBattle();
-            }
-        }
+    currentScreen = screen;
+    document.getElementById('shopMenu').style.display = 'none';
+    document.getElementById('statusBar').style.display = 'none';
+    crosshair.style.display = (screen === 'battle') ? 'block' : 'none'; // Показать прицел только на экране боя
+    if (screen === 'arena' || screen === 'raid' || screen === 'castle') {
+        drawMenu();
+    } else if (screen === 'dungeon') {
+        drawDungeonEntrance();
+    } else if (screen === 'shop') {
+        drawShop();
+    } else if (screen === 'battle') {
+        document.getElementById('statusBar').style.display = 'block';
+        updateStatusBar();
+        drawBattle();
+    }
+}
+
 
         window.changeScreen = changeScreen;  // Make changeScreen available globally
 
@@ -601,26 +605,28 @@
         window.resetGame = resetGame;  // Make resetGame available globally
 
         canvas.addEventListener('click', function(event) {
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = event.clientX - rect.left;
-            const mouseY = event.clientY - rect.top;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
 
-            if (currentScreen === 'menu') {
-                currentScreen = 'dungeon';
-                drawDungeonEntrance();
-            } else if (currentScreen === 'dungeon') {
-                const gateCenterX = canvas.width / 2;
-                const gateCenterY = canvas.height / 2;
-                if (mouseX > gateCenterX - dungeonGateImage.width / 2 &&
-                    mouseX < gateCenterX + dungeonGateImage.width / 2 &&
-                    mouseY > gateCenterY - dungeonGateImage.height / 2) {
-                    currentScreen = 'battle';
-                    drawBattle();
-                }
-            } else if (currentScreen === 'battle') {
-                hitMonster(event);
-            }
-        });
+    if (currentScreen === 'menu') {
+        currentScreen = 'dungeon';
+        drawDungeonEntrance();
+    } else if (currentScreen === 'dungeon') {
+        const gateCenterX = canvas.width / 2;
+        const gateCenterY = canvas.height / 2;
+        if (mouseX > gateCenterX - dungeonGateImage.width / 2 &&
+            mouseX < gateCenterX + dungeonGateImage.width / 2 &&
+            mouseY > gateCenterY - dungeonGateImage.height / 2) {
+            currentScreen = 'battle';
+            drawBattle();
+            crosshair.style.display = 'block'; // Показать прицел на экране боя
+        }
+    } else if (currentScreen === 'battle') {
+        hitMonster(event);
+    }
+});
+
 
         canvas.addEventListener('click', function(event) {
             const rect = canvas.getBoundingClientRect();
