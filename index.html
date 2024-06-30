@@ -291,6 +291,10 @@
     <div class="victory-message" id="victoryMessage">
         <p>Shap в печали, что вы его бьете :(</p>
     </div>
+    <div id="monsterHealthDisplay" style="display:none; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.7); color: white; padding: 10px; border-radius: 5px; font-size: 20px;">
+        Здоровье монстра: <span id="monsterHealthValue">100</span>
+    </div>
+    
     <div class="crosshair" id="crosshair"></div>
     <div id="itemDetail">
         <img id="itemDetailImage" src="" alt="Item Detail">
@@ -570,44 +574,55 @@
 
         window.continueGame = continueGame;
 
-        function hitMonster(event) {
-            if (currentScreen !== 'battle') return;
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = event.clientX - rect.left;
-            const mouseY = event.clientY - rect.top;
-            const monsterX = canvas.width / 2 - monsterImage.width / 2;
-            const monsterY = canvas.height / 2 - monsterImage.height / 2;
-            if (
-                mouseX >= monsterX &&
-                mouseX <= monsterX + monsterImage.width &&
-                mouseY >= monsterY &&
-                mouseY <= monsterY + monsterImage.height
-            ) {
-                showHitAnimation();
-                monsterHealth -= weaponPower;
-                hits += 1;
-                if (monsterHealth <= 0) {
-                    monsterHealth = 0;
-                    gold += 10;
-                    levels[currentLevel - 1].completed = true;
-                    saveProgress(nickname, {
-                        currentLevel,
-                        gold,
-                        playerHealth,
-                        weaponPower,
-                        weaponName,
-                        weaponLevel
-                    });
-                    showVictoryMessage();
-                    setTimeout(() => {
-                        document.getElementById('victoryMessage').style.display = 'none';
-                        showContinuePrompt();
-                    }, 2000);
-                }
-            }
-        }
+        function updateMonsterHealthDisplay() {
+    const healthDisplay = document.getElementById('monsterHealthDisplay');
+    const healthValue = document.getElementById('monsterHealthValue');
+    healthValue.textContent = Math.floor(monsterHealth); // Преобразование к целому числу
+    healthDisplay.style.display = 'block';
+    if (monsterHealth <= 0) {
+        healthDisplay.style.display = 'none';
+    }
+}
 
-        window.hitMonster = hitMonster;
+function hitMonster(event) {
+    if (currentScreen !== 'battle') return;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+    const monsterX = canvas.width / 2 - monsterImage.width / 2;
+    const monsterY = canvas.height / 2 - monsterImage.height / 2;
+    if (
+        mouseX >= monsterX &&
+        mouseX <= monsterX + monsterImage.width &&
+        mouseY >= monsterY &&
+        mouseY <= monsterY + monsterImage.height
+    ) {
+        showHitAnimation();
+        monsterHealth -= weaponPower;
+        hits += 1;
+        updateMonsterHealthDisplay(); // Обновление отображения здоровья
+        if (monsterHealth <= 0) {
+            monsterHealth = 0;
+            gold += 10;
+            levels[currentLevel - 1].completed = true;
+            saveProgress(nickname, {
+                currentLevel,
+                gold,
+                playerHealth,
+                weaponPower,
+                weaponName,
+                weaponLevel
+            });
+            showVictoryMessage();
+            setTimeout(() => {
+                document.getElementById('victoryMessage').style.display = 'none';
+                showContinuePrompt();
+            }, 2000);
+        }
+    }
+}
+
+window.hitMonster = hitMonster;
 
         function showContinuePrompt() {
             document.getElementById('continuePrompt').style.display = 'block';
@@ -667,6 +682,7 @@
             monsterHealth = baseMonsterHealth * Math.pow(1.1, levelNumber - 1);
             currentScreen = 'battle';
             drawBattle();
+            updateMonsterHealthDisplay(); // Обновление отображения здоровья при начале уровня
         }
 
         function drawLevelMap() {
