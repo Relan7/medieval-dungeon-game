@@ -139,17 +139,18 @@
         <h2>Введите свой никнейм</h2>
         <input type="text" id="nicknameInput" placeholder="Ваш никнейм">
         <button onclick="startGame()">Начать игру</button>
+        <div id="gameVersion">Версия игры: 1.1</div>
     </div>
     <canvas id="gameCanvas" style="display:none;"></canvas>
     <div id="bottomMenu" style="display:none;">
         <div onclick="changeScreen('arena')">Арена</div>
         <div onclick="changeScreen('dungeon')">Подземелье</div>
-        <div onclick="changeScreen('raid')">Рейд</div>
+        
         <div onclick="changeScreen('castle')">Замок</div>
         <div onclick="changeScreen('shop')">Магазин</div>
         <div onclick="toggleCharacterMenu()">Персонаж</div>
         <div onclick="toggleTopPlayers()">Топ игроки</div>
-        <div onclick="resetGame()">Начать заново</div>
+        
     </div>
     <div id="characterMenu">
         <img id="characterImage" src="peasant.png" alt="Character">
