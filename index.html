@@ -427,6 +427,7 @@ document.addEventListener('mousemove', (event) => {
                     });
                     showVictoryMessage();
                     currentScreen = 'shop';
+                    crosshair.style.display = 'none'; // Скрыть прицел при переходе в магазин
                     setTimeout(() => {
                         document.getElementById('victoryMessage').style.display = 'none';
                         document.getElementById('shopMenu').style.display = 'block';
