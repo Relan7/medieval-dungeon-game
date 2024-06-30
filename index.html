@@ -360,18 +360,28 @@ function loadProgress(nickname) {
         }
 
         function displayTopPlayers() {
-            const dbRef = ref(database);
-            return get(child(dbRef, 'topPlayers')).then((snapshot) => {
-                if (snapshot.exists()) {
-                    return snapshot.val();
-                } else {
-                    console.log("No data available");
-                    return {};
-                }
-            }).catch((error) => {
-                console.error(error);
+    const dbRef = ref(database);
+    return get(child(dbRef, 'topPlayers')).then((snapshot) => {
+        if (snapshot.exists()) {
+            const topPlayers = snapshot.val();
+            // Преобразование объекта в массив и сортировка по уровню
+            const sortedPlayers = Object.values(topPlayers).sort((a, b) => b.level - a.level);
+            
+            let topListHTML = '<h2>Топ игроки</h2>';
+            sortedPlayers.forEach(player => {
+                topListHTML += `<p>${player.nickname} - Уровень ${player.level}</p>`;
             });
+            document.getElementById('topPlayersMenu').innerHTML = topListHTML;
+            return topPlayers;
+        } else {
+            console.log("No data available");
+            return {};
         }
+    }).catch((error) => {
+        console.error(error);
+    });
+}
+
 
         let nickname = '';
         let currentLevel = 1;
