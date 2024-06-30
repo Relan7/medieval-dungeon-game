@@ -901,23 +901,23 @@ window.calculateTotalHealth = calculateTotalHealth;
         }
 
         function toggleTopPlayers() {
-            const menu = document.getElementById('topPlayersMenu');
-            if (menu.style.display === 'block') {
-                menu.style.display = 'none';
-            } else {
-                displayTopPlayers().then(topPlayers => {
-                    let topListHTML = '<h2>Топ игроки</h2>';
-                    for (const key in topPlayers) {
-                        if (topPlayers.hasOwnProperty(key)) {
-                            const player = topPlayers[key];
-                            topListHTML += `<p>${player.nickname} - Уровень ${player.level}</p>`;
-                        }
-                    }
-                    document.getElementById('topPlayersMenu').innerHTML = topListHTML;
-                    menu.style.display = 'block';
-                });
-            }
-        }
+    const menu = document.getElementById('topPlayersMenu');
+    if (menu.style.display === 'block') {
+        menu.style.display = 'none';
+    } else {
+        displayTopPlayers().then(topPlayers => {
+            let topListHTML = '<h2>Топ игроки</h2>';
+            // Преобразование объекта в массив и сортировка по уровню
+            const sortedPlayers = Object.values(topPlayers).sort((a, b) => b.level - a.level);
+            sortedPlayers.forEach(player => {
+                topListHTML += `<p>${player.nickname} - Уровень ${player.level}</p>`;
+            });
+            document.getElementById('topPlayersMenu').innerHTML = topListHTML;
+            menu.style.display = 'block';
+        });
+    }
+}
+
 
         window.toggleTopPlayers = toggleTopPlayers;
 
