@@ -462,23 +462,24 @@
         }
 
         function buyItem() {
-            if (gold >= selectedItem.cost) {
-                gold -= selectedItem.cost;
-                updateCharacterMenu();
-                updateShop();
-                saveProgress(nickname, {
-                    currentLevel,
-                    gold,
-                    playerHealth,
-                    weaponPower,
-                    weaponName,
-                    weaponLevel
-                });
-                closeItemDetail();
-            } else {
-                alert('Недостаточно золота');
-            }
-        }
+    if (gold >= selectedItem.cost) {
+        gold -= selectedItem.cost;
+        updateCharacterMenu();
+        updateShop();
+        saveProgress(nickname, {
+            currentLevel,
+            gold,
+            playerHealth,
+            weaponPower,
+            weaponName,
+            weaponLevel
+        });
+        closeItemDetail();
+    } else {
+        alert('Недостаточно золота');
+    }
+}
+
 
         function startGame() {
             const input = document.getElementById('nicknameInput').value;
