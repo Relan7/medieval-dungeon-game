@@ -416,6 +416,7 @@
                 crosshair.style.transform = 'translate(-50%, -50%) scale(1)';
             }, 100);
         }
+        window.showHitAnimation = showHitAnimation;
 
         function showMonsterMessage() {
             const message = monsterMessages[Math.floor(Math.random() * monsterMessages.length)];
@@ -426,12 +427,14 @@
                 monsterMessage.style.display = 'none';
             }, 500);
         }
+        window.showMonsterMessage = showMonsterMessage;
 
         function drawStars(x, y, count) {
             for (let i = 0; i < count; i++) {
                 ctx.drawImage(starImage, x + i * 30, y, 20, 20);
             }
         }
+        window.drawStars = drawStars;
 
         function toggleShop() {
             const shopMenu = document.getElementById('shopMenu');
@@ -443,17 +446,19 @@
         function drawShop() {
             document.getElementById('shopGold').textContent = gold;
         }
-
+        window.drawShop = drawShop;
         function showItemDetail(image, name, cost) {
             selectedItem = { image, name, cost };
             document.getElementById('itemDetailImage').src = image;
             document.getElementById('itemDetailName').textContent = name + ' - ' + cost + ' золота';
             document.getElementById('itemDetail').style.display = 'block';
         }
-
+        
+        window.showItemDetail = showItemDetail; // Добавляем в глобальную область видимости
         function closeItemDetail() {
             document.getElementById('itemDetail').style.display = 'none';
         }
+        window.closeItemDetail = closeItemDetail;
 
         function buyItem() {
             if (gold >= selectedItem.cost) {
@@ -473,6 +478,7 @@
                 alert('Недостаточно золота');
             }
         }
+        window.buyItem = buyItem;
 
         function startGame() {
             const input = document.getElementById('nicknameInput').value;
