@@ -444,18 +444,12 @@
             document.getElementById('shopGold').textContent = gold;
         }
 
-        function showItemDetail(imageSrc, itemName, itemPrice) {
-    // Найти элемент для отображения большого изображения
-    const itemDetailImage = document.getElementById('itemDetailImage');
-    // Установить источник изображения
-    itemDetailImage.src = imageSrc;
-    // Обновить описание предмета
-    const itemDetailName = document.getElementById('itemDetailName');
-    itemDetailName.textContent = `${itemName} - ${itemPrice} золота`;
-    // Показать детальное отображение предмета
-    document.getElementById('itemDetail').style.display = 'block';
-}
-
+        function showItemDetail(image, name, cost) {
+            selectedItem = { image, name, cost };
+            document.getElementById('itemDetailImage').src = image;
+            document.getElementById('itemDetailName').textContent = name + ' - ' + cost + ' золота';
+            document.getElementById('itemDetail').style.display = 'block';
+        }
 
         function closeItemDetail() {
             document.getElementById('itemDetail').style.display = 'none';
