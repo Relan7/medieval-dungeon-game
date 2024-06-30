@@ -14,6 +14,15 @@
             display: block;
             background: #000;
         }
+        .crosshair {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: url('crosshair.png') no-repeat center;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease-in-out;
+        }
         #bottomMenu {
             position: fixed;
             bottom: 0;
@@ -168,6 +177,7 @@
     <div class="victory-message" id="victoryMessage">
         <p>Shap в печали, что вы его бьете :(</p>
     </div>
+    <div class="crosshair" id="crosshair"></div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
         import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
@@ -258,6 +268,20 @@
         starImage.onload = function() {
             drawLevelMap();
         };
+
+        // Crosshair logic
+        const crosshair = document.getElementById('crosshair');
+        document.addEventListener('mousemove', (event) => {
+            crosshair.style.left = `${event.clientX}px`;
+            crosshair.style.top = `${event.clientY}px`;
+        });
+
+        function showHitAnimation() {
+            crosshair.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                crosshair.style.transform = 'scale(1)';
+            }, 100);
+        }
 
         function drawStars(x, y, count) {
             for (let i = 0; i < count; i++) {
@@ -379,6 +403,7 @@
                 mouseY >= monsterY &&
                 mouseY <= monsterY + monsterImage.height
             ) {
+                showHitAnimation();
                 monsterHealth -= weaponPower;
                 hits += 1;
                 if (monsterHealth <= 0) {
