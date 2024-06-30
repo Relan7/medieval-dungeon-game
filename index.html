@@ -339,19 +339,21 @@
     });
 }
 
-        function loadProgress(nickname) {
-            const dbRef = ref(database);
-            return get(child(dbRef, `players/${nickname}`)).then((snapshot) => {
-                if (snapshot.exists()) {
-                    return snapshot.val();
-                } else {
-                    console.log("No data available");
-                    return null;
-                }
-            }).catch((error) => {
-                console.error(error);
-            });
+
+function loadProgress(nickname) {
+    const dbRef = ref(database);
+    return get(child(dbRef, `players/${nickname}`)).then((snapshot) => {
+        if (snapshot.exists()) {
+            return snapshot.val();
+        } else {
+            console.log("No data available");
+            return null;
         }
+    }).catch((error) => {
+        console.error(error);
+    });
+}
+
 
         function updateTopPlayers(nickname, playerData) {
             set(ref(database, 'topPlayers/' + nickname), playerData);
@@ -483,6 +485,10 @@
         window.closeItemDetail = closeItemDetail;
 
         function buyItem() {
+    if (!selectedItem.type) {
+        alert('Ошибка: выбранный предмет не имеет типа.');
+        return;
+    }
     if (gold >= selectedItem.cost) {
         gold -= selectedItem.cost;
         if (!inventory[selectedItem.type]) {
@@ -503,7 +509,7 @@
             weaponPower,
             weaponName,
             weaponLevel,
-            inventory
+            inventory // Сохранение инвентаря
         });
         closeItemDetail();
     } else {
@@ -514,6 +520,10 @@
 
 
         function upgradeItem(itemType) {
+    if (!itemType || !inventory[itemType]) {
+        alert('Ошибка: тип предмета для улучшения не определен.');
+        return;
+    }
     const item = inventory[itemType];
     const upgradeCost = item.cost * item.level;
     if (gold >= upgradeCost) {
@@ -528,7 +538,7 @@
             weaponPower,
             weaponName,
             weaponLevel,
-            inventory
+            inventory // Сохранение инвентаря
         });
     } else {
         alert('Недостаточно золота для улучшения');
@@ -547,33 +557,35 @@ window.upgradeItem = upgradeItem;
 
 
 function startGame() {
-            const input = document.getElementById('nicknameInput').value;
-            console.log(`Nickname entered: ${input}`);
-            if (input) {
-                nickname = input;
-                loadProgress(nickname).then(data => {
-                    console.log(`Data loaded: ${JSON.stringify(data)}`);
-                    if (data) {
-                        currentLevel = data.currentLevel;
-                        gold = data.gold;
-                        playerHealth = data.playerHealth;
-                        weaponPower = data.weaponPower;
-                        weaponName = data.weaponName;
-                        weaponLevel = data.weaponLevel;
-                        updateCharacterMenu();
-                    } else {
-                        resetGame();
-                    }
-                });
-                document.getElementById('nicknameMenu').style.display = 'none';
-                document.getElementById('gameCanvas').style.display = 'block';
-                document.getElementById('bottomMenu').style.display = 'flex';
-                currentScreen = 'menu';
-                drawMenu();
+    const input = document.getElementById('nicknameInput').value;
+    console.log(`Nickname entered: ${input}`);
+    if (input) {
+        nickname = input;
+        loadProgress(nickname).then(data => {
+            console.log(`Data loaded: ${JSON.stringify(data)}`);
+            if (data) {
+                currentLevel = data.currentLevel;
+                gold = data.gold;
+                playerHealth = data.playerHealth;
+                weaponPower = data.weaponPower;
+                weaponName = data.weaponName;
+                weaponLevel = data.weaponLevel;
+                inventory = data.inventory || inventory; // Восстановление инвентаря
+                updateCharacterMenu();
             } else {
-                alert('Пожалуйста, введите никнейм.');
+                resetGame();
             }
-        }
+        });
+        document.getElementById('nicknameMenu').style.display = 'none';
+        document.getElementById('gameCanvas').style.display = 'block';
+        document.getElementById('bottomMenu').style.display = 'flex';
+        currentScreen = 'menu';
+        drawMenu();
+    } else {
+        alert('Пожалуйста, введите никнейм.');
+    }
+}
+
 
         window.startGame = startGame;
 
