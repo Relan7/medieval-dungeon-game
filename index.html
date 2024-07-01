@@ -227,7 +227,7 @@
         <h2>Введите свой никнейм</h2>
         <input type="text" id="nicknameInput" placeholder="Ваш никнейм">
         <button onclick="startGame()">Начать игру</button>
-        <div id="gameVersion">Версия игры: 2.0</div>
+        <div id="gameVersion">Версия игры: 2.1</div>
     </div>
     <canvas id="gameCanvas" style="display:none;"></canvas>
     <div id="bottomMenu" style="display:none;">
@@ -491,7 +491,7 @@ let playersDamage = {};
         window.showMonsterMessage = showMonsterMessage;
       
         function drawStars(x, y, count) {
-    console.log(`Drawing ${count} stars at (${x}, ${y})`);
+    //console.log(`Drawing ${count} stars at (${x}, ${y})`);
     for (let i = 0; i < count; i++) {
         ctx.drawImage(starImage, x + i * 30, y, 20, 20);
     }
@@ -820,7 +820,7 @@ function calculateStars() {
         }
 
         function completeLevel(levelNumber, stars) {
-    console.log(`Completing level ${levelNumber} with ${stars} stars`);
+    //console.log(`Completing level ${levelNumber} with ${stars} stars`);
     if (levels[levelNumber - 1]) {
         levels[levelNumber - 1].completed = true;
         levels[levelNumber - 1].stars = stars;  // Устанавливаем количество звезд
@@ -1268,7 +1268,7 @@ window.calculateTotalHealth = calculateTotalHealth;
     } else if (currentScreen === 'battle') {
         hitMonster(event);
     } else if (currentScreen === 'worldBoss') {
-        //console.log('Click detected on World Boss screen.');
+        console.log('Click detected on World Boss screen.');
         hitWorldBoss(nickname, calculateTotalDamage());
         syncWorldBossHealth();
         syncPlayersDamage();
