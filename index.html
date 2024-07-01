@@ -925,8 +925,8 @@ function updateWorldBossData() {
             const data = snapshot.val();
             worldBossHealth = data.health;
             playersDamage = data.playersDamage || {};
-            console.log(`Updated World Boss Health: ${worldBossHealth}`);
-            console.log('Updated Players Damage:', playersDamage);
+            //console.log(`Updated World Boss Health: ${worldBossHealth}`);
+            //console.log('Updated Players Damage:', playersDamage);
             // Обновляем отображение на экране
             drawWorldBossBattle();
         } else {
@@ -953,7 +953,7 @@ function updateWorldBossData() {
 
         
         function drawWorldBossBattle() {
-    console.log('Drawing World Boss Battle');
+    //console.log('Drawing World Boss Battle');
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -967,7 +967,7 @@ function updateWorldBossData() {
     const healthTextY = bossY - 40 > 0 ? bossY - 40 : 40;
 
     // Добавляем лог для проверки координат
-    console.log(`Drawing health text at: ${canvas.width / 2}, ${healthTextY}`);
+    //console.log(`Drawing health text at: ${canvas.width / 2}, ${healthTextY}`);
 
     // Добавляем отображение здоровья босса над его изображением с жирным шрифтом и обводкой
     ctx.fillStyle = 'white';
@@ -998,7 +998,7 @@ function updateWorldBossData() {
     ctx.fillText('Рейтинг игроков:', playersListX, playersListY);
     playersListY += lineHeight; // увеличение отступа после заголовка
 
-    console.log('Players damage data:', playersDamage);
+    //('Players damage data:', playersDamage);
 
     Object.entries(playersDamage).sort(([, damageA], [, damageB]) => damageB - damageA).forEach(([player, damage], index) => {
         playersListY += lineHeight; // вертикальное смещение для каждой строки
@@ -1069,7 +1069,7 @@ function updateDamageList() {
 }
 
 function hitWorldBoss(playerName, damage) {
-    console.log(`Hit World Boss: Player ${playerName} deals ${damage} damage.`);
+    //console.log(`Hit World Boss: Player ${playerName} deals ${damage} damage.`);
     if (!playersDamage[playerName]) {
         playersDamage[playerName] = 0;
     }
@@ -1084,7 +1084,7 @@ function hitWorldBoss(playerName, damage) {
 }
 
 function updateWorldBossHealthDisplay() {
-    console.log(`Updating World Boss Health Display: ${worldBossHealth}`);
+    //console.log(`Updating World Boss Health Display: ${worldBossHealth}`);
     document.getElementById('worldBossHealthValue').textContent = worldBossHealth;
 }
 
@@ -1135,7 +1135,7 @@ function loadWorldBossData() {
             const data = snapshot.val();
             worldBossHealth = data.health;
             playersDamage = data.playersDamage || {};
-            console.log(`Loaded World Boss Health: ${worldBossHealth}`);
+            //console.log(`Loaded World Boss Health: ${worldBossHealth}`);
             updateWorldBossHealthDisplay();
             updateDamageList();
         } else {
@@ -1268,7 +1268,7 @@ window.calculateTotalHealth = calculateTotalHealth;
     } else if (currentScreen === 'battle') {
         hitMonster(event);
     } else if (currentScreen === 'worldBoss') {
-        console.log('Click detected on World Boss screen.');
+        //console.log('Click detected on World Boss screen.');
         hitWorldBoss(nickname, calculateTotalDamage());
         syncWorldBossHealth();
         syncPlayersDamage();
