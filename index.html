@@ -913,22 +913,49 @@ function drawLevelsScreen() {
     ctx.drawImage(worldBossImage, bossX, bossY);
 
     // Устанавливаем координаты текста выше босса и проверяем, что они в пределах экрана
-    const healthTextY = bossY - 20 > 0 ? bossY - 20 : 20;
+    const healthTextY = bossY - 40 > 0 ? bossY - 40 : 40;
 
     // Добавляем лог для проверки координат
     console.log(`Drawing health text at: ${canvas.width / 2}, ${healthTextY}`);
 
-    // Добавляем отображение здоровья босса над его изображением
+    // Добавляем отображение здоровья босса над его изображением с жирным шрифтом и обводкой
     ctx.fillStyle = 'white';
-    ctx.font = '20px Arial';
+    ctx.font = 'bold 32px Comic Sans MS';
     ctx.textAlign = 'center';
+    
+    // Обводка текста
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 4;
+    ctx.strokeText(`Здоровье: ${worldBossHealth}`, canvas.width / 2, healthTextY);
+    
+    // Основной текст
     ctx.fillText(`Здоровье: ${worldBossHealth}`, canvas.width / 2, healthTextY);
 
+    // Рисуем полоску здоровья
     drawHealthBar(worldBossHealth, canvas.width - 210, 10, 200, 20, 'red');
     drawHealthBar(playerHealth, 10, 10, 200, 20, 'green');
+
+    // Добавляем отображение рейтинга игроков
+    const playersListX = 20; // координаты слева от экрана
+    const playersListStartY = canvas.height / 2 - (Object.keys(playersDamage).length * 15); // вертикальная координата для списка игроков, чтобы он был по центру
+    let playersListY = playersListStartY;
+
+    const lineHeight = 30; // задаем отступ между строками
+
+    ctx.textAlign = 'left';
+    ctx.font = '26px Comic Sans MS';
+    ctx.fillText('Рейтинг игроков:', playersListX, playersListY);
+    playersListY += lineHeight; // увеличение отступа после заголовка
+
+    console.log('Players damage data:', playersDamage);
+
+    Object.entries(playersDamage).sort(([, damageA], [, damageB]) => damageB - damageA).forEach(([player, damage], index) => {
+        playersListY += lineHeight; // вертикальное смещение для каждой строки
+        ctx.fillText(`${index + 1}. ${player}: ${damage}`, playersListX, playersListY);
+    });
+
     updateStatusBar();
 }
-
 
 
 
