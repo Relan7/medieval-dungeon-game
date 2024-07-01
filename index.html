@@ -1097,7 +1097,7 @@ function changeScreen(screen) {
     document.getElementById('crosshair').style.display = 'none'; // Скрываем прицел
     crosshair.style.display = (screen === 'battle' || screen === 'worldBoss') ? 'block' : 'none';
 
-    document.getElementById('worldBossScreen').style.display = (screen === 'worldBoss') ? 'block' : 'none';
+   // document.getElementById('worldBossScreen').style.display = (screen === 'worldBoss') ? 'block' : 'none';
 
     if (screen === 'arena' || screen === 'raid' || screen === 'castle') {
         drawMenu();
@@ -1299,7 +1299,6 @@ window.calculateTotalHealth = calculateTotalHealth;
 
         window.onload = function() {
     loadWorldBossData();
-    //startUpdating();
     gameLoop();
 }
 
