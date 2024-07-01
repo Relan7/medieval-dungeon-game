@@ -732,7 +732,7 @@ function hitMonster(event) {
             setTimeout(() => {
                 document.getElementById('victoryMessage').style.display = 'none';
                 showContinuePrompt();
-            }, 2000);
+            }, 50);
         }
     }
 }
@@ -981,7 +981,7 @@ function updateWorldBossData() {
 
     // Рисуем полоску здоровья
     drawHealthBar(worldBossHealth, canvas.width - 210, 10, 200, 20, 'red');
-    drawHealthBar(playerHealth, 10, 10, 200, 20, 'green');
+    //drawHealthBar(playerHealth, 10, 150, 200, 20, 'green');
 
     // Добавляем отображение рейтинга игроков
     const playersListX = 20; // координаты слева от экрана
@@ -1109,6 +1109,7 @@ function changeScreen(screen) {
         document.getElementById('statusBar').style.display = 'block';
         updateStatusBar();
         drawWorldBossBattle();
+        startUpdating(); // Запуск синхронизации только на экране мирового босса
     }
 }
 
@@ -1292,7 +1293,7 @@ window.calculateTotalHealth = calculateTotalHealth;
 
         window.onload = function() {
     loadWorldBossData();
-    startUpdating();
+    //startUpdating();
     gameLoop();
 }
 
