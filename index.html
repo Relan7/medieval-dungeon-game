@@ -900,6 +900,54 @@ function drawLevelsScreen() {
             return { x, y };
         }
         
+
+
+
+
+        const updateInterval = 1000; // Интервал обновления в миллисекундах (1 секунда)
+
+// Функция для регулярного обновления данных
+function startUpdating() {
+    setInterval(() => {
+        // Получаем последние данные с сервера
+        updateWorldBossData();
+    }, updateInterval);
+}
+
+// Функция для обновления данных босса и игроков
+function updateWorldBossData() {
+    const dbRef = ref(database);
+    get(child(dbRef, 'worldBoss')).then((snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            worldBossHealth = data.health;
+            playersDamage = data.playersDamage || {};
+            console.log(`Updated World Boss Health: ${worldBossHealth}`);
+            console.log('Updated Players Damage:', playersDamage);
+            // Обновляем отображение на экране
+            drawWorldBossBattle();
+        } else {
+            console.log("No data available for world boss");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
         function drawWorldBossBattle() {
     console.log('Drawing World Boss Battle');
@@ -1242,8 +1290,9 @@ window.calculateTotalHealth = calculateTotalHealth;
         gameLoop();
 
 
-window.onload = function() {
+        window.onload = function() {
     loadWorldBossData();
+    startUpdating();
     gameLoop();
 }
 

@@ -236,9 +236,22 @@
         <div onclick="changeScreen('raid')">Рейд</div>
         <div onclick="changeScreen('castle')">Замок</div>
         <div onclick="changeScreen('levels')">Уровни</div>
+        <div onclick="changeScreen('worldBoss')">Мировой Босс</div> <!-- Добавлено -->
 
         <div onclick="toggleShop()">Магазин</div>
         <div onclick="toggleTopPlayers()">Топ игроки</div>
+    </div>
+    <div id="worldBossScreen" style="display:none;">
+        <h2>Мировой Босс</h2>
+        <img id="worldBossImage" src="world_boss.png" alt="Мировой Босс">
+        <div id="worldBossHealth">Здоровье Босса: <span id="worldBossHealthValue">1000000</span></div>
+        <div id="playersDamageList">
+            <h3>Список игроков</h3>
+            <ul id="damageList"></ul>
+        </div>
+    </div>
+    
+    
     </div>
     <div id="characterMenu">
         <img id="characterImage" src="peasant.png" alt="Character">
@@ -406,7 +419,8 @@ function loadProgress(nickname) {
     armor: { level: 0, baseHealth: 15, cost: 70, type: 'armor' },
     helmet: { level: 0, baseHealth: 5, cost: 30, type: 'armor' }
 };
-
+let worldBossHealth = 1000000;
+let playersDamage = {};
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -445,6 +459,12 @@ function loadProgress(nickname) {
                 crosshair.style.top = `${event.clientY}px`;
             }
         });
+
+
+
+
+
+
 
         function showHitAnimation() {
             crosshair.style.transition = 'transform 0.1s ease-in-out';
@@ -879,32 +899,152 @@ function drawLevelsScreen() {
             const y = offsetY + Math.floor(index / perRow) * spacing;
             return { x, y };
         }
+        
+        
+        function drawWorldBossBattle() {
+    console.log('Drawing World Boss Battle');
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const worldBossImage = document.getElementById('worldBossImage');
+    const bossX = canvas.width / 2 - worldBossImage.width / 2;
+    const bossY = canvas.height / 2 - worldBossImage.height / 2;
+
+    ctx.drawImage(worldBossImage, bossX, bossY);
+
+    // Устанавливаем координаты текста выше босса и проверяем, что они в пределах экрана
+    const healthTextY = bossY - 40 > 0 ? bossY - 40 : 40;
+
+    // Добавляем лог для проверки координат
+    console.log(`Drawing health text at: ${canvas.width / 2}, ${healthTextY}`);
+
+    // Добавляем отображение здоровья босса над его изображением с жирным шрифтом и обводкой
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 32px Comic Sans MS';
+    ctx.textAlign = 'center';
+    
+    // Обводка текста
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 4;
+    ctx.strokeText(`Здоровье: ${worldBossHealth}`, canvas.width / 2, healthTextY);
+    
+    // Основной текст
+    ctx.fillText(`Здоровье: ${worldBossHealth}`, canvas.width / 2, healthTextY);
+
+    // Рисуем полоску здоровья
+    drawHealthBar(worldBossHealth, canvas.width - 210, 10, 200, 20, 'red');
+    drawHealthBar(playerHealth, 10, 10, 200, 20, 'green');
+
+    // Добавляем отображение рейтинга игроков
+    const playersListX = 20; // координаты слева от экрана
+    const playersListStartY = canvas.height / 2 - (Object.keys(playersDamage).length * 15); // вертикальная координата для списка игроков, чтобы он был по центру
+    let playersListY = playersListStartY;
+
+    const lineHeight = 30; // задаем отступ между строками
+
+    ctx.textAlign = 'left';
+    ctx.font = '26px Comic Sans MS';
+    ctx.fillText('Рейтинг игроков:', playersListX, playersListY);
+    playersListY += lineHeight; // увеличение отступа после заголовка
+
+    console.log('Players damage data:', playersDamage);
+
+    Object.entries(playersDamage).sort(([, damageA], [, damageB]) => damageB - damageA).forEach(([player, damage], index) => {
+        playersListY += lineHeight; // вертикальное смещение для каждой строки
+        ctx.fillText(`${index + 1}. ${player}: ${damage}`, playersListX, playersListY);
+    });
+
+    updateStatusBar();
+}
+
+
+
+
+
+
+
+
+
+
+
 
         function drawBattle() {
-            ctx.fillStyle = 'black';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(monsterImage, canvas.width / 2 - monsterImage.width / 2, canvas.height / 2 - monsterImage.height / 2);
-            drawHealthBar(playerHealth, 10, 10, 200, 20, 'green');
-            drawHealthBar(monsterHealth, canvas.width - 210, 10, 200, 20, 'red');
-            updateStatusBar();
-        }
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        function drawHealthBar(health, x, y, width, height, color) {
-            ctx.fillStyle = 'grey';
-            ctx.fillRect(x, y, width, height);
-            ctx.fillStyle = color;
-            ctx.fillRect(x, y, width * health / 100, height);
-        }
+    if (currentScreen === 'worldBoss') {
+        ctx.drawImage(document.getElementById('worldBossImage'), canvas.width / 2 - document.getElementById('worldBossImage').width / 2, canvas.height / 2 - document.getElementById('worldBossImage').height / 2);
+        drawHealthBar(worldBossHealth, canvas.width - 210, 10, 200, 20, 'red');
+    } else {
+        ctx.drawImage(monsterImage, canvas.width / 2 - monsterImage.width / 2, canvas.height / 2 - monsterImage.height / 2);
+        drawHealthBar(monsterHealth, canvas.width - 210, 10, 200, 20, 'red');
+    }
+
+    drawHealthBar(playerHealth, 10, 10, 200, 20, 'green');
+    updateStatusBar();
+}
+
+
+function drawHealthBar(health, x, y, width, height, color) {
+    ctx.fillStyle = 'grey';
+    ctx.fillRect(x, y, width, height);
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, width * (health / 1000000), height);  // Учитывая максимальное здоровье босса 1000000
+}
+
 
         function updateShop() {
             document.getElementById('shopGold').textContent = gold;
         }
 
-        function changeScreen(screen) {
+
+
+// Вызов функции загрузки данных при старте игры
+
+
+
+
+
+function updateDamageList() {
+    const damageList = document.getElementById('damageList');
+    damageList.innerHTML = '';
+
+    const sortedPlayers = Object.entries(playersDamage).sort(([, a], [, b]) => b - a);
+    sortedPlayers.forEach(([player, damage]) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${player}: ${damage} урона`;
+        damageList.appendChild(listItem);
+    });
+}
+
+function hitWorldBoss(playerName, damage) {
+    console.log(`Hit World Boss: Player ${playerName} deals ${damage} damage.`);
+    if (!playersDamage[playerName]) {
+        playersDamage[playerName] = 0;
+    }
+    playersDamage[playerName] += damage;
+    worldBossHealth -= damage;
+    if (worldBossHealth < 0) worldBossHealth = 0;
+    updateWorldBossHealthDisplay();
+    updateDamageList();
+    syncWorldBossHealth();
+    syncPlayersDamage();
+    drawWorldBossBattle();  // Добавьте этот вызов для обновления интерфейса
+}
+
+function updateWorldBossHealthDisplay() {
+    console.log(`Updating World Boss Health Display: ${worldBossHealth}`);
+    document.getElementById('worldBossHealthValue').textContent = worldBossHealth;
+}
+
+function changeScreen(screen) {
     currentScreen = screen;
     document.getElementById('shopMenu').style.display = 'none';
     document.getElementById('statusBar').style.display = 'none';
-    crosshair.style.display = (screen === 'battle') ? 'block' : 'none';
+    crosshair.style.display = (screen === 'battle' || screen === 'worldBoss') ? 'block' : 'none';
+
+    document.getElementById('worldBossScreen').style.display = (screen === 'worldBoss') ? 'block' : 'none';
+
     if (screen === 'arena' || screen === 'raid' || screen === 'castle') {
         drawMenu();
     } else if (screen === 'dungeon') {
@@ -916,20 +1056,47 @@ function drawLevelsScreen() {
         updateStatusBar();
         drawBattle();
     } else if (screen === 'levels') {
-        drawLevelsScreen();  // Вызов функции для отрисовки экрана уровней
+        drawLevelsScreen();
+    } else if (screen === 'worldBoss') {
+        document.getElementById('statusBar').style.display = 'block';
+        updateStatusBar();
+        drawWorldBossBattle();
     }
 }
 
 
+function syncWorldBossHealth() {
+    set(ref(database, 'worldBoss/health'), worldBossHealth);
+}
+
+function syncPlayersDamage() {
+    set(ref(database, 'worldBoss/playersDamage'), playersDamage);
+}
+
+function loadWorldBossData() {
+    const dbRef = ref(database);
+    return get(child(dbRef, 'worldBoss')).then((snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            worldBossHealth = data.health;
+            playersDamage = data.playersDamage || {};
+            console.log(`Loaded World Boss Health: ${worldBossHealth}`);
+            updateWorldBossHealthDisplay();
+            updateDamageList();
+        } else {
+            console.log("No data available for world boss");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+}
+
+
+
+
         window.changeScreen = changeScreen;
 
-// function toggleCharacterMenu() {
-// const menu = document.getElementById('characterMenu');
-// menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-// updateCharacterMenu();
-// }
 
-// window.toggleCharacterMenu = toggleCharacterMenu;
 
         function updateCharacterMenu() {
     playerHealth = calculateTotalHealth(); // Обновление текущего здоровья игрока
@@ -1015,39 +1182,46 @@ window.calculateTotalHealth = calculateTotalHealth;
         window.resetGame = resetGame;
 
         canvas.addEventListener('click', function(event) {
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = event.clientX - rect.left;
-            const mouseY = event.clientY - rect.top;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
 
-            if (currentScreen === 'menu') {
-                currentScreen = 'dungeon';
-                drawDungeonEntrance();
-            } else if (currentScreen === 'dungeon') {
-                const gateCenterX = canvas.width / 2;
-                const gateCenterY = canvas.height / 2;
-                if (mouseX > gateCenterX - dungeonGateImage.width / 2 &&
-                    mouseX < gateCenterX + dungeonGateImage.width / 2 &&
-                    mouseY > gateCenterY - dungeonGateImage.height / 2) {
-                    currentScreen = 'battle';
-                    drawBattle();
-                    crosshair.style.display = 'block';
-                } else {
-                    levels.forEach((level, index) => {
-                        const { x, y } = getLevelPosition(index);
-                        const radius = 25;
+    if (currentScreen === 'menu') {
+        currentScreen = 'dungeon';
+        drawDungeonEntrance();
+    } else if (currentScreen === 'dungeon') {
+        const gateCenterX = canvas.width / 2;
+        const gateCenterY = canvas.height / 2;
+        if (mouseX > gateCenterX - dungeonGateImage.width / 2 &&
+            mouseX < gateCenterX + dungeonGateImage.width / 2 &&
+            mouseY > gateCenterY - dungeonGateImage.height / 2) {
+            currentScreen = 'battle';
+            drawBattle();
+            crosshair.style.display = 'block';
+        } else {
+            levels.forEach((level, index) => {
+                const { x, y } = getLevelPosition(index);
+                const radius = 25;
 
-                        if (Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2) < radius) {
-                            if (levels[index].completed || index === currentLevel - 1) {
-                                startLevel(level.number);
-                            }
-                        }
-                    });
+                if (Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2) < radius) {
+                    if (levels[index].completed || index === currentLevel - 1) {
+                        startLevel(level.number);
+                    }
                 }
-            } else if (currentScreen === 'battle') {
-                hitMonster(event);
-            }
-        });
+            });
+        }
+    } else if (currentScreen === 'battle') {
+        hitMonster(event);
+    } else if (currentScreen === 'worldBoss') {
+        console.log('Click detected on World Boss screen.');
+        hitWorldBoss(nickname, calculateTotalDamage());
+        syncWorldBossHealth();
+        syncPlayersDamage();
+    }
+});
 
+
+       
         function gameLoop() {
             requestAnimationFrame(gameLoop);
             if (currentScreen === 'menu') {
@@ -1066,6 +1240,13 @@ window.calculateTotalHealth = calculateTotalHealth;
         }
 
         gameLoop();
+
+
+window.onload = function() {
+    loadWorldBossData();
+    gameLoop();
+}
+
     </script>
 </body>
 </html>
