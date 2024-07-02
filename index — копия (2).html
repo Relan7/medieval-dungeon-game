@@ -236,10 +236,10 @@
         <div onclick="changeScreen('raid')">Рейд</div>
         <div onclick="changeScreen('castle')">Замок</div>
         <div onclick="changeScreen('levels')">Уровни</div>
-        <div onclick="changeScreen('worldBoss')">Мировой Босс</div>
+        <div onclick="changeScreen('worldBoss')">Мировой Босс</div> <!-- Добавлено -->
+
         <div onclick="toggleShop()">Магазин</div>
         <div onclick="toggleTopPlayers()">Топ игроки</div>
-        <button id="autoboyButton" onclick="toggleAutoHit()">Автобой</button> <!-- New Button -->
     </div>
     <div id="worldBossScreen" style="display:none;">
         <h2>Мировой Босс</h2>
@@ -422,9 +422,6 @@ function loadProgress(nickname) {
 let worldBossHealth = 1000000;
 let playersDamage = {};
 let isUpdating = false;
-let isAutoHitting = false;
-let autoHitInterval;
-
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -471,22 +468,7 @@ let autoHitInterval;
 });
 
 
-function toggleAutoHit() {
-    if (isAutoHitting) {
-        clearInterval(autoHitInterval);
-        isAutoHitting = false;
-        document.getElementById('autoboyButton').textContent = 'Автобой';
-    } else {
-        isAutoHitting = true;
-        document.getElementById('autoboyButton').textContent = 'Стоп Автобой';
-        autoHitInterval = setInterval(() => {
-            if (currentScreen === 'battle') {
-                hitMonster({ clientX: canvas.width / 2, clientY: canvas.height / 2 });
-            }
-        }, 1000);
-    }
-}
-window.toggleAutoHit = toggleAutoHit;
+
 
 
 
