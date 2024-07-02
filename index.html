@@ -436,6 +436,8 @@ let isUpdating = false;
 
         const backgroundImage = new Image();
         backgroundImage.src = 'background.png';
+        const castle = new Image();
+        castle.src = 'castle.png';
         const dungeonGateImage = new Image();
         dungeonGateImage.src = 'dung.png';
         const monsterImage = new Image();
@@ -778,6 +780,9 @@ window.hitMonster = hitMonster;
         function drawMenu() {
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
         }
+        function drawCastle() {
+            ctx.drawImage(castle, 0, 0, canvas.width, canvas.height);
+        }
 
         function drawDungeonEntrance() {
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
@@ -1116,10 +1121,12 @@ function changeScreen(screen) {
         document.getElementById('worldBossScreen').style.display = 'none';
     }
 
-    if (screen === 'arena' || screen === 'raid' || screen === 'castle') {
+    if (screen === 'arena' || screen === 'raid' ) {
         drawMenu();
     } else if (screen === 'dungeon') {
         drawDungeonEntrance();
+    } else if (screen === 'castle') {
+        drawCastle();
     } else if (screen === 'shop') {
         drawShop();
     } else if (screen === 'battle') {
