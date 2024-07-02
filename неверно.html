@@ -25,6 +25,30 @@
             transition: transform 0.1s ease-in-out;
             display: none;
         }
+        /* Стили для контейнера HP-бара */
+#hpBarContainer {
+    display: none; /* Скрываем HP-бар по умолчанию */
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 30px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    overflow: hidden;
+    z-index: 10000; /* Устанавливаем высокий z-index */
+    border: 2px solid yellow; /* Временная граница для отладки */
+}
+
+/* Стили для самой полоски HP */
+#hpBar {
+    width: 100%;
+    height: 100%;
+    background: red;
+    border-radius: 15px;
+    transition: width 0.25s;
+}
         #bottomMenu {
             position: fixed;
             bottom: 0;
@@ -144,6 +168,11 @@
             text-align: center;
             display: none;
         }
+
+
+
+
+
         #characterImage {
             width: 297px;
             height: 500px;
@@ -240,6 +269,8 @@
         <div onclick="toggleShop()">Магазин</div>
         <div onclick="toggleTopPlayers()">Топ игроки</div>
         <button id="autoboyButton" onclick="toggleAutoHit()">Автобой</button> <!-- New Button -->
+        <button onclick="document.getElementById('hpBarContainer').style.display = 'block';">Show HP Bar</button>
+
     </div>
     <div id="worldBossScreen" style="display:none;">
         <h2>Мировой Босс</h2>
@@ -249,7 +280,12 @@
             <h3>Список игроков</h3>
             <ul id="damageList"></ul>
         </div>
-    </div>
+       
+       
+        <div id="hpBarContainer">
+            <div id="hpBar"></div>
+        </div>
+        
     
     
     </div>
@@ -323,7 +359,7 @@
         <img id="victoryImage" src="win.png" alt="Вы победили" style="display: none; width: 700px; height: auto;">
         <p>Shap в печали, что вы его бьете :(</p>
         <p>Вы хотите продолжить унижать Shap и убить следующего монстра?</p>
-        <div id="goldEarned" style="display: none; font-size: 24px; color: gold; font-family: 'Comic Sans MS', cursive, sans-serif;">Золото: <span id="goldAmount"></span></div>
+        <div id="goldEarned" style="display: none; font-size: 24px; color: gold; font-family: 'Comic Sans MS', cursive, sans-serif;">Золото получено за бой : <span id="goldAmount"></span></div>
         <button onclick="goToCastle()">Нет</button>
     </div>
     
@@ -349,7 +385,21 @@
         const database = getDatabase(app);
 
         function saveProgress(nickname, playerData) {
-    set(ref(database, 'players/' + nickname), playerData)
+            console.log('Saving progress...', playerData);
+    const updatedData = {
+        ...playerData,
+        currentLevel,
+        gold,
+        playerHealth,
+        weaponPower,
+        weaponName,
+        weaponLevel,
+        inventory,
+        levels,
+        monsterHealth // Добавьте текущее здоровье монстра
+    };
+
+    set(ref(database, 'players/' + nickname), updatedData)
     .then(() => {
         console.log('Data saved successfully.');
     })
@@ -358,15 +408,22 @@
     });
 }
 
+
 async function loadProgress(nickname) {
     const dbRef = ref(database);
     try {
         const snapshot = await get(child(dbRef, `players/${nickname}`));
         if (snapshot.exists()) {
             const data = snapshot.val();
+            console.log('Loaded progress:', data);
             // Восстановление прогресса уровней
             if (data.levels) {
                 levels = data.levels;
+            }
+            if (data.monsterHealth) {
+                monsterHealth = data.monsterHealth;
+            } else {
+                monsterHealth = baseMonsterHealth * Math.pow(1.1, currentLevel - 1);
             }
             return data;
         } else {
@@ -378,6 +435,7 @@ async function loadProgress(nickname) {
         return null;
     }
 }
+
 
 
 
@@ -641,24 +699,26 @@ async function startGame() {
             weaponPower = data.weaponPower;
             weaponName = data.weaponName;
             weaponLevel = data.weaponLevel;
-            inventory = data.inventory || inventory; // Восстановление инвентаря
-            levels = data.levels || levels; // Восстановление прогресса уровней
+            inventory = data.inventory || inventory;
+            levels = data.levels || levels;
+            monsterHealth = data.monsterHealth; // Загрузка сохраненного здоровья монстра
             updateCharacterMenu();
         } else {
             resetGame();
+            monsterHealth = baseMonsterHealth * Math.pow(1.1, currentLevel - 1); // Установка начального здоровья монстра
         }
         document.getElementById('nicknameMenu').style.display = 'none';
         document.getElementById('gameCanvas').style.display = 'block';
         document.getElementById('bottomMenu').style.display = 'flex';
         currentScreen = 'menu';
         console.log(`Screen set to: ${currentScreen}`);
-                // Инициализация здоровья монстра перед первым боем
-                monsterHealth = baseMonsterHealth * Math.pow(1.1, currentLevel - 1);
         drawMenu();
+        updateMonsterHealthDisplay(); // Обновление отображения здоровья
     } else {
         alert('Пожалуйста, введите никнейм.');
     }
 }
+
 
 
 
@@ -724,15 +784,84 @@ async function startGame() {
 
         window.continueGame = continueGame;
 
-        function updateMonsterHealthDisplay() {
+
+        function updateHPBar(healthPercentage) {
+    const hpBar = document.getElementById('hpBar');
+    const hpBarContainer = document.getElementById('hpBarContainer');
+
+    if (!hpBar || !hpBarContainer) {
+        console.error('HP bar or container not found!');
+        return;
+    }
+
+    if (healthPercentage < 0) healthPercentage = 0;  // Избегаем отрицательных значений
+
+    hpBarContainer.style.width = '300px';  // Установите фиксированную ширину
+    hpBarContainer.style.height = '30px';  // Установите фиксированную высоту
+
+    hpBar.style.width = `${healthPercentage}%`;
+    console.log(`HP bar width set to ${healthPercentage}%`);
+
+    setTimeout(() => {
+        const containerRect = hpBarContainer.getBoundingClientRect();
+        console.log(`HP bar container position: top=${containerRect.top}, left=${containerRect.left}, width=${containerRect.width}, height=${containerRect.height}`);
+        if (containerRect.width === 0 || containerRect.height === 0) {
+            console.error('HP bar container has zero width or height!');
+        }
+
+        const rect = hpBar.getBoundingClientRect();
+        console.log(`HP bar position: top=${rect.top}, left=${rect.left}, width=${rect.width}, height=${rect.height}`);
+        if (rect.width === 0 || rect.height === 0) {
+            console.error('HP bar has zero width or height!');
+        }
+    }, 100); // 100 мс задержка для проверки размеров
+}
+
+
+
+function updateMonsterHealthDisplay() {
     const healthDisplay = document.getElementById('monsterHealthDisplay');
     const healthValue = document.getElementById('monsterHealthValue');
-    healthValue.textContent = Math.floor(monsterHealth); // Преобразование к целому числу
-    healthDisplay.style.display = 'block';
+    const hpBarContainer = document.getElementById('hpBarContainer');
+
+    console.log(`Updating monster health display on screen: ${currentScreen}`);
+
+    if (currentScreen === 'battle' || currentScreen === 'dungeon') {
+        const healthPercentage = (monsterHealth / baseMonsterHealth) * 100;
+        healthValue.textContent = Math.floor(monsterHealth);
+        healthDisplay.style.display = 'block';
+        hpBarContainer.style.display = 'block'; // Показываем HP-бар
+
+        // Устанавливаем фиксированные размеры контейнера
+        hpBarContainer.style.width = '300px';
+        hpBarContainer.style.height = '30px';
+
+        // Добавляем проверку размеров контейнера
+        setTimeout(() => {
+            const containerRect = hpBarContainer.getBoundingClientRect();
+            console.log(`HP bar container position: top=${containerRect.top}, left=${containerRect.left}, width=${containerRect.width}, height=${containerRect.height}`);
+            if (containerRect.width === 0 || containerRect.height === 0) {
+                console.error('HP bar container has zero width or height!');
+            }
+        }, 100);
+
+        updateHPBar(healthPercentage); // Обновляем HP-бар
+        console.log("Monster health display and HP bar should be visible");
+    } else {
+        healthDisplay.style.display = 'none';
+        hpBarContainer.style.display = 'none'; // Скрываем HP-бар
+        console.log("Monster health display and HP bar should be hidden");
+    }
+
     if (monsterHealth <= 0) {
         healthDisplay.style.display = 'none';
+        hpBarContainer.style.display = 'none'; // Скрываем HP-бар
+        console.log("Monster is dead, hiding health display and HP bar");
     }
 }
+
+
+
 
 function hitMonster(event) {
     if (currentScreen !== 'battle') return;
@@ -755,6 +884,7 @@ function hitMonster(event) {
         monsterHealth -= totalDamage;
         hits += 1;
         updateMonsterHealthDisplay(); // Обновление отображения здоровья
+        console.log(`Monster hit: new health = ${monsterHealth}`); // Добавляем вывод нового здоровья монстра
         if (monsterHealth <= 0) {
             monsterHealth = 0;
             gold += 10;
@@ -882,8 +1012,10 @@ function calculateStars() {
 
 
         function startLevel(levelNumber) {
+            console.log(`Starting level: ${levelNumber}`);
             currentLevel = levelNumber;
             monsterHealth = baseMonsterHealth * Math.pow(1.1, levelNumber - 1);
+            console.log(`Initialized monster health: ${monsterHealth}`);
             currentScreen = 'battle';
             drawBattle();
             updateMonsterHealthDisplay(); // Обновление отображения здоровья при начале уровня
@@ -940,8 +1072,8 @@ function drawLevelsScreen() {
 
 
         function drawLevelMap() {
-            console.log(levels);  // Вывод данных уровней в консоль
-            console.log('Drawing level map');
+           // console.log(levels);  // Вывод данных уровней в консоль
+          //  console.log('Drawing level map');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(mapImage, 0, 0, canvas.width, canvas.height);
 
@@ -1171,23 +1303,28 @@ function changeScreen(screen) {
     document.getElementById('statusBar').style.display = 'none';
     document.getElementById('monsterHealthDisplay').style.display = 'none'; // Скрываем отображение здоровья монстра
     document.getElementById('crosshair').style.display = 'none'; // Скрываем прицел
+    //document.getElementById('hpBarContainer').style.display = 'none'; // Скрываем HP-бар по умолчанию
+
     crosshair.style.display = (screen === 'battle' || screen === 'worldBoss') ? 'block' : 'none';
 
-    // Убедимся, что экран мирового босса не устанавливается повторно
     if (screen === 'worldBoss') {
         document.getElementById('worldBossScreen').style.display = 'block';
         document.getElementById('statusBar').style.display = 'block';
         updateStatusBar();
         drawWorldBossBattle();
-        //startUpdating(); // Запуск синхронизации только на экране мирового босса
+        console.log("Finished setting up battle screen"); // Добавляем вывод после действий
     } else {
         document.getElementById('worldBossScreen').style.display = 'none';
     }
 
-    if (screen === 'raid' ) {
+    if (screen === 'raid') {
         drawMenu();
     } else if (screen === 'dungeon') {
+        document.getElementById('statusBar').style.display = 'block';
+        document.getElementById('hpBarContainer').style.display = 'block'; // Показываем HP-бар
+        console.log("HP bar should be visible now on dungeon screen"); // Выводим сообщение в консоль
         drawDungeonEntrance();
+        updateMonsterHealthDisplay(); // Обновляем отображение здоровья монстра
     } else if (screen === 'arena') {
         arena();
     } else if (screen === 'castle') {
@@ -1195,13 +1332,20 @@ function changeScreen(screen) {
     } else if (screen === 'shop') {
         drawShop();
     } else if (screen === 'battle') {
-        document.getElementById('statusBar').style.display = 'block';
+        //document.getElementById('statusBar').style.display = 'block';
+        //document.getElementById('hpBarContainer').style.display = 'block'; // Показываем HP-бар
+        console.log("HP bar should be visible now on battle screen"); // Выводим сообщение в консоль
         updateStatusBar();
         drawBattle();
+        console.log("Finished setting up battle screen"); // Добавляем вывод после действий
+        updateMonsterHealthDisplay(); // Обновляем отображение здоровья монстра
     } else if (screen === 'levels') {
         drawLevelsScreen();
     }
 }
+
+
+
 
 
 function syncWorldBossHealth() {
@@ -1359,6 +1503,21 @@ window.calculateTotalHealth = calculateTotalHealth;
     }
 });
 
+// Добавьте обработчик события `beforeunload`
+window.addEventListener('beforeunload', (event) => {
+    saveProgress(nickname, {
+        currentLevel,
+        gold,
+        playerHealth,
+        weaponPower,
+        weaponName,
+        weaponLevel,
+        inventory,
+        levels,
+        monsterHealth // Добавьте текущее здоровье монстра
+    });
+});
+
 
        
         function gameLoop() {
@@ -1382,12 +1541,23 @@ window.calculateTotalHealth = calculateTotalHealth;
 
 
         window.onload = function() {
-            console.log("Page loaded, initializing game.");
+    console.log("Page loaded, initializing game.");
+
+    const hpBarContainer = document.getElementById('hpBarContainer');
+    const hpBar = document.getElementById('hpBar');
+
+    if (!hpBarContainer || !hpBar) {
+        console.error('HP bar or container not found in DOM!');
+    } else {
+        console.log('HP bar and container found in DOM.');
+    }
+
     loadWorldBossData();
     gameLoop();
     changeScreen('menu'); // Начальный экран
     startUpdating(); // Запуск обновления при старте игры
 }
+
 
     </script>
 </body>

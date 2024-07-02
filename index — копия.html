@@ -227,7 +227,7 @@
         <h2>Введите свой никнейм</h2>
         <input type="text" id="nicknameInput" placeholder="Ваш никнейм">
         <button onclick="startGame()">Начать игру</button>
-        <div id="gameVersion">Версия игры: 1.3</div>
+        <div id="gameVersion">Версия игры: 2.1</div>
     </div>
     <canvas id="gameCanvas" style="display:none;"></canvas>
     <div id="bottomMenu" style="display:none;">
@@ -236,10 +236,10 @@
         <div onclick="changeScreen('raid')">Рейд</div>
         <div onclick="changeScreen('castle')">Замок</div>
         <div onclick="changeScreen('levels')">Уровни</div>
-        <div onclick="changeScreen('worldBoss')">Мировой Босс</div> <!-- Добавлено -->
-
+        <div onclick="changeScreen('worldBoss')">Мировой Босс</div>
         <div onclick="toggleShop()">Магазин</div>
         <div onclick="toggleTopPlayers()">Топ игроки</div>
+        <button id="autoboyButton" onclick="toggleAutoHit()">Автобой</button> <!-- New Button -->
     </div>
     <div id="worldBossScreen" style="display:none;">
         <h2>Мировой Босс</h2>
@@ -421,6 +421,10 @@ function loadProgress(nickname) {
 };
 let worldBossHealth = 1000000;
 let playersDamage = {};
+let isUpdating = false;
+let isAutoHitting = false;
+let autoHitInterval;
+
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -435,6 +439,10 @@ let playersDamage = {};
 
         const backgroundImage = new Image();
         backgroundImage.src = 'background.png';
+        const castle = new Image();
+        castle.src = 'castle.png';
+        const arena2 = new Image();
+        arena2.src = 'arena.png';
         const dungeonGateImage = new Image();
         dungeonGateImage.src = 'dung.png';
         const monsterImage = new Image();
@@ -454,13 +462,31 @@ let playersDamage = {};
         // Crosshair logic
         const crosshair = document.getElementById('crosshair');
         document.addEventListener('mousemove', (event) => {
+    if (currentScreen === 'battle') {
+        crosshair.style.left = `${event.clientX}px`;
+        crosshair.style.top = `${event.clientY}px`;
+    } else {
+        crosshair.style.display = 'none'; // Скрываем прицел, если не в режиме "battle"
+    }
+});
+
+
+function toggleAutoHit() {
+    if (isAutoHitting) {
+        clearInterval(autoHitInterval);
+        isAutoHitting = false;
+        document.getElementById('autoboyButton').textContent = 'Автобой';
+    } else {
+        isAutoHitting = true;
+        document.getElementById('autoboyButton').textContent = 'Стоп Автобой';
+        autoHitInterval = setInterval(() => {
             if (currentScreen === 'battle') {
-                crosshair.style.left = `${event.clientX}px`;
-                crosshair.style.top = `${event.clientY}px`;
+                hitMonster({ clientX: canvas.width / 2, clientY: canvas.height / 2 });
             }
-        });
-
-
+        }, 1000);
+    }
+}
+window.toggleAutoHit = toggleAutoHit;
 
 
 
@@ -488,7 +514,7 @@ let playersDamage = {};
         window.showMonsterMessage = showMonsterMessage;
       
         function drawStars(x, y, count) {
-    console.log(`Drawing ${count} stars at (${x}, ${y})`);
+    //console.log(`Drawing ${count} stars at (${x}, ${y})`);
     for (let i = 0; i < count; i++) {
         ctx.drawImage(starImage, x + i * 30, y, 20, 20);
     }
@@ -619,6 +645,7 @@ function startGame() {
         document.getElementById('gameCanvas').style.display = 'block';
         document.getElementById('bottomMenu').style.display = 'flex';
         currentScreen = 'menu';
+        console.log(`Screen set to: ${currentScreen}`);
         drawMenu();
     } else {
         alert('Пожалуйста, введите никнейм.');
@@ -732,7 +759,7 @@ function hitMonster(event) {
             setTimeout(() => {
                 document.getElementById('victoryMessage').style.display = 'none';
                 showContinuePrompt();
-            }, 2000);
+            }, 50);
         }
     }
 }
@@ -772,6 +799,12 @@ window.hitMonster = hitMonster;
 
         function drawMenu() {
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+        }
+        function drawCastle() {
+            ctx.drawImage(castle, 0, 0, canvas.width, canvas.height);
+        }
+        function arena() {
+            ctx.drawImage(arena2, 0, 0, canvas.width, canvas.height);
         }
 
         function drawDungeonEntrance() {
@@ -817,7 +850,7 @@ function calculateStars() {
         }
 
         function completeLevel(levelNumber, stars) {
-    console.log(`Completing level ${levelNumber} with ${stars} stars`);
+    //console.log(`Completing level ${levelNumber} with ${stars} stars`);
     if (levels[levelNumber - 1]) {
         levels[levelNumber - 1].completed = true;
         levels[levelNumber - 1].stars = stars;  // Устанавливаем количество звезд
@@ -900,9 +933,58 @@ function drawLevelsScreen() {
             return { x, y };
         }
         
+
+
+
+
+        const updateInterval = 1000; // Интервал обновления в миллисекундах (1 секунда)
+
+// Функция для регулярного обновления данных
+function startUpdating() {
+    if (!isUpdating) {
+        isUpdating = true;
+        setInterval(() => {
+            // Получаем последние данные с сервера
+            updateWorldBossData();
+        }, updateInterval);
+    }
+}
+
+
+// Функция для обновления данных босса и игроков
+function updateWorldBossData() {
+    const dbRef = ref(database);
+    get(child(dbRef, 'worldBoss')).then((snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            worldBossHealth = data.health;
+            playersDamage = data.playersDamage || {};
+            if (currentScreen === 'worldBoss') {
+                drawWorldBossBattle();
+            }
+        } else {
+            console.log("No data available for world boss");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
         
         function drawWorldBossBattle() {
-    console.log('Drawing World Boss Battle');
+    //console.log('Drawing World Boss Battle');
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -916,7 +998,7 @@ function drawLevelsScreen() {
     const healthTextY = bossY - 40 > 0 ? bossY - 40 : 40;
 
     // Добавляем лог для проверки координат
-    console.log(`Drawing health text at: ${canvas.width / 2}, ${healthTextY}`);
+    //console.log(`Drawing health text at: ${canvas.width / 2}, ${healthTextY}`);
 
     // Добавляем отображение здоровья босса над его изображением с жирным шрифтом и обводкой
     ctx.fillStyle = 'white';
@@ -933,7 +1015,7 @@ function drawLevelsScreen() {
 
     // Рисуем полоску здоровья
     drawHealthBar(worldBossHealth, canvas.width - 210, 10, 200, 20, 'red');
-    drawHealthBar(playerHealth, 10, 10, 200, 20, 'green');
+    //drawHealthBar(playerHealth, 10, 150, 200, 20, 'green');
 
     // Добавляем отображение рейтинга игроков
     const playersListX = 20; // координаты слева от экрана
@@ -947,7 +1029,7 @@ function drawLevelsScreen() {
     ctx.fillText('Рейтинг игроков:', playersListX, playersListY);
     playersListY += lineHeight; // увеличение отступа после заголовка
 
-    console.log('Players damage data:', playersDamage);
+    //('Players damage data:', playersDamage);
 
     Object.entries(playersDamage).sort(([, damageA], [, damageB]) => damageB - damageA).forEach(([player, damage], index) => {
         playersListY += lineHeight; // вертикальное смещение для каждой строки
@@ -1018,7 +1100,7 @@ function updateDamageList() {
 }
 
 function hitWorldBoss(playerName, damage) {
-    console.log(`Hit World Boss: Player ${playerName} deals ${damage} damage.`);
+    //console.log(`Hit World Boss: Player ${playerName} deals ${damage} damage.`);
     if (!playersDamage[playerName]) {
         playersDamage[playerName] = 0;
     }
@@ -1033,22 +1115,43 @@ function hitWorldBoss(playerName, damage) {
 }
 
 function updateWorldBossHealthDisplay() {
-    console.log(`Updating World Boss Health Display: ${worldBossHealth}`);
+    //console.log(`Updating World Boss Health Display: ${worldBossHealth}`);
     document.getElementById('worldBossHealthValue').textContent = worldBossHealth;
 }
 
+function startBossBattle() {
+    changeScreen('worldBoss');
+    startUpdating(); // Убедитесь, что обновление запущено
+}
+
 function changeScreen(screen) {
+    console.log(`Changing screen to: ${screen}`);
     currentScreen = screen;
     document.getElementById('shopMenu').style.display = 'none';
     document.getElementById('statusBar').style.display = 'none';
+    document.getElementById('monsterHealthDisplay').style.display = 'none'; // Скрываем отображение здоровья монстра
+    document.getElementById('crosshair').style.display = 'none'; // Скрываем прицел
     crosshair.style.display = (screen === 'battle' || screen === 'worldBoss') ? 'block' : 'none';
 
-    document.getElementById('worldBossScreen').style.display = (screen === 'worldBoss') ? 'block' : 'none';
+    // Убедимся, что экран мирового босса не устанавливается повторно
+    if (screen === 'worldBoss') {
+        document.getElementById('worldBossScreen').style.display = 'block';
+        document.getElementById('statusBar').style.display = 'block';
+        updateStatusBar();
+        drawWorldBossBattle();
+        //startUpdating(); // Запуск синхронизации только на экране мирового босса
+    } else {
+        document.getElementById('worldBossScreen').style.display = 'none';
+    }
 
-    if (screen === 'arena' || screen === 'raid' || screen === 'castle') {
+    if (screen === 'raid' ) {
         drawMenu();
     } else if (screen === 'dungeon') {
         drawDungeonEntrance();
+    } else if (screen === 'arena') {
+        arena();
+    } else if (screen === 'castle') {
+        drawCastle();
     } else if (screen === 'shop') {
         drawShop();
     } else if (screen === 'battle') {
@@ -1057,10 +1160,6 @@ function changeScreen(screen) {
         drawBattle();
     } else if (screen === 'levels') {
         drawLevelsScreen();
-    } else if (screen === 'worldBoss') {
-        document.getElementById('statusBar').style.display = 'block';
-        updateStatusBar();
-        drawWorldBossBattle();
     }
 }
 
@@ -1080,7 +1179,7 @@ function loadWorldBossData() {
             const data = snapshot.val();
             worldBossHealth = data.health;
             playersDamage = data.playersDamage || {};
-            console.log(`Loaded World Boss Health: ${worldBossHealth}`);
+            //console.log(`Loaded World Boss Health: ${worldBossHealth}`);
             updateWorldBossHealthDisplay();
             updateDamageList();
         } else {
@@ -1242,9 +1341,12 @@ window.calculateTotalHealth = calculateTotalHealth;
         gameLoop();
 
 
-window.onload = function() {
+        window.onload = function() {
+            console.log("Page loaded, initializing game.");
     loadWorldBossData();
     gameLoop();
+    changeScreen('menu'); // Начальный экран
+    startUpdating(); // Запуск обновления при старте игры
 }
 
     </script>

@@ -308,7 +308,7 @@
     <div class="victory-message" id="victoryMessage">
         <p>Shap в печали, что вы его бьете :(</p>
     </div>
-    <div id="monsterHealthDisplay" style="display:none; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.7); color: white; padding: 10px; border-radius: 5px; font-size: 20px;">
+    <div id="monsterHealthDisplay" style="display:none; position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.7); color: white; padding: 10px; border-radius: 5px; font-size: 30px;">
         Здоровье монстра: <span id="monsterHealthValue">100</span>
     </div>
     
@@ -320,11 +320,15 @@
         <button onclick="closeItemDetail()">Закрыть</button>
     </div>
     <div id="continuePrompt">
+        <img id="victoryImage" src="win.png" alt="Вы победили" style="display: none; width: 700px; height: auto;">
         <p>Shap в печали, что вы его бьете :(</p>
         <p>Вы хотите продолжить унижать Shap и убить следующего монстра?</p>
-        <button onclick="continueToNextLevel()">Да</button>
+        <div id="goldEarned" style="display: none; font-size: 24px; color: gold; font-family: 'Comic Sans MS', cursive, sans-serif;">Золото: <span id="goldAmount"></span></div>
         <button onclick="goToCastle()">Нет</button>
     </div>
+    
+    
+    
     <div class="monster-message" id="monsterMessage"></div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
@@ -345,21 +349,25 @@
         const database = getDatabase(app);
 
         function saveProgress(nickname, playerData) {
+    console.log('Saving progress:', playerData); // Лог сохранения данных
     set(ref(database, 'players/' + nickname), playerData)
-    .then(() => {
-        console.log('Data saved successfully.');
-    })
-    .catch((error) => {
-        console.error('Error saving data:', error);
-    });
+        .then(() => {
+            console.log('Data saved successfully.');
+        })
+        .catch((error) => {
+            console.error('Error saving data:', error);
+        });
 }
 
-function loadProgress(nickname) {
+
+
+async function loadProgress(nickname) {
     const dbRef = ref(database);
-    return get(child(dbRef, `players/${nickname}`)).then((snapshot) => {
+    try {
+        const snapshot = await get(child(dbRef, `players/${nickname}`));
         if (snapshot.exists()) {
             const data = snapshot.val();
-            // Восстановление прогресса уровней
+            console.log('Loaded progress:', data); // Лог загруженных данных
             if (data.levels) {
                 levels = data.levels;
             }
@@ -368,10 +376,13 @@ function loadProgress(nickname) {
             console.log("No data available");
             return null;
         }
-    }).catch((error) => {
+    } catch (error) {
         console.error(error);
-    });
+        return null;
+    }
 }
+
+
 
 
 
@@ -620,37 +631,40 @@ window.upgradeItem = upgradeItem;
         
 
 
-function startGame() {
+async function startGame() {
     const input = document.getElementById('nicknameInput').value;
     console.log(`Nickname entered: ${input}`);
     if (input) {
         nickname = input;
-        loadProgress(nickname).then(data => {
-            console.log(`Data loaded: ${JSON.stringify(data)}`);
-            if (data) {
-                currentLevel = data.currentLevel;
-                gold = data.gold;
-                playerHealth = data.playerHealth;
-                weaponPower = data.weaponPower;
-                weaponName = data.weaponName;
-                weaponLevel = data.weaponLevel;
-                inventory = data.inventory || inventory; // Восстановление инвентаря
-                levels = data.levels || levels; // Восстановление прогресса уровней
-                updateCharacterMenu();
-            } else {
-                resetGame();
-            }
-        });
+        const data = await loadProgress(nickname);
+        console.log(`Data loaded: ${JSON.stringify(data)}`);
+        if (data) {
+            currentLevel = data.currentLevel;
+            gold = data.gold;
+            playerHealth = data.playerHealth;
+            weaponPower = data.weaponPower;
+            weaponName = data.weaponName;
+            weaponLevel = data.weaponLevel;
+            inventory = data.inventory || inventory; // Восстановление инвентаря
+            levels = data.levels || levels; // Восстановление прогресса уровней
+            updateCharacterMenu();
+        } else {
+            resetGame();
+        }
         document.getElementById('nicknameMenu').style.display = 'none';
         document.getElementById('gameCanvas').style.display = 'block';
         document.getElementById('bottomMenu').style.display = 'flex';
         currentScreen = 'menu';
         console.log(`Screen set to: ${currentScreen}`);
+        // Инициализация здоровья монстра перед первым боем
+        monsterHealth = baseMonsterHealth * Math.pow(1.1, currentLevel - 1);
         drawMenu();
     } else {
         alert('Пожалуйста, введите никнейм.');
     }
 }
+
+
 
 
 
@@ -718,6 +732,7 @@ function startGame() {
         function updateMonsterHealthDisplay() {
     const healthDisplay = document.getElementById('monsterHealthDisplay');
     const healthValue = document.getElementById('monsterHealthValue');
+    console.log(`Updating monster health display: ${monsterHealth}`); // Лог для проверки инициализации здоровья монстра
     healthValue.textContent = Math.floor(monsterHealth); // Преобразование к целому числу
     healthDisplay.style.display = 'block';
     if (monsterHealth <= 0) {
@@ -725,13 +740,17 @@ function startGame() {
     }
 }
 
+
 function hitMonster(event) {
     if (currentScreen !== 'battle') return;
+    if (monsterHealth <= 0) return; // Если жизни монстра меньше или равны нулю, не обрабатываем удар
+
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
     const monsterX = canvas.width / 2 - monsterImage.width / 2;
     const monsterY = canvas.height / 2 - monsterImage.height / 2;
+
     if (
         mouseX >= monsterX &&
         mouseX <= monsterX + monsterImage.width &&
@@ -740,6 +759,7 @@ function hitMonster(event) {
     ) {
         showHitAnimation();
         const totalDamage = calculateTotalDamage(); // Получение общего урона
+        console.log(`Monster Health before hit: ${monsterHealth}, Total Damage: ${totalDamage}`);
         monsterHealth -= totalDamage;
         hits += 1;
         updateMonsterHealthDisplay(); // Обновление отображения здоровья
@@ -763,17 +783,60 @@ function hitMonster(event) {
         }
     }
 }
-
 window.hitMonster = hitMonster;
 
 
-        function showContinuePrompt() {
-            document.getElementById('continuePrompt').style.display = 'block';
-        }
 
-        function hideContinuePrompt() {
-            document.getElementById('continuePrompt').style.display = 'none';
-        }
+
+
+function showContinuePrompt() {
+    document.getElementById('continuePrompt').style.display = 'block';
+    document.getElementById('victoryImage').style.display = 'block';
+
+    const continueTimeout = setTimeout(() => {
+        continueToNextLevel();
+    }, 5000); // 5 секунд
+
+    document.getElementById('continuePrompt').querySelector('button').onclick = () => {
+        clearTimeout(continueTimeout);
+        completeLevel(currentLevel, calculateStars());
+        goToNextLevel();
+    };
+}
+
+function goToNextLevel() {
+    levels[currentLevel - 1].completed = true;
+    currentLevel += 1; // Переход на следующий уровень
+    resetMonsterState(); // Сброс состояния монстра для следующего уровня
+    saveProgress(nickname, {
+        currentLevel,
+        gold,
+        playerHealth,
+        weaponPower,
+        weaponName,
+        weaponLevel,
+        inventory,
+        levels
+    });
+    hideContinuePrompt(); // Скрываем диалоговое окно
+    changeScreen('castle'); // Переход на экран замка
+}
+
+function resetMonsterState() {
+    monsterHealth = baseMonsterHealth * Math.pow(1.1, currentLevel - 1);
+    console.log(`Monster health reset to: ${monsterHealth}`);
+}
+
+
+
+
+function hideContinuePrompt() {
+    document.getElementById('continuePrompt').style.display = 'none';
+    document.getElementById('victoryImage').style.display = 'none';
+    document.getElementById('goldEarned').style.display = 'none'; // Скрыть текст с количеством золота
+}
+
+
 
         function continueToNextLevel() {
             hideContinuePrompt();
@@ -791,9 +854,12 @@ window.hitMonster = hitMonster;
         window.continueToNextLevel = continueToNextLevel;
 
         function goToCastle() {
-            hideContinuePrompt();
-            changeScreen('castle');
-        }
+    hideContinuePrompt();
+    changeScreen('castle');
+}
+window.goToCastle = goToCastle;
+
+
 
         window.goToCastle = goToCastle;
 
@@ -827,6 +893,16 @@ window.hitMonster = hitMonster;
 
     const starsEarned = calculateStars(); // Расчет количества заработанных звезд
     completeLevel(currentLevel, starsEarned); // Обновление данных уровня
+
+    // Показать изображение "Вы победили"
+    const victoryImage = document.getElementById('victoryImage');
+    victoryImage.style.display = 'block';
+
+    // Показать количество полученного золота
+    const goldEarnedElement = document.getElementById('goldEarned');
+    const goldAmount = document.getElementById('goldAmount');
+    goldAmount.textContent = 10; // Укажите здесь количество полученного золота
+    goldEarnedElement.style.display = 'block';
 }
 
 function calculateStars() {
@@ -841,19 +917,19 @@ function calculateStars() {
 }
 
 
-        function startLevel(levelNumber) {
-            currentLevel = levelNumber;
-            monsterHealth = baseMonsterHealth * Math.pow(1.1, levelNumber - 1);
-            currentScreen = 'battle';
-            drawBattle();
-            updateMonsterHealthDisplay(); // Обновление отображения здоровья при начале уровня
-        }
+function startLevel(levelNumber) {
+    currentLevel = levelNumber;
+    monsterHealth = baseMonsterHealth * Math.pow(1.1, levelNumber - 1);
+    console.log(`Starting level ${levelNumber}, Monster Health: ${monsterHealth}`); // Лог для проверки инициализации здоровья монстра
+    currentScreen = 'battle';
+    drawBattle();
+    updateMonsterHealthDisplay(); // Обновление отображения здоровья при начале уровня
+}
 
-        function completeLevel(levelNumber, stars) {
-    //console.log(`Completing level ${levelNumber} with ${stars} stars`);
+function completeLevel(levelNumber, stars) {
     if (levels[levelNumber - 1]) {
         levels[levelNumber - 1].completed = true;
-        levels[levelNumber - 1].stars = stars;  // Устанавливаем количество звезд
+        levels[levelNumber - 1].stars = stars;
         saveProgress(nickname, {
             currentLevel,
             gold,
@@ -862,9 +938,9 @@ function calculateStars() {
             weaponName,
             weaponLevel,
             inventory,
-            levels // Сохраняем прогресс уровней
+            levels
         });
-        drawLevelMap();  // Обновляем отображение карты уровней
+        drawLevelMap();
     }
 }
 
@@ -1050,7 +1126,10 @@ function updateWorldBossData() {
 
 
 
-        function drawBattle() {
+function drawBattle() {
+    console.log('Drawing battle screen');
+    console.log(`Monster Health: ${monsterHealth}`);
+    console.log(`Player Health: ${playerHealth}`);
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -1058,13 +1137,20 @@ function updateWorldBossData() {
         ctx.drawImage(document.getElementById('worldBossImage'), canvas.width / 2 - document.getElementById('worldBossImage').width / 2, canvas.height / 2 - document.getElementById('worldBossImage').height / 2);
         drawHealthBar(worldBossHealth, canvas.width - 210, 10, 200, 20, 'red');
     } else {
-        ctx.drawImage(monsterImage, canvas.width / 2 - monsterImage.width / 2, canvas.height / 2 - monsterImage.height / 2);
+        const mobWidth = 600;
+        const mobHeight = 580;
+        const x = (canvas.width / 2) - (mobWidth / 2);
+        const y = (canvas.height / 2) - (mobHeight / 2);
+        ctx.drawImage(monsterImage, x, y, mobWidth, mobHeight); // Указываем размеры изображения
+
         drawHealthBar(monsterHealth, canvas.width - 210, 10, 200, 20, 'red');
     }
 
     drawHealthBar(playerHealth, 10, 10, 200, 20, 'green');
     updateStatusBar();
 }
+
+
 
 
 function drawHealthBar(health, x, y, width, height, color) {
@@ -1129,22 +1215,20 @@ function changeScreen(screen) {
     currentScreen = screen;
     document.getElementById('shopMenu').style.display = 'none';
     document.getElementById('statusBar').style.display = 'none';
-    document.getElementById('monsterHealthDisplay').style.display = 'none'; // Скрываем отображение здоровья монстра
-    document.getElementById('crosshair').style.display = 'none'; // Скрываем прицел
+    document.getElementById('monsterHealthDisplay').style.display = 'none';
+    document.getElementById('crosshair').style.display = 'none';
     crosshair.style.display = (screen === 'battle' || screen === 'worldBoss') ? 'block' : 'none';
 
-    // Убедимся, что экран мирового босса не устанавливается повторно
     if (screen === 'worldBoss') {
         document.getElementById('worldBossScreen').style.display = 'block';
         document.getElementById('statusBar').style.display = 'block';
         updateStatusBar();
         drawWorldBossBattle();
-        //startUpdating(); // Запуск синхронизации только на экране мирового босса
     } else {
         document.getElementById('worldBossScreen').style.display = 'none';
     }
 
-    if (screen === 'raid' ) {
+    if (screen === 'raid') {
         drawMenu();
     } else if (screen === 'dungeon') {
         drawDungeonEntrance();
@@ -1155,13 +1239,28 @@ function changeScreen(screen) {
     } else if (screen === 'shop') {
         drawShop();
     } else if (screen === 'battle') {
-        document.getElementById('statusBar').style.display = 'block';
-        updateStatusBar();
-        drawBattle();
+        loadProgress(nickname).then(data => {
+            console.log('Data after loading progress:', data);
+            if (data) {
+                currentLevel = data.currentLevel;
+                gold = data.gold;
+                playerHealth = data.playerHealth;
+                weaponPower = data.weaponPower;
+                weaponName = data.weaponName;
+                weaponLevel = data.weaponLevel;
+                inventory = data.inventory || inventory;
+                levels = data.levels || levels;
+                updateCharacterMenu();
+            }
+            document.getElementById('statusBar').style.display = 'block';
+            updateStatusBar();
+            startLevel(currentLevel); // Инициализация уровня перед отрисовкой боя
+        });
     } else if (screen === 'levels') {
         drawLevelsScreen();
     }
 }
+
 
 
 function syncWorldBossHealth() {
@@ -1240,11 +1339,12 @@ function calculateTotalHealth() {
 }
 window.calculateTotalHealth = calculateTotalHealth;
 
-        function updateStatusBar() {
-            document.getElementById('statusGold').textContent = gold;
-            document.getElementById('statusLevel').textContent = currentLevel;
-            document.getElementById('playerHealthBar').style.width = playerHealth + '%';
-        }
+function updateStatusBar() {
+    document.getElementById('statusGold').textContent = gold;
+    document.getElementById('statusLevel').textContent = currentLevel;
+    document.getElementById('playerHealthBar').style.width = (playerHealth / 100) + '%'; // Обновление ширины полосы здоровья
+}
+
 
         function toggleTopPlayers() {
     const menu = document.getElementById('topPlayersMenu');
@@ -1337,6 +1437,24 @@ window.calculateTotalHealth = calculateTotalHealth;
                 drawShop();
             }
         }
+
+        window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    if (currentScreen === 'battle') {
+        drawBattle(); // Перерисовка экрана боя
+    } else if (currentScreen === 'arena') {
+        drawArena(); // Перерисовка арены
+    } else if (currentScreen === 'menu') {
+        drawMenu(); // Перерисовка меню
+    } else if (currentScreen === 'dungeon') {
+        drawDungeonEntrance(); // Перерисовка подземелья
+    } else if (currentScreen === 'worldBoss') {
+        drawWorldBossBattle(); // Перерисовка боя с мировым боссом
+    }
+});
+
+
 
         gameLoop();
 
