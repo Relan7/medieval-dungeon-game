@@ -39,7 +39,7 @@
         }
         #characterMenu {
     position: fixed;
-    top: 30px;
+    top: 0px;
     right: 10px;
     background: rgba(0, 0, 0, 0.8);
     color: white;
@@ -220,6 +220,9 @@
             font-size: 16px;
             display: none;
         }
+        #weaponInfo, #healthInfo {
+            display: none; /* Скрываем элементы оружия и здоровья */
+        }
     </style>
 </head>
 <body>
@@ -255,11 +258,13 @@
     </div>
     <div id="characterMenu">
         <img id="characterImage" src="peasant.png" alt="Character">
-        <p>Оружие: <span id="weapon"></span></p>
-        <p>Здоровье: <span id="health"></span></p>
-        <p>Урон: <span id="damage"></span></p>
-        <p>Золото: <span id="gold"></span></p>
+        <p style="display:none;">Оружие: <span id="weapon"></span></p> <!-- Скрытый элемент для отображения оружия -->
+        <p style="display:none;">Здоровье: <span id="health"></span></p> <!-- Скрытый элемент для отображения здоровья -->
         <p>Уровень: <span id="level"></span></p>
+        <p>Золото: <span id="gold"></span></p>
+        <p>Урон: <span id="damage"></span></p>
+        
+        
         <p>Инвентарь: <pre id="inventory"></pre></p>
     </div>
     <div id="shopMenu">
@@ -304,6 +309,7 @@
         </div>
         <p>Золото: <span id="statusGold"></span></p>
         <p>Уровень: <span id="statusLevel"></span></p>
+        <p>Урон: <span id="statusDamage"></span></p> 
     </div>
     <div class="victory-message" id="victoryMessage">
         <p>Shap в печали, что вы его бьете :(</p>
@@ -795,7 +801,7 @@ function showContinuePrompt() {
 
     const continueTimeout = setTimeout(() => {
         continueToNextLevel();
-    }, 5000); // 5 секунд
+    }, 2000); // 2 секунд
 
     document.getElementById('continuePrompt').querySelector('button').onclick = () => {
         clearTimeout(continueTimeout);
@@ -1091,7 +1097,7 @@ function updateWorldBossData() {
 
     // Рисуем полоску здоровья
     drawHealthBar(worldBossHealth, canvas.width - 210, 10, 200, 20, 'red');
-    //drawHealthBar(playerHealth, 10, 150, 200, 20, 'green');
+    
 
     // Добавляем отображение рейтинга игроков
     const playersListX = 20; // координаты слева от экрана
@@ -1127,9 +1133,6 @@ function updateWorldBossData() {
 
 
 function drawBattle() {
-    console.log('Drawing battle screen');
-    console.log(`Monster Health: ${monsterHealth}`);
-    console.log(`Player Health: ${playerHealth}`);
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -1146,7 +1149,7 @@ function drawBattle() {
         drawHealthBar(monsterHealth, canvas.width - 210, 10, 200, 20, 'red');
     }
 
-    drawHealthBar(playerHealth, 10, 10, 200, 20, 'green');
+    
     updateStatusBar();
 }
 
@@ -1232,6 +1235,8 @@ function changeScreen(screen) {
         drawMenu();
     } else if (screen === 'dungeon') {
         drawDungeonEntrance();
+        document.getElementById('statusBar').style.display = 'block';
+        updateStatusBar();
     } else if (screen === 'arena') {
         arena();
     } else if (screen === 'castle') {
@@ -1239,6 +1244,7 @@ function changeScreen(screen) {
     } else if (screen === 'shop') {
         drawShop();
     } else if (screen === 'battle') {
+        
         loadProgress(nickname).then(data => {
             console.log('Data after loading progress:', data);
             if (data) {
@@ -1342,8 +1348,12 @@ window.calculateTotalHealth = calculateTotalHealth;
 function updateStatusBar() {
     document.getElementById('statusGold').textContent = gold;
     document.getElementById('statusLevel').textContent = currentLevel;
-    document.getElementById('playerHealthBar').style.width = (playerHealth / 100) + '%'; // Обновление ширины полосы здоровья
+    document.getElementById('playerHealthBar').style.width = playerHealth + '%'; // Обновление ширины полосы здоровья
+    document.getElementById('statusDamage').textContent = calculateTotalDamage(); // Обновление значения урона
+    //document.getElementById('statusWeapon').textContent = inventory.sword.basePower; // Обновление значения оружия
+    //document.getElementById('statusHealth').textContent = playerHealth; // Обновление значения здоровья
 }
+
 
 
         function toggleTopPlayers() {
