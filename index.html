@@ -421,6 +421,7 @@ function loadProgress(nickname) {
 };
 let worldBossHealth = 1000000;
 let playersDamage = {};
+let isUpdating = false;
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -622,6 +623,7 @@ function startGame() {
         document.getElementById('gameCanvas').style.display = 'block';
         document.getElementById('bottomMenu').style.display = 'flex';
         currentScreen = 'menu';
+        console.log(`Screen set to: ${currentScreen}`);
         drawMenu();
     } else {
         alert('Пожалуйста, введите никнейм.');
@@ -911,11 +913,15 @@ function drawLevelsScreen() {
 
 // Функция для регулярного обновления данных
 function startUpdating() {
-    setInterval(() => {
-        // Получаем последние данные с сервера
-        updateWorldBossData();
-    }, updateInterval);
+    if (!isUpdating) {
+        isUpdating = true;
+        setInterval(() => {
+            // Получаем последние данные с сервера
+            updateWorldBossData();
+        }, updateInterval);
+    }
 }
+
 
 // Функция для обновления данных босса и игроков
 function updateWorldBossData() {
@@ -925,10 +931,9 @@ function updateWorldBossData() {
             const data = snapshot.val();
             worldBossHealth = data.health;
             playersDamage = data.playersDamage || {};
-            //console.log(`Updated World Boss Health: ${worldBossHealth}`);
-            //console.log('Updated Players Damage:', playersDamage);
-            // Обновляем отображение на экране
-            drawWorldBossBattle();
+            if (currentScreen === 'worldBoss') {
+                drawWorldBossBattle();
+            }
         } else {
             console.log("No data available for world boss");
         }
@@ -936,8 +941,6 @@ function updateWorldBossData() {
         console.error(error);
     });
 }
-
-
 
 
 
@@ -1088,6 +1091,11 @@ function updateWorldBossHealthDisplay() {
     document.getElementById('worldBossHealthValue').textContent = worldBossHealth;
 }
 
+function startBossBattle() {
+    changeScreen('worldBoss');
+    startUpdating(); // Убедитесь, что обновление запущено
+}
+
 function changeScreen(screen) {
     console.log(`Changing screen to: ${screen}`);
     currentScreen = screen;
@@ -1097,7 +1105,16 @@ function changeScreen(screen) {
     document.getElementById('crosshair').style.display = 'none'; // Скрываем прицел
     crosshair.style.display = (screen === 'battle' || screen === 'worldBoss') ? 'block' : 'none';
 
-   // document.getElementById('worldBossScreen').style.display = (screen === 'worldBoss') ? 'block' : 'none';
+    // Убедимся, что экран мирового босса не устанавливается повторно
+    if (screen === 'worldBoss') {
+        document.getElementById('worldBossScreen').style.display = 'block';
+        document.getElementById('statusBar').style.display = 'block';
+        updateStatusBar();
+        drawWorldBossBattle();
+        //startUpdating(); // Запуск синхронизации только на экране мирового босса
+    } else {
+        document.getElementById('worldBossScreen').style.display = 'none';
+    }
 
     if (screen === 'arena' || screen === 'raid' || screen === 'castle') {
         drawMenu();
@@ -1111,11 +1128,6 @@ function changeScreen(screen) {
         drawBattle();
     } else if (screen === 'levels') {
         drawLevelsScreen();
-    } else if (screen === 'worldBoss') {
-        document.getElementById('statusBar').style.display = 'block';
-        updateStatusBar();
-        drawWorldBossBattle();
-        startUpdating(); // Запуск синхронизации только на экране мирового босса
     }
 }
 
@@ -1298,8 +1310,11 @@ window.calculateTotalHealth = calculateTotalHealth;
 
 
         window.onload = function() {
+            console.log("Page loaded, initializing game.");
     loadWorldBossData();
     gameLoop();
+    changeScreen('menu'); // Начальный экран
+    startUpdating(); // Запуск обновления при старте игры
 }
 
     </script>
