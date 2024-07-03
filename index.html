@@ -515,8 +515,8 @@ window.updateTotalDamage = updateTotalDamage;
 
 
 
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+import { getDatabase, ref, set, get, child, runTransaction } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCPQFqbWCL3XaM-sLYDWgWMdslhS7O7WC8",
@@ -530,7 +530,7 @@ window.updateTotalDamage = updateTotalDamage;
         };
 
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(initializeApp(firebaseConfig));
+        const database = getDatabase(app);
         window.currentSessionId = null;
 
 function startSession(nickname) {
@@ -550,37 +550,41 @@ function startSession(nickname) {
 
 
 
-
 async function saveProgress(nickname, sessionId, playerData) {
-    const dbRef = ref(database);
-    const sessionSnapshot = await get(child(dbRef, `players/${nickname}/session`));
-    if (sessionSnapshot.exists() && sessionSnapshot.val() !== sessionId) {
-        console.log('Another session is active, cannot save progress.');
-        return;
-    }
+    const dbRef = ref(database, `players/${nickname}/session`);
+    const sessionSnapshot = await get(dbRef);
 
-    console.log('Saving progress:', playerData);
-    set(ref(database, 'players/' + nickname), playerData)
-        .then(() => {
-            console.log('Data saved successfully.');
-        })
-        .catch((error) => {
-            console.error('Error saving data:', error);
-        });
+    if (sessionSnapshot.exists() && sessionSnapshot.val() === sessionId) {
+        console.log('Saving progress:', playerData);
+        set(ref(database, `players/${nickname}`), playerData)
+            .then(() => {
+                console.log('Data saved successfully.');
+            })
+            .catch((error) => {
+                console.error('Error saving data:', error);
+            });
+    } else {
+        console.log('Session mismatch, progress not saved.');
+    }
 }
+
+
 
 function savePlayerData() {
-    saveProgress(nickname, {
-        currentLevel,
-        gold,
-        playerHealth,
-        weaponPower,
-        weaponName,
-        weaponLevel,
-        levels,
-        heroes // Сохранение данных о героях
-    });
+    if (nickname && currentSessionId) {
+        saveProgress(nickname, currentSessionId, {
+            currentLevel,
+            gold,
+            playerHealth,
+            weaponPower,
+            weaponName,
+            weaponLevel,
+            levels,
+            heroes // Сохранение данных о героях
+        });
+    }
 }
+
 
 
 function validateData(data) {
@@ -789,47 +793,60 @@ window.toggleAutoHit = toggleAutoHit;
     console.log(`Nickname entered: ${input}`);
     if (input) {
         nickname = input;
-        const sessionId = generateSessionId();
         const dbRef = ref(database, `players/${nickname}/session`);
-        const sessionSnapshot = await get(dbRef);
 
-        if (sessionSnapshot.exists() && sessionSnapshot.val() !== null) {
-            alert('Этот ник уже используется в другой сессии. Пожалуйста, завершите предыдущую сессию.');
-            return;
+        try {
+            const result = await runTransaction(dbRef, (currentSession) => {
+                if (currentSession === null || currentSession === "") {
+                    return generateSessionId();
+                } else {
+                    alert('Этот ник уже используется в другой сессии. Пожалуйста, завершите предыдущую сессию.');
+                    throw new Error("Session already active");
+                }
+            });
+
+            currentSessionId = result.snapshot.val();
+            continueGameSetup();
+        } catch (error) {
+            console.error('Transaction failed: ', error);
         }
-
-        await set(dbRef, sessionId);
-        currentSessionId = sessionId;
-
-        const data = await loadProgress(nickname);
-        console.log(`Data loaded: ${JSON.stringify(data)}`);
-        if (data) {
-            currentLevel = data.currentLevel;
-            gold = data.gold;
-            playerHealth = data.playerHealth;
-            weaponPower = data.weaponPower;
-            weaponName = data.weaponName;
-            weaponLevel = data.weaponLevel;
-            levels = data.levels || levels;
-            heroes = data.heroes || heroes;
-            updateCharacterMenu();
-            addHeroesToMenu();
-        }
-
-        document.getElementById('nicknameMenu').style.display = 'none';
-        document.getElementById('gameCanvas').style.display = 'block';
-        document.getElementById('bottomMenu').style.display = 'flex';
-        currentScreen = 'menu';
-        console.log(`Screen set to: ${currentScreen}`);
-
-        initializeMonster(baseMonsterHealth * Math.pow(1.1, currentLevel - 1));
-        drawMenu();
     } else {
         alert('Пожалуйста, введите никнейм.');
     }
 }
-
 window.startGame = startGame;
+
+async function continueGameSetup() {
+    const data = await loadProgress(nickname);
+    console.log(`Data loaded: ${JSON.stringify(data)}`);
+    if (data) {
+        currentLevel = data.currentLevel;
+        gold = data.gold;
+        playerHealth = data.playerHealth;
+        weaponPower = data.weaponPower;
+        weaponName = data.weaponName;
+        weaponLevel = data.weaponLevel;
+        levels = data.levels || levels;
+        heroes = data.heroes || heroes;
+        updateCharacterMenu();
+        addHeroesToMenu();
+    }
+
+    document.getElementById('nicknameMenu').style.display = 'none';
+    document.getElementById('gameCanvas').style.display = 'block';
+    document.getElementById('bottomMenu').style.display = 'flex';
+    currentScreen = 'menu';
+    console.log(`Screen set to: ${currentScreen}`);
+
+    initializeMonster(baseMonsterHealth * Math.pow(1.1, currentLevel - 1));
+    drawMenu();
+}
+
+window.continueGameSetup = continueGameSetup;
+
+
+
+
 
         function generateSessionId() {
     return Math.random().toString(36).substr(2, 9);
@@ -837,19 +854,22 @@ window.startGame = startGame;
 
 function endSession(nickname, sessionId) {
     const dbRef = ref(database, `players/${nickname}/session`);
-    get(dbRef).then(snapshot => {
-        if (snapshot.exists() && snapshot.val() === sessionId) {
-            set(dbRef, null);
+    runTransaction(dbRef, (currentSession) => {
+        if (currentSession === sessionId) {
+            return null;
+        } else {
+            throw new Error("Session mismatch");
         }
+    }).then(() => {
+        currentSessionId = null;
+    }).catch((error) => {
+        console.error('Transaction failed: ', error);
     });
 }
 
 function endCurrentSession() {
     if (nickname && currentSessionId) {
-        setTimeout(() => {
-            endSession(nickname, currentSessionId);
-            currentSessionId = null;
-        }, 1000);
+        endSession(nickname, currentSessionId);
     }
 }
 
@@ -861,7 +881,9 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-        window.endCurrentSession = endCurrentSession;
+window.endCurrentSession = endCurrentSession;
+
+
 
  
 
@@ -1055,20 +1077,21 @@ function hideContinuePrompt() {
 
 
 
-        function continueToNextLevel() {
-            hideContinuePrompt();
-            if (currentLevel < 100) {
-                currentLevel++;
-                startLevel(currentLevel);
-            } else {
-                currentScreen = 'victory';
-                drawVictoryScreen();
-            }
-            updateTopPlayers(nickname, { nickname, level: currentLevel });
-            drawLevelMap();
-        }
+function continueToNextLevel() {
+    hideContinuePrompt();
+    if (currentLevel < 100) {
+        currentLevel++;
+        startLevel(currentLevel);
+    } else {
+        currentScreen = 'victory';
+        drawVictoryScreen();
+    }
+    updateTopPlayers(nickname, { nickname, level: currentLevel });
+    drawLevelMap();
+}
 
-        window.continueToNextLevel = continueToNextLevel;
+window.continueToNextLevel = continueToNextLevel;
+
 
 
 
@@ -1447,7 +1470,6 @@ function changeScreen(screen) {
     } else if (screen === 'shop') {
         drawShop();
     } else if (screen === 'battle') {
-        
         loadProgress(nickname).then(data => {
             console.log('Data after loading progress:', data);
             if (data) {
@@ -1457,7 +1479,6 @@ function changeScreen(screen) {
                 weaponPower = data.weaponPower;
                 weaponName = data.weaponName;
                 weaponLevel = data.weaponLevel;
-                
                 levels = data.levels || levels;
                 updateCharacterMenu();
             }
@@ -1469,6 +1490,9 @@ function changeScreen(screen) {
         drawLevelsScreen();
     }
 }
+
+window.changeScreen = changeScreen;
+
 
 
 
@@ -1497,11 +1521,7 @@ function loadWorldBossData() {
         console.error(error);
     });
 }
-
-
-
-
-        window.changeScreen = changeScreen;
+       
 
 
 
