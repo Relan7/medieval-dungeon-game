@@ -53,22 +53,6 @@
     overflow: auto; /* Добавление прокрутки, если содержимое превышает максимальный размер */
 }
 
-#leftCharacterMenu {
-        position: fixed;
-        top: 0px;
-        left: 0px;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        display: block;
-        font-size: 16px;
-        text-align: center;
-        max-width: calc(100vw - 20px);
-        max-height: calc(100vh - 20px);
-        overflow: auto;
-    }
-
 
         #shopMenu {
             position: fixed;
@@ -126,7 +110,7 @@
         .status-bar {
             position: fixed;
             top: 10px;
-            left: 300px;
+            left: 10px;
             background: rgba(0, 0, 0, 0.5);
             color: white;
             padding: 10px;
@@ -148,10 +132,6 @@
             height: 100%;
             background: #0f0;
         }
-        .monster-health-bar-inner {
-            height: 100%;
-            background: #f00; /* Red for monster health */
-        }
         .victory-message {
             position: fixed;
             top: 50%;
@@ -164,20 +144,6 @@
             text-align: center;
             display: none;
         }
-        .hero img {
-        width: 175px;
-        height: 242px;
-        border-radius: 10px;
-        transition: filter 0.3s;
-    }
-
-    .hero.not-hired img {
-        filter: brightness(30%);
-    }
-
-    .hero.hired img {
-        filter: brightness(100%);
-    }
         #characterImage {
             width: 297px;
             height: 500px;
@@ -287,10 +253,7 @@
             <ul id="damageList"></ul>
         </div>
     </div>
-   
-    <div id="leftCharacterMenu">
-        <!-- Контент меню для найма героев слева будет динамически добавлен через JavaScript -->
-    </div>
+    
     
     </div>
     <div id="characterMenu">
@@ -299,9 +262,7 @@
         <p style="display:none;">Здоровье: <span id="health"></span></p> <!-- Скрытый элемент для отображения здоровья -->
         <p style="display:none;">Уровень: <span id="level"></span></p>
         <p style="display:none;">Золото: <span id="gold"></span></p>
-        <p id="totalDamage">Суммарный урон: 0</p>
-
-        <p style="display:none;">Урон: <span id="damage"></span></p>
+        <p>Урон: <span id="damage"></span></p>
         
         
         <p>Инвентарь: <pre id="inventory"></pre></p>
@@ -348,12 +309,8 @@
         </div>
         <p>Золото: <span id="statusGold"></span></p>
         <p>Уровень: <span id="statusLevel"></span></p>
-        <p>Урон: <span id="statusDamage"></span></p>
+        <p>Урон: <span id="statusDamage"></span></p> 
     </div>
-    <div class="health-bar" id="monsterHealthBarContainer" style="display:none;">
-        <div class="monster-health-bar-inner" id="monsterHealthBar"></div>
-    </div>
-    
     <div class="victory-message" id="victoryMessage">
         <p>Shap в печали, что вы его бьете :(</p>
     </div>
@@ -369,7 +326,7 @@
         <button onclick="closeItemDetail()">Закрыть</button>
     </div>
     <div id="continuePrompt">
-        <img id="victoryImage" src="win2.png" alt="Вы победили" style="display: none; width: 700px; height: auto;">
+        <img id="victoryImage" src="win.png" alt="Вы победили" style="display: none; width: 700px; height: auto;">
         <p>Shap в печали, что вы его бьете :(</p>
         <p>Вы хотите продолжить унижать Shap и убить следующего монстра?</p>
         <div id="goldEarned" style="display: none; font-size: 24px; color: gold; font-family: 'Comic Sans MS', cursive, sans-serif;">Золото: <span id="goldAmount"></span></div>
@@ -380,117 +337,6 @@
     
     <div class="monster-message" id="monsterMessage"></div>
     <script type="module">
-
-
-
-    // Данные о героях
-    let heroes = [
-        { name: 'Эльф', level: 0, damage: 1, cost: 15, img: 'hero1.png', hired: false },
-        { name: 'Гном', level: 0, damage: 10, cost: 100, img: 'hero2.png', hired: false },
-        { name: 'хоббит', level: 0, damage: 120, cost: 1000, img: 'hero3.png', hired: false },
-        { name: 'Тор', level: 0, damage: 1000, cost: 5000, img: 'hero4.png', hired: false },
-        { name: 'Кузнечик', level: 0, damage: 2500, cost: 15000, img: 'hero5.png' , hired: false},
-    ];
-
-// Функция для создания элемента героя
-function createHeroElement(hero) {
-    const heroDiv = document.createElement('div');
-    heroDiv.className = `hero ${hero.hired ? 'hired' : 'not-hired'}`;
-
-    const heroImg = document.createElement('img');
-    heroImg.src = hero.img;
-    heroImg.alt = hero.name;
-    heroDiv.appendChild(heroImg);
-
-    const heroName = document.createElement('p');
-    heroName.textContent = hero.name;
-    heroDiv.appendChild(heroName);
-
-    const heroLevel = document.createElement('p');
-    heroLevel.textContent = `Ур.: ${hero.level}`;
-    heroDiv.appendChild(heroLevel);
-
-    const heroDamage = document.createElement('p');
-    heroDamage.textContent = `Урон: ${hero.damage}`;
-    heroDiv.appendChild(heroDamage);
-
-    const heroCost = document.createElement('p');
-    heroCost.textContent = `Стоимость: ${hero.cost}`;
-    heroDiv.appendChild(heroCost);
-
-    const hireButton = document.createElement('button');
-    hireButton.textContent = hero.hired ? 'Улучшить' : 'Нанять';
-    hireButton.onclick = () => {
-        hireOrUpgradeHero(hero, heroDiv, hireButton);
-    };
-    heroDiv.appendChild(hireButton);
-
-    return heroDiv;
-}
-window.createHeroElement = createHeroElement;
-
-    // Функция для добавления героев в меню
-    function addHeroesToMenu() {
-    const leftCharacterMenu = document.getElementById('leftCharacterMenu');
-    leftCharacterMenu.innerHTML = ''; // Очистка меню перед добавлением героев
-    heroes.forEach(hero => {
-        const heroElement = createHeroElement(hero);
-        leftCharacterMenu.appendChild(heroElement);
-    });
-}
-
-    window.addHeroesToMenu = addHeroesToMenu;
-
-
-    function hireOrUpgradeHero(hero, heroDiv, hireButton) {
-    if (!hero.hired && gold >= hero.cost) {
-        gold -= hero.cost;
-        hero.hired = true;
-        totalDamage += hero.damage;
-        heroDiv.classList.remove('not-hired');
-        heroDiv.classList.add('hired');
-        hireButton.textContent = 'Улучшить';
-        console.log(`${hero.name} нанят за ${hero.cost} золота! Осталось золота: ${gold}`);
-    } else if (hero.hired) {
-        const upgradeCost = hero.cost * (hero.level + 1);
-        if (gold >= upgradeCost) {
-            gold -= upgradeCost;
-            totalDamage -= hero.damage;
-            hero.level++;
-            hero.damage += 10; // Пример повышения урона
-            totalDamage += hero.damage;
-            hireButton.textContent = 'Улучшить';
-            heroDiv.querySelector('p:nth-child(3)').textContent = `Ур.: ${hero.level}`;
-            heroDiv.querySelector('p:nth-child(4)').textContent = `Урон: ${hero.damage}`;
-            console.log(`${hero.name} улучшен до уровня ${hero.level} за ${upgradeCost} золота! Осталось золота: ${gold}`);
-        } else {
-            console.log('Недостаточно золота для улучшения!');
-        }
-    } else {
-        console.log('Недостаточно золота для найма!');
-    }
-    updateTotalDamage();
-    updateStatusBar(); // Обновление статус бара после найма/улучшения героя
-    savePlayerData(); // Сохранение прогресса после изменения состояния героя
-}
-window.hireOrUpgradeHero = hireOrUpgradeHero;
-
-
-// Функция для обновления суммарного урона
-function updateTotalDamage() {
-    totalDamage = calculateTotalDamage();
-    const totalDamageElement = document.getElementById('totalDamage');
-    if (totalDamageElement) {
-        totalDamageElement.textContent = `Суммарный урон: ${totalDamage}`;
-    }
-}
-window.updateTotalDamage = updateTotalDamage;
-
-
-
-
-
-
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
         import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
@@ -519,19 +365,7 @@ window.updateTotalDamage = updateTotalDamage;
         });
 }
 
-function savePlayerData() {
-    saveProgress(nickname, {
-        currentLevel,
-        gold,
-        playerHealth,
-        weaponPower,
-        weaponName,
-        weaponLevel,
-        inventory,
-        levels,
-        heroes // Сохранение данных о героях
-    });
-}
+
 
 async function loadProgress(nickname) {
     const dbRef = ref(database);
@@ -543,9 +377,6 @@ async function loadProgress(nickname) {
             if (data.levels) {
                 levels = data.levels;
             }
-            if (data.heroes) {
-                heroes = data.heroes;
-            }
             return data;
         } else {
             console.log("No data available");
@@ -556,7 +387,6 @@ async function loadProgress(nickname) {
         return null;
     }
 }
-
 
 
 
@@ -591,7 +421,6 @@ async function loadProgress(nickname) {
 
 
         let nickname = '';
-        let totalDamage = 0;
         let currentLevel = 1;
         let gold = 0;
         let playerHealth = 100;
@@ -824,10 +653,8 @@ async function startGame() {
             weaponLevel = data.weaponLevel;
             inventory = data.inventory || inventory; // Восстановление инвентаря
             levels = data.levels || levels; // Восстановление прогресса уровней
-            heroes = data.heroes || heroes; // Восстановление данных о героях
             updateCharacterMenu();
-            addHeroesToMenu(); // Обновление меню героев
-        }
+        } 
         document.getElementById('nicknameMenu').style.display = 'none';
         document.getElementById('gameCanvas').style.display = 'block';
         document.getElementById('bottomMenu').style.display = 'flex';
@@ -840,7 +667,6 @@ async function startGame() {
         alert('Пожалуйста, введите никнейм.');
     }
 }
-
 
 
 
@@ -908,12 +734,13 @@ async function startGame() {
         window.continueGame = continueGame;
 
         function updateMonsterHealthDisplay() {
+    const healthDisplay = document.getElementById('monsterHealthDisplay');
     const healthValue = document.getElementById('monsterHealthValue');
+    console.log(`Updating monster health display: ${monsterHealth}`); // Лог для проверки инициализации здоровья монстра
     healthValue.textContent = Math.floor(monsterHealth); // Преобразование к целому числу
+    healthDisplay.style.display = 'block';
     if (monsterHealth <= 0) {
-        document.getElementById('monsterHealthBarContainer').style.display = 'none';
-    } else {
-        document.getElementById('monsterHealthBarContainer').style.display = 'block';
+        healthDisplay.style.display = 'none';
     }
 }
 
@@ -962,14 +789,11 @@ function hitMonster(event) {
                 showContinuePrompt();
             }, 50);
         }
-        document.getElementById('monsterHealthBar').style.width = `${(monsterHealth / baseMonsterHealth) * 100}%`;
     }
 }
+
+
 window.hitMonster = hitMonster;
-
-
-
-
 
 
 
@@ -1105,13 +929,11 @@ function calculateStars() {
 function startLevel(levelNumber) {
     currentLevel = levelNumber;
     monsterHealth = baseMonsterHealth * Math.pow(1.1, levelNumber - 1);
-    document.getElementById('monsterHealthBar').style.width = '100%'; // Полная ширина при начале уровня
-    document.getElementById('monsterHealthBarContainer').style.display = 'block'; // Отображение бара здоровья монстра
+    console.log(`Starting level ${levelNumber}, Monster Health: ${monsterHealth}`); // Лог для проверки инициализации здоровья монстра
     currentScreen = 'battle';
     drawBattle();
     updateMonsterHealthDisplay(); // Обновление отображения здоровья при начале уровня
 }
-
 
 function completeLevel(levelNumber, stars) {
     if (levels[levelNumber - 1]) {
@@ -1500,9 +1322,7 @@ function loadWorldBossData() {
         }
     }
     document.getElementById('inventory').innerHTML = inventoryInfo;
-    updateStatusBar(); // Обновление статус бара
 }
-
 
 window.updateCharacterMenu = updateCharacterMenu;
 
@@ -1513,14 +1333,6 @@ function calculateTotalDamage() {
             totalDamage += item.basePower + item.level * 5;
         }
     }
-
-    // Добавляем урон от героев
-    for (const hero of heroes) {
-        if (hero.hired) {
-            totalDamage += hero.damage;
-        }
-    }
-
     return totalDamage;
 }
 window.calculateTotalDamage = calculateTotalDamage;
@@ -1651,7 +1463,6 @@ function updateStatusBar() {
 
         window.onload = function() {
             console.log("Page loaded, initializing game.");
-            addHeroesToMenu();
     loadWorldBossData();
     gameLoop();
     changeScreen('menu'); // Начальный экран
