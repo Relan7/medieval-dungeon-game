@@ -938,20 +938,18 @@ async function startGame() {
 function updateMonsterHealthDisplay() {
     const healthValue = document.getElementById('monsterHealthValue');
     const healthDisplay = document.getElementById('monsterHealthDisplay');
-    const currentHealth = Math.max(monsterHealth, 0); // Убедитесь, что здоровье не меньше 0
-    const percentageHealth = (currentHealth / baseMonsterHealth) * 100;
+    const percentageHealth = (monsterHealth / baseMonsterHealth) * 100;
 
-    healthValue.textContent = Math.floor(currentHealth); // Преобразование к целому числу
+    healthValue.textContent = Math.floor(monsterHealth); // Преобразование к целому числу
     healthDisplay.style.display = 'block'; // Сделать элемент видимым
     healthDisplay.style.background = `linear-gradient(to right, #ff416c ${percentageHealth}%, #ff4b2b ${percentageHealth}%)`;
-
-    if (currentHealth <= 0) {
+    
+    if (monsterHealth <= 0) {
         document.getElementById('monsterHealthBarContainer').style.display = 'none';
     } else {
         document.getElementById('monsterHealthBarContainer').style.display = 'block';
     }
 }
-
 
 window.updateMonsterHealthDisplay = updateMonsterHealthDisplay;
 
@@ -976,12 +974,10 @@ function hitMonster(event) {
         const totalDamage = calculateTotalDamage(); // Получение общего урона
         console.log(`Monster Health before hit: ${monsterHealth}, Total Damage: ${totalDamage}`);
         monsterHealth -= totalDamage;
-        if (monsterHealth < 0) {
-            monsterHealth = 0;
-        }
         hits += 1;
         updateMonsterHealthDisplay(); // Обновление отображения здоровья
         if (monsterHealth <= 0) {
+            monsterHealth = 0;
             let goldReward = 10 * currentLevel; // Прогрессия награды золота
             gold += goldReward;
             document.getElementById('goldAmount').textContent = goldReward; // Обновление отображения заработанного золота
@@ -1005,7 +1001,6 @@ function hitMonster(event) {
         document.getElementById('monsterHealthBar').style.width = `${(monsterHealth / baseMonsterHealth) * 100}%`;
     }
 }
-
 window.hitMonster = hitMonster;
 
 // Начальное создание монстра с базовым здоровьем
