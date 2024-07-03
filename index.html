@@ -530,7 +530,8 @@ window.updateTotalDamage = updateTotalDamage;
         };
 
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        const database = getDatabase(initializeApp(firebaseConfig));
+        window.currentSessionId = null;
 
 function startSession(nickname) {
     const sessionId = generateSessionId();
@@ -538,17 +539,15 @@ function startSession(nickname) {
     return sessionId;
 }
 
-function endSession(nickname, sessionId) {
-    get(ref(database, 'players/' + nickname + '/session')).then(snapshot => {
-        if (snapshot.exists() && snapshot.val() === sessionId) {
-            set(ref(database, 'players/' + nickname + '/session'), null);
-        }
-    });
-}
 
-function generateSessionId() {
-    return Math.random().toString(36).substr(2, 9);
-}
+
+
+
+
+
+
+
+
 
 
 
@@ -656,6 +655,7 @@ async function loadProgress(nickname) {
 
 
         let nickname = '';
+        let currentSessionId = null;
         let totalDamage = 0;
         let currentLevel = 1;
         let gold = 100;
@@ -663,7 +663,7 @@ async function loadProgress(nickname) {
         let weaponPower = 10;
         let weaponName = 'Кулаки';
         let weaponLevel = 0;
-        let selectedItem = {};
+        //let selectedItem = {};
         const monsterMessages = ["Не бейте меня", "За что мне это все ?? ", "я не буду больше читерить", "простите я просто сплю с админами :( )"];
 
 let worldBossHealth = 1000000;
@@ -716,6 +716,8 @@ let autoHitInterval;
         crosshair.style.display = 'none'; // Скрываем прицел, если не в режиме "battle"
     }
 });
+
+
 
 
 function toggleAutoHit() {
@@ -782,11 +784,23 @@ window.toggleAutoHit = toggleAutoHit;
 
 
 
-async function startGame() {
+        async function startGame() {
     const input = document.getElementById('nicknameInput').value;
     console.log(`Nickname entered: ${input}`);
     if (input) {
         nickname = input;
+        const sessionId = generateSessionId();
+        const dbRef = ref(database, `players/${nickname}/session`);
+        const sessionSnapshot = await get(dbRef);
+
+        if (sessionSnapshot.exists() && sessionSnapshot.val() !== null) {
+            alert('Этот ник уже используется в другой сессии. Пожалуйста, завершите предыдущую сессию.');
+            return;
+        }
+
+        await set(dbRef, sessionId);
+        currentSessionId = sessionId;
+
         const data = await loadProgress(nickname);
         console.log(`Data loaded: ${JSON.stringify(data)}`);
         if (data) {
@@ -796,33 +810,60 @@ async function startGame() {
             weaponPower = data.weaponPower;
             weaponName = data.weaponName;
             weaponLevel = data.weaponLevel;
-            levels = data.levels || levels; // Восстановление прогресса уровней
-            heroes = data.heroes || heroes; // Восстановление данных о героях
+            levels = data.levels || levels;
+            heroes = data.heroes || heroes;
             updateCharacterMenu();
-            addHeroesToMenu(); // Обновление меню героев
+            addHeroesToMenu();
         }
+
         document.getElementById('nicknameMenu').style.display = 'none';
         document.getElementById('gameCanvas').style.display = 'block';
         document.getElementById('bottomMenu').style.display = 'flex';
         currentScreen = 'menu';
         console.log(`Screen set to: ${currentScreen}`);
-        
-        // Инициализация здоровья монстра перед первым боем
+
         initializeMonster(baseMonsterHealth * Math.pow(1.1, currentLevel - 1));
-        
         drawMenu();
     } else {
         alert('Пожалуйста, введите никнейм.');
     }
 }
 
+window.startGame = startGame;
 
+        function generateSessionId() {
+    return Math.random().toString(36).substr(2, 9);
+}
 
+function endSession(nickname, sessionId) {
+    const dbRef = ref(database, `players/${nickname}/session`);
+    get(dbRef).then(snapshot => {
+        if (snapshot.exists() && snapshot.val() === sessionId) {
+            set(dbRef, null);
+        }
+    });
+}
 
+function endCurrentSession() {
+    if (nickname && currentSessionId) {
+        setTimeout(() => {
+            endSession(nickname, currentSessionId);
+            currentSessionId = null;
+        }, 1000);
+    }
+}
 
+window.addEventListener('beforeunload', endCurrentSession);
 
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        endCurrentSession();
+    }
+});
 
-        window.startGame = startGame;
+        window.endCurrentSession = endCurrentSession;
+
+ 
 
         function buyWeapon(type, power, cost) {
             if (gold >= cost) {
