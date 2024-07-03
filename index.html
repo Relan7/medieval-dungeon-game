@@ -532,8 +532,35 @@ window.updateTotalDamage = updateTotalDamage;
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        function saveProgress(nickname, playerData) {
-    console.log('Saving progress:', playerData); // Лог сохранения данных
+function startSession(nickname) {
+    const sessionId = generateSessionId();
+    set(ref(database, 'players/' + nickname + '/session'), sessionId);
+    return sessionId;
+}
+
+function endSession(nickname, sessionId) {
+    get(ref(database, 'players/' + nickname + '/session')).then(snapshot => {
+        if (snapshot.exists() && snapshot.val() === sessionId) {
+            set(ref(database, 'players/' + nickname + '/session'), null);
+        }
+    });
+}
+
+function generateSessionId() {
+    return Math.random().toString(36).substr(2, 9);
+}
+
+
+
+async function saveProgress(nickname, sessionId, playerData) {
+    const dbRef = ref(database);
+    const sessionSnapshot = await get(child(dbRef, `players/${nickname}/session`));
+    if (sessionSnapshot.exists() && sessionSnapshot.val() !== sessionId) {
+        console.log('Another session is active, cannot save progress.');
+        return;
+    }
+
+    console.log('Saving progress:', playerData);
     set(ref(database, 'players/' + nickname), playerData)
         .then(() => {
             console.log('Data saved successfully.');
@@ -555,6 +582,21 @@ function savePlayerData() {
         heroes // Сохранение данных о героях
     });
 }
+
+
+function validateData(data) {
+    if (!data || !data.heroes || !Array.isArray(data.heroes)) {
+        console.error('Invalid data format:', data);
+        return false;
+    }
+    return true;
+}
+
+
+
+
+
+
 
 async function loadProgress(nickname) {
     const dbRef = ref(database);
