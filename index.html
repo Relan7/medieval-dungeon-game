@@ -516,7 +516,7 @@ window.updateTotalDamage = updateTotalDamage;
 
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-import { getDatabase, ref, set, get, child, runTransaction } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+import { getDatabase, ref, set, get, child, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCPQFqbWCL3XaM-sLYDWgWMdslhS7O7WC8",
@@ -797,15 +797,11 @@ window.toggleAutoHit = toggleAutoHit;
 
         try {
             const result = await runTransaction(dbRef, (currentSession) => {
-                if (currentSession === null || currentSession === "") {
-                    return generateSessionId();
-                } else {
-                    alert('Этот ник уже используется в другой сессии. Пожалуйста, завершите предыдущую сессию.');
-                    throw new Error("Session already active");
-                }
+                return generateSessionId();  // Всегда генерируем новый идентификатор сессии
             });
 
             currentSessionId = result.snapshot.val();
+            watchSessionChanges();
             continueGameSetup();
         } catch (error) {
             console.error('Transaction failed: ', error);
@@ -815,6 +811,18 @@ window.toggleAutoHit = toggleAutoHit;
     }
 }
 window.startGame = startGame;
+function watchSessionChanges() {
+    const dbRef = ref(database, `players/${nickname}/session`);
+    onValue(dbRef, (snapshot) => {
+        const sessionId = snapshot.val();
+        if (sessionId !== currentSessionId) {
+            alert('Вы были выброшены из игры, так как сессия была начата с другого устройства или вкладки.');
+            endCurrentSession();
+            location.reload();  // Перезагрузка страницы для выхода из игры
+        }
+    });
+}
+window.watchSessionChanges = watchSessionChanges;
 
 async function continueGameSetup() {
     const data = await loadProgress(nickname);
