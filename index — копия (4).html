@@ -76,7 +76,7 @@
     bottom: 60px;
     left: 50%;
     transform: translateX(-50%);
-    background: linear-gradient(to right, #ff416c 100%, #ff4b2b 100%);
+    background: linear-gradient(to right, #ff416c, #ff4b2b);
     color: white;
     padding: 10px 20px;
     border-radius: 25px;
@@ -85,10 +85,7 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     text-align: center;
     letter-spacing: 1px;
-    width: 300px; /* Фиксированная ширина для примера */
 }
-
-
 
         #shopMenu {
             position: fixed;
@@ -932,20 +929,14 @@ async function startGame() {
 
         function updateMonsterHealthDisplay() {
     const healthValue = document.getElementById('monsterHealthValue');
-    const healthDisplay = document.getElementById('monsterHealthDisplay');
-    const percentageHealth = (monsterHealth / baseMonsterHealth) * 100;
-
     healthValue.textContent = Math.floor(monsterHealth); // Преобразование к целому числу
-    healthDisplay.style.display = 'block'; // Сделать элемент видимым
-    healthDisplay.style.background = `linear-gradient(to right, #ff416c ${percentageHealth}%, #ff4b2b ${percentageHealth}%)`;
-    
+    document.getElementById('monsterHealthDisplay').style.display = 'block'; // Сделать элемент видимым
     if (monsterHealth <= 0) {
         document.getElementById('monsterHealthBarContainer').style.display = 'none';
     } else {
         document.getElementById('monsterHealthBarContainer').style.display = 'block';
     }
 }
-
 window.updateMonsterHealthDisplay = updateMonsterHealthDisplay;
 
 
