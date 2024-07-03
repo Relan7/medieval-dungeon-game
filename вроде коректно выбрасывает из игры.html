@@ -435,11 +435,11 @@ function createHeroElement(hero) {
     heroDiv.appendChild(heroLevel);
 
     const heroDamage = document.createElement('p');
-    heroDamage.textContent = `Урон: ${Math.floor(hero.damage)}`;
+    heroDamage.textContent = `Урон: ${hero.damage}`;
     heroDiv.appendChild(heroDamage);
 
     const heroCost = document.createElement('p');
-    heroCost.textContent = `Стоимость: ${Math.floor(hero.cost)}`;
+    heroCost.textContent = `Стоимость: ${hero.cost}`;
     heroDiv.appendChild(heroCost);
 
     const hireButton = document.createElement('button');
@@ -451,7 +451,6 @@ function createHeroElement(hero) {
 
     return heroDiv;
 }
-
 window.createHeroElement = createHeroElement;
 
     // Функция для добавления героев в меню
@@ -464,46 +463,40 @@ window.createHeroElement = createHeroElement;
     });
 }
 
-
     window.addHeroesToMenu = addHeroesToMenu;
 
 
     function hireOrUpgradeHero(hero, heroDiv, hireButton) {
-    if (gold >= hero.cost) {
+    if (!hero.hired && gold >= hero.cost) {
         gold -= hero.cost;
-        document.getElementById('goldAmount').textContent = gold;
-
-        if (!hero.hired) {
-            hero.hired = true;
-            hero.level = 1;
-        } else {
-            hero.level += 1;
-        }
-        hero.damage = Math.floor(hero.damage * 1.1); // Урон округляется до целого числа
-        hero.cost = Math.floor(hero.cost * 2); // Стоимость округляется до целого числа
-
-        // Обновление интерфейса героя
-        heroDiv.querySelector('p:nth-child(3)').textContent = `Ур.: ${hero.level}`;
-        heroDiv.querySelector('p:nth-child(4)').textContent = `Урон: ${hero.damage}`;
-        heroDiv.querySelector('p:nth-child(5)').textContent = `Стоимость: ${hero.cost}`;
+        hero.hired = true;
+        totalDamage += hero.damage;
+        heroDiv.classList.remove('not-hired');
+        heroDiv.classList.add('hired');
         hireButton.textContent = 'Улучшить';
-
-        saveProgress(nickname, currentSessionId, { // Сохранение прогресса
-            currentLevel,
-            gold,
-            playerHealth,
-            weaponPower,
-            weaponName,
-            weaponLevel,
-            levels,
-            heroes
-        });
+        console.log(`${hero.name} нанят за ${hero.cost} золота! Осталось золота: ${gold}`);
+    } else if (hero.hired) {
+        const upgradeCost = hero.cost * (hero.level + 1);
+        if (gold >= upgradeCost) {
+            gold -= upgradeCost;
+            totalDamage -= hero.damage;
+            hero.level++;
+            hero.damage += 10; // Пример повышения урона
+            totalDamage += hero.damage;
+            hireButton.textContent = 'Улучшить';
+            heroDiv.querySelector('p:nth-child(3)').textContent = `Ур.: ${hero.level}`;
+            heroDiv.querySelector('p:nth-child(4)').textContent = `Урон: ${hero.damage}`;
+            console.log(`${hero.name} улучшен до уровня ${hero.level} за ${upgradeCost} золота! Осталось золота: ${gold}`);
+        } else {
+            console.log('Недостаточно золота для улучшения!');
+        }
     } else {
-        alert('Недостаточно золота');
+        console.log('Недостаточно золота для найма!');
     }
+    updateTotalDamage();
+    updateStatusBar(); // Обновление статус бара после найма/улучшения героя
+    savePlayerData(); // Сохранение прогресса после изменения состояния героя
 }
-
-
 window.hireOrUpgradeHero = hireOrUpgradeHero;
 
 
@@ -562,25 +555,8 @@ async function saveProgress(nickname, sessionId, playerData) {
     const sessionSnapshot = await get(dbRef);
 
     if (sessionSnapshot.exists() && sessionSnapshot.val() === sessionId) {
-        const validPlayerData = {
-            currentLevel: playerData.currentLevel || 1,
-            gold: playerData.gold || 100,
-            playerHealth: playerData.playerHealth || 100,
-            weaponPower: playerData.weaponPower || 0,
-            weaponName: playerData.weaponName || 'Кулаки',
-            weaponLevel: playerData.weaponLevel || 0,
-            levels: playerData.levels || new Array(100).fill().map((_, i) => ({ number: i + 1, stars: 0, completed: false })),
-            heroes: playerData.heroes || [
-                { name: 'Эльф', level: 0, damage: 1, cost: 15, img: 'hero1.png', hired: false },
-                { name: 'Гном', level: 0, damage: 10, cost: 100, img: 'hero2.png', hired: false },
-                { name: 'хоббит', level: 0, damage: 120, cost: 1000, img: 'hero3.png', hired: false },
-                { name: 'Тор', level: 0, damage: 1000, cost: 5000, img: 'hero4.png', hired: false },
-                { name: 'Кузнечик', level: 0, damage: 2500, cost: 15000, img: 'hero5.png', hired: false }
-            ]
-        };
-
-        console.log('Saving progress:', validPlayerData);
-        set(ref(database, `players/${nickname}`), validPlayerData)
+        console.log('Saving progress:', playerData);
+        set(ref(database, `players/${nickname}`), playerData)
             .then(() => {
                 console.log('Data saved successfully.');
             })
@@ -591,9 +567,6 @@ async function saveProgress(nickname, sessionId, playerData) {
         console.log('Session mismatch, progress not saved.');
     }
 }
-
-
-
 
 
 
@@ -635,6 +608,12 @@ async function loadProgress(nickname) {
         if (snapshot.exists()) {
             const data = snapshot.val();
             console.log('Loaded progress:', data); // Лог загруженных данных
+            if (data.levels) {
+                levels = data.levels;
+            }
+            if (data.heroes) {
+                heroes = data.heroes;
+            }
             return data;
         } else {
             console.log("No data available");
@@ -645,7 +624,6 @@ async function loadProgress(nickname) {
         return null;
     }
 }
-
 
 
 
@@ -680,20 +658,16 @@ async function loadProgress(nickname) {
 }
 
 
-let nickname = '';
-let currentSessionId = null;
-let totalDamage = 0;
-let currentLevel = 1;
-let gold = 100;
-let playerHealth = 100;
-let weaponPower = 10;
-let weaponName = 'Кулаки';
-let weaponLevel = 0;
-let baseMonsterHealth = 100;
-let monsterHealth = baseMonsterHealth;
-let levels = new Array(100).fill().map((_, i) => ({ number: i + 1, stars: 0, completed: false }));
-
-
+        let nickname = '';
+        let currentSessionId = null;
+        let totalDamage = 0;
+        let currentLevel = 1;
+        let gold = 100;
+        let playerHealth = 100;
+        let weaponPower = 10;
+        let weaponName = 'Кулаки';
+        let weaponLevel = 0;
+        //let selectedItem = {};
         const monsterMessages = ["Не бейте меня", "За что мне это все ?? ", "я не буду больше читерить", "простите я просто сплю с админами :( )"];
 
 let worldBossHealth = 1000000;
@@ -710,8 +684,9 @@ let autoHitInterval;
 
         let currentScreen = 'menu';
             let hits = 0;
-            
-
+            let baseMonsterHealth = 100; // Установите это значение на начальное здоровье монстра
+            let monsterHealth = baseMonsterHealth;
+        let levels = new Array(100).fill().map((_, i) => ({ number: i + 1, stars: 0, completed: false }));
 
         const backgroundImage = new Image();
         backgroundImage.src = 'background.png';
@@ -853,20 +828,14 @@ async function continueGameSetup() {
     const data = await loadProgress(nickname);
     console.log(`Data loaded: ${JSON.stringify(data)}`);
     if (data) {
-        currentLevel = data.currentLevel || 1;
-        gold = data.gold || 100;
-        playerHealth = data.playerHealth || 100;
-        weaponPower = data.weaponPower || 0;
-        weaponName = data.weaponName || 'Кулаки';
-        weaponLevel = data.weaponLevel || 0;
-        levels = data.levels || new Array(100).fill().map((_, i) => ({ number: i + 1, stars: 0, completed: false }));
-        heroes = data.heroes || [
-            { name: 'Эльф', level: 0, damage: 1, cost: 15, img: 'hero1.png', hired: false },
-            { name: 'Гном', level: 0, damage: 10, cost: 100, img: 'hero2.png', hired: false },
-            { name: 'хоббит', level: 0, damage: 120, cost: 1000, img: 'hero3.png', hired: false },
-            { name: 'Тор', level: 0, damage: 1000, cost: 5000, img: 'hero4.png', hired: false },
-            { name: 'Кузнечик', level: 0, damage: 2500, cost: 15000, img: 'hero5.png', hired: false }
-        ];
+        currentLevel = data.currentLevel;
+        gold = data.gold;
+        playerHealth = data.playerHealth;
+        weaponPower = data.weaponPower;
+        weaponName = data.weaponName;
+        weaponLevel = data.weaponLevel;
+        levels = data.levels || levels;
+        heroes = data.heroes || heroes;
         updateCharacterMenu();
         addHeroesToMenu();
     }
@@ -880,10 +849,6 @@ async function continueGameSetup() {
     initializeMonster(baseMonsterHealth * Math.pow(1.1, currentLevel - 1));
     drawMenu();
 }
-
-
-
-
 
 window.continueGameSetup = continueGameSetup;
 
@@ -990,7 +955,8 @@ window.endCurrentSession = endCurrentSession;
 
         window.continueGame = continueGame;
 
-        function updateMonsterHealthDisplay() {
+// Обновление функции отображения здоровья монстра
+function updateMonsterHealthDisplay() {
     const healthValue = document.getElementById('monsterHealthValue');
     const healthDisplay = document.getElementById('monsterHealthDisplay');
     const currentHealth = Math.max(monsterHealth, 0); // Убедитесь, что здоровье не меньше 0
@@ -1006,7 +972,6 @@ window.endCurrentSession = endCurrentSession;
         document.getElementById('monsterHealthBarContainer').style.display = 'block';
     }
 }
-
 
 
 window.updateMonsterHealthDisplay = updateMonsterHealthDisplay;
@@ -1029,7 +994,7 @@ function hitMonster(event) {
         mouseY <= monsterY + monsterImage.height
     ) {
         showHitAnimation();
-        totalDamage = calculateTotalDamage(); // Получение общего урона
+        const totalDamage = calculateTotalDamage(); // Получение общего урона
         console.log(`Monster Health before hit: ${monsterHealth}, Total Damage: ${totalDamage}`);
         monsterHealth -= totalDamage;
         if (monsterHealth < 0) {
@@ -1041,24 +1006,16 @@ function hitMonster(event) {
             let goldReward = 10 * currentLevel; // Прогрессия награды золота
             gold += goldReward;
             document.getElementById('goldAmount').textContent = goldReward; // Обновление отображения заработанного золота
-            if (levels[currentLevel - 1]) { // Проверка, существует ли элемент в массиве
-                levels[currentLevel - 1].completed = true;
-            } else {
-                console.error(`Level ${currentLevel} does not exist in levels array.`);
-            }
-
-            // Сохранение прогресса после убийства монстра
-            saveProgress(nickname, currentSessionId, {
+            levels[currentLevel - 1].completed = true;
+            saveProgress(nickname, {
                 currentLevel,
                 gold,
                 playerHealth,
                 weaponPower,
                 weaponName,
                 weaponLevel,
-                levels,
-                heroes
+                levels // Сохранение прогресса уровней
             });
-
             showVictoryMessage();
             setTimeout(() => {
                 document.getElementById('victoryMessage').style.display = 'none';
@@ -1069,17 +1026,14 @@ function hitMonster(event) {
     }
 }
 
-
-
 window.hitMonster = hitMonster;
 
 // Начальное создание монстра с базовым здоровьем
 function initializeMonster(initialHealth) {
-    baseMonsterHealth = Math.floor(initialHealth);
-    monsterHealth = baseMonsterHealth;
+    baseMonsterHealth = initialHealth;
+    monsterHealth = initialHealth;
     updateMonsterHealthDisplay();
 }
-
 window.initializeMonster = initializeMonster;
 
 
@@ -1142,20 +1096,7 @@ function continueToNextLevel() {
     }
     updateTopPlayers(nickname, { nickname, level: currentLevel });
     drawLevelMap();
-
-    // Сохранение прогресса после перехода на следующий уровень
-    saveProgress(nickname, currentSessionId, {
-        currentLevel,
-        gold,
-        playerHealth,
-        weaponPower,
-        weaponName,
-        weaponLevel,
-        levels,
-        heroes
-    });
 }
-
 
 window.continueToNextLevel = continueToNextLevel;
 
@@ -1429,17 +1370,22 @@ function drawBattle() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const mobWidth = 600;
-    const mobHeight = 580;
-    const x = (canvas.width / 2) - (mobWidth / 2);
-    const y = (canvas.height / 2) - (mobHeight / 2);
-    ctx.drawImage(monsterImage, x, y, mobWidth, mobHeight); // Указываем размеры изображения
+    if (currentScreen === 'worldBoss') {
+        ctx.drawImage(document.getElementById('worldBossImage'), canvas.width / 2 - document.getElementById('worldBossImage').width / 2, canvas.height / 2 - document.getElementById('worldBossImage').height / 2);
+        drawHealthBar(worldBossHealth, canvas.width - 210, 10, 200, 20, 'red');
+    } else {
+        const mobWidth = 600;
+        const mobHeight = 580;
+        const x = (canvas.width / 2) - (mobWidth / 2);
+        const y = (canvas.height / 2) - (mobHeight / 2);
+        ctx.drawImage(monsterImage, x, y, mobWidth, mobHeight); // Указываем размеры изображения
 
-    drawHealthBar(monsterHealth, canvas.width - 210, 10, 200, 20, 'red');
+        drawHealthBar(monsterHealth, canvas.width - 210, 10, 200, 20, 'red');
+    }
 
+    
     updateStatusBar();
 }
-
 
 
 
@@ -1603,16 +1549,15 @@ function loadWorldBossData() {
 window.updateCharacterMenu = updateCharacterMenu;
 
 function calculateTotalDamage() {
-    let totalDamage = Math.floor(weaponPower); // Урон от оружия в целых числах
+    let totalDamage = 0;
     for (const hero of heroes) {
         if (hero.hired) {
-            totalDamage += Math.floor(hero.damage); // Урон от героев в целых числах
+            totalDamage += hero.damage;
         }
     }
+
     return totalDamage;
 }
-
-
 window.calculateTotalDamage = calculateTotalDamage;
 
 function calculateTotalHealth() {
