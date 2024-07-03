@@ -325,7 +325,7 @@
         <p style="display:none;">Урон: <span id="damage"></span></p>
         
         
-        <p>Инвентарь: <pre id="inventory"></pre></p>
+        
     </div>
     <div id="shopMenu">
         <button class="close-btn" onclick="toggleShop()">X</button>
@@ -397,7 +397,7 @@
         <p>Shap в печали, что вы его бьете :(</p>
         <p>Вы хотите продолжить унижать Shap и убить следующего монстра?</p>
         <div id="goldEarned" style="display: none; font-size: 24px; color: gold; font-family: 'Comic Sans MS', cursive, sans-serif;">Золото: <span id="goldAmount"></span></div>
-        <button onclick="goToCastle()">Нет</button>
+        
     </div>
     
     
@@ -551,7 +551,6 @@ function savePlayerData() {
         weaponPower,
         weaponName,
         weaponLevel,
-        inventory,
         levels,
         heroes // Сохранение данных о героях
     });
@@ -617,20 +616,14 @@ async function loadProgress(nickname) {
         let nickname = '';
         let totalDamage = 0;
         let currentLevel = 1;
-        let gold = 0;
+        let gold = 100;
         let playerHealth = 100;
         let weaponPower = 10;
         let weaponName = 'Кулаки';
         let weaponLevel = 0;
         let selectedItem = {};
         const monsterMessages = ["Не бейте меня", "За что мне это все ?? ", "я не буду больше читерить", "простите я просто сплю с админами :( )"];
-        let inventory = {
-    sword: { level: 0, basePower: 10, cost: 50, type: 'weapon' },
-    bow: { level: 0, basePower: 8, cost: 40, type: 'weapon' },
-    crossbow: { level: 0, basePower: 12, cost: 60, type: 'weapon' },
-    armor: { level: 0, baseHealth: 15, cost: 70, type: 'armor' },
-    helmet: { level: 0, baseHealth: 5, cost: 30, type: 'armor' }
-};
+
 let worldBossHealth = 1000000;
 let playersDamage = {};
 let isUpdating = false;
@@ -746,91 +739,6 @@ window.toggleAutoHit = toggleAutoHit;
         window.drawShop = drawShop;
 
 
-        function showItemDetail(image, name, cost, type, power) {
-    selectedItem = { image, name, cost, type, power };
-    document.getElementById('itemDetailImage').src = image;
-    document.getElementById('itemDetailName').textContent = name + ' - ' + cost + ' золота';
-    document.getElementById('itemDetail').style.display = 'block';
-}
-
-        window.showItemDetail = showItemDetail; // Добавляем в глобальную область видимости
-        
-        function closeItemDetail() {
-            document.getElementById('itemDetail').style.display = 'none';
-        }
-        window.closeItemDetail = closeItemDetail;
-
-        function buyItem() {
-    if (!selectedItem.type) {
-        alert('Ошибка: выбранный предмет не имеет типа.');
-        return;
-    }
-    if (gold >= selectedItem.cost) {
-        gold -= selectedItem.cost;
-        if (!inventory[selectedItem.type]) {
-            if (selectedItem.type === 'armor' || selectedItem.type === 'helmet') {
-                inventory[selectedItem.type] = { level: 1, baseHealth: selectedItem.power, cost: selectedItem.cost, type: selectedItem.type };
-            } else {
-                inventory[selectedItem.type] = { level: 1, basePower: selectedItem.power, cost: selectedItem.cost, type: selectedItem.type };
-            }
-        } else {
-            inventory[selectedItem.type].level += 1;
-        }
-        updateCharacterMenu();
-        updateShop();
-        saveProgress(nickname, {
-            currentLevel,
-            gold,
-            playerHealth,
-            weaponPower,
-            weaponName,
-            weaponLevel,
-            inventory // Сохранение инвентаря
-        });
-        closeItemDetail();
-    } else {
-        alert('Недостаточно золота');
-    }
-}
-        window.buyItem = buyItem;
-
-
-        function upgradeItem(itemType) {
-    if (!itemType || !inventory[itemType]) {
-        alert('Ошибка: тип предмета для улучшения не определен.');
-        return;
-    }
-    const item = inventory[itemType];
-    const upgradeCost = item.cost * item.level;
-    if (gold >= upgradeCost) {
-        gold -= upgradeCost;
-        item.level += 1;
-        updateCharacterMenu();
-        updateShop();
-        saveProgress(nickname, {
-            currentLevel,
-            gold,
-            playerHealth,
-            weaponPower,
-            weaponName,
-            weaponLevel,
-            inventory // Сохранение инвентаря
-        });
-    } else {
-        alert('Недостаточно золота для улучшения');
-    }
-}
-
-document.getElementById('inventory').addEventListener('click', function(event) {
-    const itemType = event.target.getAttribute('data-type');
-    if (itemType) {
-        upgradeItem(itemType);
-    }
-});
-
-window.upgradeItem = upgradeItem;
-        
-
 
 async function startGame() {
     const input = document.getElementById('nicknameInput').value;
@@ -846,7 +754,6 @@ async function startGame() {
             weaponPower = data.weaponPower;
             weaponName = data.weaponName;
             weaponLevel = data.weaponLevel;
-            inventory = data.inventory || inventory; // Восстановление инвентаря
             levels = data.levels || levels; // Восстановление прогресса уровней
             heroes = data.heroes || heroes; // Восстановление данных о героях
             updateCharacterMenu();
@@ -994,7 +901,6 @@ function hitMonster(event) {
                 weaponPower,
                 weaponName,
                 weaponLevel,
-                inventory, // Сохранение инвентаря
                 levels // Сохранение прогресса уровней
             });
             showVictoryMessage();
@@ -1029,12 +935,6 @@ function showContinuePrompt() {
     const continueTimeout = setTimeout(() => {
         continueToNextLevel();
     }, 2000); // 2 секунд
-
-    document.getElementById('continuePrompt').querySelector('button').onclick = () => {
-        clearTimeout(continueTimeout);
-        completeLevel(currentLevel, calculateStars());
-        goToNextLevel();
-    };
 }
 
 function goToNextLevel() {
@@ -1049,7 +949,6 @@ function goToNextLevel() {
         weaponPower,
         weaponName,
         weaponLevel,
-        inventory,
         levels
     });
     hideContinuePrompt(); // Скрываем диалоговое окно
@@ -1088,15 +987,7 @@ function hideContinuePrompt() {
 
         window.continueToNextLevel = continueToNextLevel;
 
-        function goToCastle() {
-    hideContinuePrompt();
-    changeScreen('castle');
-}
-window.goToCastle = goToCastle;
 
-
-
-        window.goToCastle = goToCastle;
 
         function drawMenu() {
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
@@ -1173,7 +1064,6 @@ function completeLevel(levelNumber, stars) {
             weaponPower,
             weaponName,
             weaponLevel,
-            inventory,
             levels
         });
         drawLevelMap();
@@ -1484,7 +1374,7 @@ function changeScreen(screen) {
                 weaponPower = data.weaponPower;
                 weaponName = data.weaponName;
                 weaponLevel = data.weaponLevel;
-                inventory = data.inventory || inventory;
+                
                 levels = data.levels || levels;
                 updateCharacterMenu();
             }
@@ -1540,15 +1430,7 @@ function loadWorldBossData() {
     document.getElementById('gold').textContent = gold;
     document.getElementById('level').textContent = currentLevel;
 
-    let inventoryInfo = '';
-    for (const [key, item] of Object.entries(inventory)) {
-        if (item.type === 'weapon') {
-            inventoryInfo += `<div data-type="${key}">${key}: Уровень ${item.level}, Сила ${item.basePower + item.level * 5}</div>\n`;
-        } else if (item.type === 'armor') {
-            inventoryInfo += `<div data-type="${key}">${key}: Уровень ${item.level}, Защита ${item.baseHealth + item.level * 5}</div>\n`;
-        }
-    }
-    document.getElementById('inventory').innerHTML = inventoryInfo;
+
     updateStatusBar(); // Обновление статус бара
 }
 
@@ -1557,13 +1439,6 @@ window.updateCharacterMenu = updateCharacterMenu;
 
 function calculateTotalDamage() {
     let totalDamage = 0;
-    for (const item of Object.values(inventory)) {
-        if (item.type === 'weapon') {
-            totalDamage += item.basePower + item.level * 5;
-        }
-    }
-
-    // Добавляем урон от героев
     for (const hero of heroes) {
         if (hero.hired) {
             totalDamage += hero.damage;
@@ -1576,11 +1451,7 @@ window.calculateTotalDamage = calculateTotalDamage;
 
 function calculateTotalHealth() {
     let totalHealth = 100; // базовое здоровье
-    for (const item of Object.values(inventory)) {
-        if (item.type === 'armor') {
-            totalHealth += item.baseHealth + item.level * 5;
-        }
-    }
+
     return totalHealth;
 }
 window.calculateTotalHealth = calculateTotalHealth;
@@ -1590,7 +1461,7 @@ function updateStatusBar() {
     document.getElementById('statusLevel').textContent = currentLevel;
     document.getElementById('playerHealthBar').style.width = playerHealth + '%'; // Обновление ширины полосы здоровья
     document.getElementById('statusDamage').textContent = calculateTotalDamage(); // Обновление значения урона
-    //document.getElementById('statusWeapon').textContent = inventory.sword.basePower; // Обновление значения оружия
+    
     //document.getElementById('statusHealth').textContent = playerHealth; // Обновление значения здоровья
 }
 
