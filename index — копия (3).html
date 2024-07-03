@@ -260,8 +260,8 @@
         <img id="characterImage" src="peasant.png" alt="Character">
         <p style="display:none;">Оружие: <span id="weapon"></span></p> <!-- Скрытый элемент для отображения оружия -->
         <p style="display:none;">Здоровье: <span id="health"></span></p> <!-- Скрытый элемент для отображения здоровья -->
-        <p style="display:none;">Уровень: <span id="level"></span></p>
-        <p style="display:none;">Золото: <span id="gold"></span></p>
+        <p>Уровень: <span id="level"></span></p>
+        <p>Золото: <span id="gold"></span></p>
         <p>Урон: <span id="damage"></span></p>
         
         
@@ -654,7 +654,9 @@ async function startGame() {
             inventory = data.inventory || inventory; // Восстановление инвентаря
             levels = data.levels || levels; // Восстановление прогресса уровней
             updateCharacterMenu();
-        } 
+        } else {
+            resetGame();
+        }
         document.getElementById('nicknameMenu').style.display = 'none';
         document.getElementById('gameCanvas').style.display = 'block';
         document.getElementById('bottomMenu').style.display = 'flex';
@@ -769,9 +771,7 @@ function hitMonster(event) {
         updateMonsterHealthDisplay(); // Обновление отображения здоровья
         if (monsterHealth <= 0) {
             monsterHealth = 0;
-            let goldReward = 10 * currentLevel; // Прогрессия награды золота
-            gold += goldReward;
-            document.getElementById('goldAmount').textContent = goldReward; // Обновление отображения заработанного золота
+            gold += 10;
             levels[currentLevel - 1].completed = true;
             saveProgress(nickname, {
                 currentLevel,
@@ -779,9 +779,7 @@ function hitMonster(event) {
                 playerHealth,
                 weaponPower,
                 weaponName,
-                weaponLevel,
-                inventory, // Сохранение инвентаря
-                levels // Сохранение прогресса уровней
+                weaponLevel
             });
             showVictoryMessage();
             setTimeout(() => {
@@ -791,8 +789,6 @@ function hitMonster(event) {
         }
     }
 }
-
-
 window.hitMonster = hitMonster;
 
 
@@ -910,9 +906,10 @@ window.goToCastle = goToCastle;
 
     // Показать количество полученного золота
     const goldEarnedElement = document.getElementById('goldEarned');
+    const goldAmount = document.getElementById('goldAmount');
+    goldAmount.textContent = 10; // Укажите здесь количество полученного золота
     goldEarnedElement.style.display = 'block';
 }
-
 
 function calculateStars() {
     // Логика расчета количества звезд, например, на основе оставшегося здоровья игрока или времени
@@ -1380,7 +1377,18 @@ function updateStatusBar() {
 
         window.toggleTopPlayers = toggleTopPlayers;
 
+        function resetGame() {
+            currentLevel = 1;
+            gold = 0;
+            playerHealth = 100;
+            weaponPower = 10;
+            weaponName = 'Кулаки';
+            weaponLevel = 0;
+            updateCharacterMenu();
+            updateStatusBar();
+        }
 
+        window.resetGame = resetGame;
 
         canvas.addEventListener('click', function(event) {
     const rect = canvas.getBoundingClientRect();
