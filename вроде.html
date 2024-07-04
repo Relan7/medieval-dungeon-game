@@ -550,23 +550,23 @@ function startSession(nickname) {
 
 
 
-async function saveProgress(nickname, sessionId, playerData) {
-    const dbRef = ref(database, `players/${nickname}/session`);
-    const sessionSnapshot = await get(dbRef);
-
-    if (sessionSnapshot.exists() && sessionSnapshot.val() === sessionId) {
-        console.log('Saving progress:', playerData);
-        set(ref(database, `players/${nickname}`), playerData)
-            .then(() => {
-                console.log('Data saved successfully.');
-            })
-            .catch((error) => {
-                console.error('Error saving data:', error);
-            });
-    } else {
-        console.log('Session mismatch, progress not saved.');
+async function saveProgress(data) {
+    try {
+        const dbRef = ref(database, `players/${nickname}/progress`);
+        const sessionRef = ref(database, `players/${nickname}/session`);
+        const sessionSnapshot = await get(sessionRef);
+        if (sessionSnapshot.val() !== currentSessionId) {
+            console.log(`Session mismatch, progress not saved. Current session: ${currentSessionId}, Server session: ${sessionSnapshot.val()}`);
+            alert('Сессия изменилась. Прогресс не сохранен.');
+            return;
+        }
+        await set(dbRef, data);
+        console.log('Data saved successfully.');
+    } catch (error) {
+        console.error('Error saving progress:', error);
     }
 }
+window.saveProgress = saveProgress;
 
 
 
@@ -796,26 +796,64 @@ window.toggleAutoHit = toggleAutoHit;
         const dbRef = ref(database, `players/${nickname}/session`);
 
         try {
-            const result = await runTransaction(dbRef, (currentSession) => {
-                return generateSessionId();  // Всегда генерируем новый идентификатор сессии
-            });
+            const sessionSnapshot = await get(dbRef);
+            if (sessionSnapshot.exists()) {
+                const existingSessionId = sessionSnapshot.val();
+                console.log(`Existing session found for ${nickname}: ${existingSessionId}`);
+                await endSession(nickname, existingSessionId);
+            } else {
+                console.log(`No existing session found for ${nickname}`);
+            }
 
-            currentSessionId = result.snapshot.val();
+            const newSessionId = generateSessionId();
+            await set(dbRef, newSessionId);
+            currentSessionId = newSessionId;
+            console.log(`New session started for ${nickname}: ${newSessionId}`);
             watchSessionChanges();
             continueGameSetup();
         } catch (error) {
-            console.error('Transaction failed: ', error);
+            console.error('Error starting new session:', error);
         }
     } else {
         alert('Пожалуйста, введите никнейм.');
     }
 }
 window.startGame = startGame;
+
+async function endSession(nickname, sessionId) {
+    const dbRef = ref(database, `players/${nickname}/session`);
+    try {
+        const result = await runTransaction(dbRef, (currentSession) => {
+            if (currentSession === null) {
+                console.log(`No session to end for ${nickname}.`);
+                return null; // Ignore if there's no session
+            }
+            if (currentSession === sessionId) {
+                console.log(`Ending session ${sessionId} for ${nickname}`);
+                return null;
+            } else {
+                console.error(`Session mismatch during transaction: currentSession=${currentSession}, sessionId=${sessionId}`);
+                throw new Error("Session mismatch");
+            }
+        });
+        if (result.committed) {
+            console.log(`Session ${sessionId} for ${nickname} ended successfully`);
+            currentSessionId = null;
+        } else {
+            console.log(`Session ${sessionId} for ${nickname} was not ended`);
+        }
+    } catch (error) {
+        console.error('Error ending session:', error);
+    }
+}
+window.endSession = endSession;
+
 function watchSessionChanges() {
     const dbRef = ref(database, `players/${nickname}/session`);
     onValue(dbRef, (snapshot) => {
         const sessionId = snapshot.val();
-        if (sessionId !== currentSessionId) {
+        if (sessionId !== currentSessionId && sessionId !== null) {
+            console.log(`Session changed from ${currentSessionId} to ${sessionId}`);
             alert('Вы были выброшены из игры, так как сессия была начата с другого устройства или вкладки.');
             endCurrentSession();
             location.reload();  // Перезагрузка страницы для выхода из игры
@@ -824,10 +862,21 @@ function watchSessionChanges() {
 }
 window.watchSessionChanges = watchSessionChanges;
 
+function generateSessionId() {
+    return Math.random().toString(36).substr(2, 9);
+}
+
+function endCurrentSession() {
+    if (nickname && currentSessionId) {
+        endSession(nickname, currentSessionId);
+    }
+}
+window.endCurrentSession = endCurrentSession;
+
 async function continueGameSetup() {
     const data = await loadProgress(nickname);
     console.log(`Data loaded: ${JSON.stringify(data)}`);
-    if (data) {
+    if (validateData(data)) {
         currentLevel = data.currentLevel;
         gold = data.gold;
         playerHealth = data.playerHealth;
@@ -856,40 +905,6 @@ window.continueGameSetup = continueGameSetup;
 
 
 
-        function generateSessionId() {
-    return Math.random().toString(36).substr(2, 9);
-}
-
-function endSession(nickname, sessionId) {
-    const dbRef = ref(database, `players/${nickname}/session`);
-    runTransaction(dbRef, (currentSession) => {
-        if (currentSession === sessionId) {
-            return null;
-        } else {
-            throw new Error("Session mismatch");
-        }
-    }).then(() => {
-        currentSessionId = null;
-    }).catch((error) => {
-        console.error('Transaction failed: ', error);
-    });
-}
-
-function endCurrentSession() {
-    if (nickname && currentSessionId) {
-        endSession(nickname, currentSessionId);
-    }
-}
-
-window.addEventListener('beforeunload', endCurrentSession);
-
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        endCurrentSession();
-    }
-});
-
-window.endCurrentSession = endCurrentSession;
 
 
 

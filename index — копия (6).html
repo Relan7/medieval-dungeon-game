@@ -566,10 +566,9 @@ async function saveProgress() {
         weaponLevel,
         heroes,
         levels,
-        session: currentSessionId,
-        monsterHealth // Добавляем здоровье монстра для сохранения
+        session: currentSessionId
     };
-    console.log('Saving progress:', progressData); // Логирование данных перед сохранением
+
     try {
         const dbRef = ref(database, `players/${nickname}/progress`);
         const sessionRef = ref(database, `players/${nickname}/session`);
@@ -655,15 +654,10 @@ function applyProgress(data) {
         weaponLevel = data.weaponLevel;
         heroes = data.heroes || heroes;
         levels = data.levels || levels;
-        monsterHealth = data.monsterHealth || baseMonsterHealth; // Восстанавливаем здоровье монстра
-
-        console.log('Loaded progress:', data); // Логирование загруженных данных
-
         updateCharacterMenu();
         addHeroesToMenu();
     }
 }
-
 
 
 
@@ -1041,7 +1035,6 @@ function hitMonster(event) {
         if (monsterHealth < 0) {
             monsterHealth = 0;
         }
-        console.log(`Monster Health after hit: ${monsterHealth}`); // Логирование здоровья после удара
         hits += 1;
         updateMonsterHealthDisplay(); // Обновление отображения здоровья
         if (monsterHealth <= 0) {
@@ -1059,36 +1052,31 @@ function hitMonster(event) {
                 weaponName,
                 weaponLevel,
                 heroes,
-                levels,
-                monsterHealth // Добавляем здоровье монстра для сохранения
+                levels
             });
 
             // Сохранение прогресса после убийства монстра
             saveProgress();
 
-            console.log("Calling showVictoryMessage()");
             showVictoryMessage();
+            setTimeout(() => {
+                document.getElementById('victoryMessage').style.display = 'none';
+                showContinuePrompt();
+            }, 50);
         }
         document.getElementById('monsterHealthBar').style.width = `${(monsterHealth / baseMonsterHealth) * 100}%`;
     }
 }
-
-
 window.hitMonster = hitMonster;
 
 // Начальное создание монстра с базовым здоровьем
 function initializeMonster(initialHealth) {
-    
+    baseMonsterHealth = initialHealth;
     monsterHealth = initialHealth;
-    console.log('Initializing monster with health:', initialHealth); // Логирование инициализации здоровья
     updateMonsterHealthDisplay();
 }
 window.initializeMonster = initializeMonster;
 
-const level = 5;
-const baseHealth = 100; // Предположим, базовое здоровье
-const calculatedHealth = baseHealth * Math.pow(1.1, level - 1);
-console.log(`Calculated health for level ${level}: ${calculatedHealth}`);
 
 
 
@@ -1097,12 +1085,6 @@ console.log(`Calculated health for level ${level}: ${calculatedHealth}`);
 function showContinuePrompt() {
     currentLevel++; // Переход к следующему уровню
     console.log(`Proceeding to level ${currentLevel}`);
-
-    // Используем фиксированное baseMonsterHealth для расчета нового здоровья монстра
-    const newMonsterHealth = baseMonsterHealth * Math.pow(1.1, currentLevel - 1);
-    console.log(`New monster health for level ${currentLevel}: ${newMonsterHealth}`);
-    console.log(`Base monster health: ${baseMonsterHealth}`); // Логирование начального значения здоровья
-    monsterHealth = newMonsterHealth;
 
     // Логирование прогресса перед сохранением на новом уровне
     console.log('Saving progress after proceeding to next level:', {
@@ -1113,19 +1095,15 @@ function showContinuePrompt() {
         weaponName,
         weaponLevel,
         heroes,
-        levels,
-        monsterHealth // Добавляем здоровье монстра для сохранения
+        levels
     });
 
     // Сохранение прогресса на новом уровне
     saveProgress();
 
-    initializeMonster(newMonsterHealth);
+    initializeMonster(baseMonsterHealth * Math.pow(1.1, currentLevel - 1));
     drawMenu();
 }
-
-
-
 
 window.showContinuePrompt = showContinuePrompt;
 
@@ -1189,59 +1167,20 @@ window.continueToNextLevel = continueToNextLevel;
         }
         
         function showVictoryMessage() {
-    console.log("Victory message displayed");
+    const victoryMessage = document.getElementById('victoryMessage');
+    victoryMessage.style.display = 'block';
 
-    // Создаем контейнер для сообщения о победе
-    const victoryMessage = document.createElement('div');
-    victoryMessage.id = 'victoryMessage';
-    victoryMessage.style.position = 'absolute';
-    victoryMessage.style.top = '50%';
-    victoryMessage.style.left = '50%';
-    victoryMessage.style.transform = 'translate(-50%, -50%)';
-    victoryMessage.style.padding = '20px';
-    victoryMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    victoryMessage.style.color = 'white';
-    victoryMessage.style.fontSize = '24px';
-    victoryMessage.style.textAlign = 'center';
-    document.body.appendChild(victoryMessage);
+    const starsEarned = calculateStars(); // Расчет количества заработанных звезд
+    completeLevel(currentLevel, starsEarned); // Обновление данных уровня
 
-    // Добавляем картинку победы
-    const victoryImage = document.createElement('img');
-    victoryImage.id = 'victoryImage';
-    victoryImage.src = 'win2.png';
-    victoryImage.alt = 'Вы победили';
-    victoryImage.style.width = '700px';
-    victoryImage.style.height = 'auto';
-    victoryImage.onclick = () => {
-        document.body.removeChild(victoryMessage);
-        showContinuePrompt();
-    };
-    victoryMessage.appendChild(victoryImage);
+    // Показать изображение "Вы победили"
+    const victoryImage = document.getElementById('victoryImage');
+    victoryImage.style.display = 'block';
 
-    // Добавляем отображение заработанного золота
-    const goldEarnedDiv = document.createElement('div');
-    goldEarnedDiv.id = 'goldEarned';
-    goldEarnedDiv.style.fontSize = '24px';
-    goldEarnedDiv.style.color = 'gold';
-    goldEarnedDiv.style.fontFamily = "'Comic Sans MS', cursive, sans-serif";
-    goldEarnedDiv.textContent = `Золото: ${document.getElementById('goldAmount').textContent}`;
-    victoryMessage.appendChild(goldEarnedDiv);
-
-    // Добавляем текст сообщения о победе
-    const victoryText = document.createElement('p');
-    victoryText.textContent = 'Победа! Вы хотите продолжить унижать Shap и убить следующего монстра?';
-    victoryMessage.appendChild(victoryText);
-
-    // Убираем сообщение через 3 секунды
-    setTimeout(() => {
-        if (document.body.contains(victoryMessage)) {
-            document.body.removeChild(victoryMessage);
-            showContinuePrompt();
-        }
-    }, 3000); // Время отображения сообщения о победе
+    // Показать количество полученного золота
+    const goldEarnedElement = document.getElementById('goldEarned');
+    goldEarnedElement.style.display = 'block';
 }
-
-window.showVictoryMessage = showVictoryMessage;
 
 
 function calculateStars() {
