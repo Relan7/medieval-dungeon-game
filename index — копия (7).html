@@ -669,27 +669,6 @@ function applyProgress(data) {
 }
 
 
-const characterImages = [
-    'peasant.png',     // 0-9 уровень
-    'warrior.png',     // 10-19 уровень
-    'knight.png',      // 20-29 уровень
-    'mage.png',        // 30-39 уровень
-    'archer.png',      // 40-49 уровень
-    'paladin.png',     // 50-59 уровень
-    'barbarian.png',   // 60-69 уровень
-    'assassin.png',    // 70-79 уровень
-    'samurai.png',     // 80-89 уровень
-    'dragon_knight.png' // 90-99 уровень
-];
-
-function updateCharacterImage() {
-    const index = Math.floor(currentLevel / 10);
-    const imageIndex = index < characterImages.length ? index : characterImages.length - 1;
-    document.getElementById('characterImage').src = characterImages[imageIndex];
-}
-window.updateCharacterImage = updateCharacterImage;
-
-
 
 
 
@@ -1095,7 +1074,6 @@ function hitMonster(event) {
             showVictoryMessage();
         }
         document.getElementById('monsterHealthBar').style.width = `${(monsterHealth / baseMonsterHealth) * 100}%`;
-        updateCharacterImage(); // вызов функции для смены изображения
     }
 }
 
@@ -1177,7 +1155,6 @@ function continueToNextLevel() {
     if (currentLevel < 100) {
         currentLevel++;
         startLevel(currentLevel);
-        updateCharacterImage(); // вызов функции для смены изображения
     } else {
         currentScreen = 'victory';
         drawVictoryScreen();
@@ -1185,7 +1162,6 @@ function continueToNextLevel() {
     updateTopPlayers(nickname, { nickname, level: currentLevel });
     drawLevelMap();
 }
-
 
 window.continueToNextLevel = continueToNextLevel;
 
@@ -1292,9 +1268,8 @@ function startLevel(levelNumber) {
     currentScreen = 'battle';
     drawBattle();
     updateMonsterHealthDisplay(); // Обновление отображения здоровья при начале уровня
-    updateCharacterImage(); // вызов функции для смены изображения
 }
-window.startLevel = startLevel;
+
 
 function completeLevel(levelNumber, stars) {
     if (levels[levelNumber - 1]) {
@@ -1311,9 +1286,7 @@ function completeLevel(levelNumber, stars) {
         });
         drawLevelMap();
     }
-    updateCharacterImage(); // вызов функции для смены изображения
 }
-window.completeLevel = completeLevel;
 
 
 function drawLevelsScreen() {
@@ -1663,7 +1636,8 @@ function loadWorldBossData() {
        
 
 
-function updateCharacterMenu() {
+
+        function updateCharacterMenu() {
     playerHealth = calculateTotalHealth(); // Обновление текущего здоровья игрока
     document.getElementById('weapon').textContent = weaponName;
     document.getElementById('health').textContent = playerHealth;
@@ -1671,13 +1645,12 @@ function updateCharacterMenu() {
     document.getElementById('gold').textContent = gold;
     document.getElementById('level').textContent = currentLevel;
 
-    // Смена изображения персонажа при достижении уровня выше 10
-    updateCharacterImage(); // Вызов функции для смены изображения
 
     updateStatusBar(); // Обновление статус бара
 }
-window.updateCharacterMenu = updateCharacterMenu;
 
+
+window.updateCharacterMenu = updateCharacterMenu;
 
 function calculateTotalDamage() {
     let totalDamage = 0;
