@@ -420,7 +420,8 @@
         { name: 'Кузнечик', level: 0, damage: 2500, cost: 15000, img: 'hero5.png' , hired: false},
     ];
 
-    function createHeroElement(hero) {
+// Функция для создания элемента героя
+function createHeroElement(hero) {
     const heroDiv = document.createElement('div');
     heroDiv.className = `hero ${hero.hired ? 'hired' : 'not-hired'}`;
 
@@ -442,8 +443,7 @@
     heroDiv.appendChild(heroDamage);
 
     const heroCost = document.createElement('p');
-    const upgradeCost = hero.hired ? hero.cost * (hero.level + 1) : hero.cost;
-    heroCost.textContent = `Стоимость: ${upgradeCost}`;
+    heroCost.textContent = `Стоимость: ${hero.cost}`;
     heroDiv.appendChild(heroCost);
 
     const hireButton = document.createElement('button');
@@ -455,7 +455,6 @@
 
     return heroDiv;
 }
-
 window.createHeroElement = createHeroElement;
 
     // Функция для добавления героев в меню
@@ -491,7 +490,6 @@ window.createHeroElement = createHeroElement;
             hireButton.textContent = 'Улучшить';
             heroDiv.querySelector('p:nth-child(3)').textContent = `Ур.: ${hero.level}`;
             heroDiv.querySelector('p:nth-child(4)').textContent = `Урон: ${hero.damage}`;
-            updateHeroCost(hero, heroDiv); // Обновление стоимости до нажатия кнопки
             console.log(`${hero.name} улучшен до уровня ${hero.level} за ${upgradeCost} золота! Осталось золота: ${gold}`);
         } else {
             console.log('Недостаточно золота для улучшения!');
@@ -503,8 +501,6 @@ window.createHeroElement = createHeroElement;
     updateStatusBar(); // Обновление статус бара после найма/улучшения героя
     savePlayerData(); // Сохранение прогресса после изменения состояния героя
 }
-
-
 window.hireOrUpgradeHero = hireOrUpgradeHero;
 
 
@@ -622,6 +618,12 @@ function validateData(data) {
     return true;
 }
 
+
+
+
+
+
+
 // Функция для загрузки прогресса
 async function loadProgress(nickname) {
     if (!nickname) {
@@ -665,16 +667,6 @@ function applyProgress(data) {
         addHeroesToMenu();
     }
 }
-
-
-function updateHeroCost(hero, heroDiv) {
-    const upgradeCost = hero.cost * (hero.level + 1);
-    heroDiv.querySelector('p:nth-child(5)').textContent = `Стоимость: ${upgradeCost}`;
-}
-
-
-
-
 
 
 const characterImages = [
