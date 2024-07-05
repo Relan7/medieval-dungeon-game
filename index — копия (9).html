@@ -557,24 +557,12 @@ window.createHeroElement = createHeroElement;
         console.log('Недостаточно золота для найма!');
     }
     updateTotalDamage();
-    localGoldUpdated = true; // Устанавливаем флаг перед обновлением статус бара
     updateStatusBar(); // Обновление статус бара после найма/улучшения героя
-    saveGoldToDatabase(); // Явное сохранение золота в базу данных
     savePlayerData(); // Сохранение прогресса после изменения состояния героя
 }
 
+
 window.hireOrUpgradeHero = hireOrUpgradeHero;
-
-
-function saveGoldToDatabase() {
-    const playerGoldRef = ref(database, `players/${nickname}/gold`);
-    set(playerGoldRef, gold).then(() => {
-        console.log(`Gold saved to database: ${gold}`);
-    }).catch((error) => {
-        console.error('Error saving gold to database:', error);
-    });
-}
-
 
 
 // Функция для обновления суммарного урона
@@ -627,6 +615,7 @@ function startSession(nickname) {
 
 
 
+// Функция для сохранения прогресса
 async function saveProgress() {
     if (!nickname || !currentSessionId) {
         console.error('Cannot save progress: no nickname or session ID');
@@ -656,17 +645,12 @@ async function saveProgress() {
             return;
         }
         await set(dbRef, progressData);
-        console.log('Data saved successfully:', progressData); // Логирование успешного сохранения
+        console.log('Data saved successfully.');
     } catch (error) {
         console.error('Error saving progress:', error);
     }
 }
 window.saveProgress = saveProgress;
-
-
-
-
-
 
 
 
@@ -758,18 +742,10 @@ function toggleFullscreen() {
         window.toggleFullscreen = toggleFullscreen;
 
         function toggleMailWindow() {
-    const mailWindow = document.getElementById('mailWindow');
-    if (mailWindow.style.display === 'block') {
-        mailWindow.style.display = 'none';
-    } else {
-        mailWindow.innerHTML = ''; // Очищаем содержимое перед загрузкой новой почты
-        loadMail();
-        mailWindow.style.display = 'block';
-    }
-}
-window.toggleMailWindow = toggleMailWindow;
-
-
+            const mailWindow = document.getElementById('mailWindow');
+            mailWindow.style.display = mailWindow.style.display === 'block' ? 'none' : 'block';
+        }        
+        window.toggleMailWindow = toggleMailWindow;
 const characterImages = [
     'peasant.png',     // 0-9 уровень
     'warrior.png',     // 10-19 уровень
@@ -1052,174 +1028,6 @@ async function continueGameSetup() {
     drawMenu();
 }
 window.continueGameSetup = continueGameSetup;
-
-
-
-
-
-
-function sendRewards() {
-    const sortedPlayers = Object.entries(playersDamage).sort(([, damageA], [, damageB]) => damageB - damageA);
-    const rewards = {
-        top3: 10000,
-        top10: 1000
-    };
-
-    sortedPlayers.forEach(([player, damage], index) => {
-        let reward = 0;
-        if (index < 3) {
-            reward = rewards.top3;
-        } else if (index < 10) {
-            reward = rewards.top10;
-        }
-        if (reward > 0) {
-            sendMail(player, reward, index + 1, damage);
-            console.log(`Reward sent to player ${player}: ${reward} gold for rank ${index + 1} with damage ${damage}`);
-        }
-    });
-
-    // Обнуление рейтинга
-    playersDamage = {};
-    syncPlayersDamage();
-}
-window.sendRewards = sendRewards;
-
-
-function sendMail(player, reward, rank, damage) {
-    const mailMessage = `Поздравляем! Вы заняли ${rank}-е место в рейтинге с уроном ${damage}. Ваша награда: ${reward} золота.`;
-    const playerMailRef = ref(database, `players/${player}/mail`);
-    console.log(`Preparing to send mail to ${player}: ${mailMessage}`);
-    get(playerMailRef).then((snapshot) => {
-        let playerMail = snapshot.val() || {};
-        // Проверка на существование аналогичного письма
-        const existingMail = Object.values(playerMail).find(mail => mail.message === mailMessage);
-        if (existingMail) {
-            console.log(`Mail already exists for player ${player}: ${mailMessage}`);
-            return;
-        }
-        const mailId = `mail_${Date.now()}`;
-        playerMail[mailId] = {
-            reward: reward,
-            message: mailMessage,
-            timestamp: Date.now()
-        };
-        set(playerMailRef, playerMail).then(() => {
-            console.log(`Mail sent to player ${player}: ${mailMessage}`);
-        }).catch((error) => {
-            console.error('Error setting mail data:', error);
-        });
-    }).catch((error) => {
-        console.error('Error getting mail data:', error);
-    });
-}
-window.sendMail = sendMail;
-
-function resetWorldBossHealthImmediately() {
-    worldBossHealth = 1000000; // Установите максимальное здоровье босса
-    syncWorldBossHealth(); // Синхронизируйте новое значение здоровья с базой данных
-    console.log("World Boss Health has been reset to 100% immediately");
-    updateWorldBossHealthDisplay(); // Обновите отображение здоровья на экране
-    drawWorldBossBattle(); // Перерисуйте экран боя с боссом
-}
-
-
-
-
-function loadMail() {
-    const mailWindow = document.getElementById('mailWindow');
-    mailWindow.innerHTML = '<h2>Ваша почта</h2><div id="mailContent"></div><button onclick="toggleMailWindow()">Закрыть</button>';
-    const mailContent = document.getElementById('mailContent');
-    const playerMailRef = ref(database, `players/${nickname}/mail`);
-    console.log(`Loading mail for player ${nickname}`);
-    get(playerMailRef).then((snapshot) => {
-        const mailsObject = snapshot.val() || {};
-        console.log('Mails Object:', mailsObject);
-        const mails = Object.entries(mailsObject); // Преобразуем объект в массив [ключ, значение]
-        mails.forEach(([mailId, mail]) => {
-            const mailItem = document.createElement('div');
-            console.log('Mail Item:', mail);
-            mailItem.innerHTML = `
-                <p>${mail.message}</p>
-                <p>Награда: ${mail.reward} золота</p>
-                <button onclick="claimReward('${mailId}', ${mail.reward})">Получить награду</button>
-            `;
-            mailContent.appendChild(mailItem);
-        });
-    }).catch((error) => {
-        console.error('Error loading mail:', error);
-    });
-}
-window.loadMail = loadMail;
-
-function claimReward(mailId, reward) {
-    const playerMailRef = ref(database, `players/${nickname}/mail/${mailId}`);
-    const playerGoldRef = ref(database, `players/${nickname}/gold`);
-
-    // Получаем текущее количество золота
-    get(playerGoldRef).then((snapshot) => {
-        let currentGold = snapshot.val() || 0;
-        currentGold += reward;
-
-        // Обновляем количество золота и сохраняем прогресс
-        set(playerGoldRef, currentGold).then(() => {
-            console.log(`Gold updated: ${currentGold}`);
-            gold = currentGold; // Обновляем глобальную переменную золота
-            document.getElementById('statusGold').textContent = gold; // Обновляем отображение золота в интерфейсе
-
-            // Удаляем письмо
-            set(playerMailRef, null).then(() => {
-                console.log(`Mail ${mailId} deleted`);
-
-                // Перезагружаем почту
-                loadMail();
-                saveProgress(); // Сохраняем прогресс
-                updateStatusBar(); // Обновляем статус бар
-            }).catch((error) => {
-                console.error('Error deleting mail:', error);
-            });
-        }).catch((error) => {
-            console.error('Error updating gold:', error);
-        });
-    }).catch((error) => {
-        console.error('Error getting current gold:', error);
-    });
-}
-window.claimReward = claimReward;
-
-
-
-function spendGold(amount) {
-    const playerGoldRef = ref(database, `players/${nickname}/gold`);
-
-    // Получаем текущее количество золота
-    get(playerGoldRef).then((snapshot) => {
-        let currentGold = snapshot.val() || 0;
-        if (currentGold >= amount) {
-            currentGold -= amount;
-
-            // Обновляем количество золота и сохраняем прогресс
-            set(playerGoldRef, currentGold).then(() => {
-                console.log(`Gold spent: ${amount}, remaining gold: ${currentGold}`);
-                gold = currentGold; // Обновляем глобальную переменную золота
-                document.getElementById('statusGold').textContent = gold; // Обновляем отображение золота в интерфейсе
-                saveProgress(); // Сохраняем прогресс
-                updateStatusBar(); // Обновляем статус бар
-            }).catch((error) => {
-                console.error('Error updating gold:', error);
-            });
-        } else {
-            console.log('Not enough gold to spend.');
-        }
-    }).catch((error) => {
-        console.error('Error getting current gold:', error);
-    });
-}
-window.spendGold = spendGold;
-
-
-
-
-
 
 
 
@@ -1856,8 +1664,7 @@ function updateDamageList() {
 }
 
 function hitWorldBoss(playerName, damage) {
-    if (worldBossHealth <= 0) return; // Проверка, чтобы не засчитывать урон после смерти босса
-
+    //console.log(`Hit World Boss: Player ${playerName} deals ${damage} damage.`);
     if (!playersDamage[playerName]) {
         playersDamage[playerName] = 0;
     }
@@ -1868,14 +1675,8 @@ function hitWorldBoss(playerName, damage) {
     updateDamageList();
     syncWorldBossHealth();
     syncPlayersDamage();
-
-    if (worldBossHealth <= 0) {
-        // Вызов функции отправки наград при смерти босса
-        sendRewards();
-    }
+    drawWorldBossBattle();  // Добавьте этот вызов для обновления интерфейса
 }
-
-
 
 function updateWorldBossHealthDisplay() {
     //console.log(`Updating World Boss Health Display: ${worldBossHealth}`);
@@ -2008,46 +1809,14 @@ function calculateTotalHealth() {
 }
 window.calculateTotalHealth = calculateTotalHealth;
 
-let localGoldUpdated = false;
-
 function updateStatusBar() {
-    console.log('updateStatusBar called'); // Логирование вызова функции
-
-    if (!localGoldUpdated) {
-        const playerGoldRef = ref(database, `players/${nickname}/gold`);
-        get(playerGoldRef).then((snapshot) => {
-            const goldAmount = snapshot.val() || 0;
-            console.log(`Gold amount retrieved from database: ${goldAmount}`); // Логирование полученного значения из базы данных
-
-            document.getElementById('statusGold').textContent = goldAmount;
-            gold = goldAmount; // Обновляем глобальную переменную золота
-            console.log(`Global gold variable updated: ${gold}`); // Логирование обновленного значения глобальной переменной
-
-        }).catch((error) => {
-            console.error('Error getting gold:', error);
-        });
-    } else {
-        localGoldUpdated = false; // Сбрасываем флаг после использования
-    }
-
+    document.getElementById('statusGold').textContent = gold;
     document.getElementById('statusLevel').textContent = currentLevel;
     document.getElementById('playerHealthBar').style.width = playerHealth + '%'; // Обновление ширины полосы здоровья
     document.getElementById('statusDamage').textContent = calculateTotalDamage(); // Обновление значения урона
-
-    console.log('Status bar updated'); // Логирование обновления статус бара
+    
+    //document.getElementById('statusHealth').textContent = playerHealth; // Обновление значения здоровья
 }
-window.updateStatusBar = updateStatusBar;
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2161,7 +1930,6 @@ window.updateStatusBar = updateStatusBar;
     changeScreen('menu'); // Начальный экран
     startUpdating(); // Запуск обновления при старте игры
     startHourlyReset(); // Запуск таймера для сброса здоровья босса
-    resetWorldBossHealthImmediately();
 }
 
     </script>
