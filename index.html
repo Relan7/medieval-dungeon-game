@@ -1114,13 +1114,6 @@ function sendMail(player, reward, rank, damage) {
 }
 window.sendMail = sendMail;
 
-function resetWorldBossHealthImmediately() {
-    worldBossHealth = 1000000; // Установите максимальное здоровье босса
-    syncWorldBossHealth(); // Синхронизируйте новое значение здоровья с базой данных
-    console.log("World Boss Health has been reset to 100% immediately");
-    updateWorldBossHealthDisplay(); // Обновите отображение здоровья на экране
-    drawWorldBossBattle(); // Перерисуйте экран боя с боссом
-}
 
 
 
@@ -2161,7 +2154,7 @@ window.updateStatusBar = updateStatusBar;
     changeScreen('menu'); // Начальный экран
     startUpdating(); // Запуск обновления при старте игры
     startHourlyReset(); // Запуск таймера для сброса здоровья босса
-    resetWorldBossHealthImmediately();
+    
 }
 
     </script>

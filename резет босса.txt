@@ -1,0 +1,15 @@
+function resetWorldBossHealthImmediately() {
+    worldBossHealth = 1000000; // Установите максимальное здоровье босса
+    syncWorldBossHealth(); // Синхронизируйте новое значение здоровья с базой данных
+    console.log("World Boss Health has been reset to 100% immediately");
+    updateWorldBossHealthDisplay(); // Обновите отображение здоровья на экране
+    drawWorldBossBattle(); // Перерисуйте экран боя с боссом
+}
+
+
+
+
+
+
+в конец
+resetWorldBossHealthImmediately();
