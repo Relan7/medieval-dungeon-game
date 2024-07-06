@@ -548,45 +548,13 @@ let rewardMultiplier = 1; // Начальное значение множите�
 
 
     // Данные о героях
-    let newHeroes = [
-    { name: 'Эльф', level: 1, baseDamage: 5, baseCost: 50, damage: 5, cost: 50, img: 'hero1.png', hired: false },
-    { name: 'Гном', level: 1, baseDamage: 10, baseCost: 100, damage: 10, cost: 100, img: 'hero2.png', hired: false },
-    { name: 'Хоббит', level: 1, baseDamage: 20, baseCost: 250, damage: 20, cost: 250, img: 'hero3.png', hired: false },
-    { name: 'Тор', level: 1, baseDamage: 30, baseCost: 500, damage: 30, cost: 500, img: 'hero4.png', hired: false },
-    { name: 'Кузнечик', level: 1, baseDamage: 40, baseCost: 1000, damage: 40, cost: 1000, img: 'hero5.png', hired: false },
-];
-let heroes = [...newHeroes];
-// Функция для миграции данных героев
-function migrateHeroData(oldHeroes) {
-    return oldHeroes.map(oldHero => {
-        const newHero = newHeroes.find(hero => hero.name === oldHero.name);
-        if (newHero) {
-            return {
-                ...newHero,
-                level: oldHero.level,
-                damage: calculateHeroStats(oldHero.level, newHero.baseDamage, newHero.baseCost).newDamage,
-                cost: calculateHeroStats(oldHero.level, newHero.baseDamage, newHero.baseCost).newCost,
-                hired: oldHero.hired,
-            };
-        }
-        return oldHero;
-    });
-}
-window.migrateHeroData = migrateHeroData;
-
-function calculateHeroStats(level, baseDamage, baseCost) {
-    const damageMultiplier = 1.10; // Коэффициент увеличения урона
-    const costMultiplier = 1.2; // Коэффициент увеличения стоимости
-    const newDamage = Math.floor(baseDamage * Math.pow(damageMultiplier, level - 1));
-    const newCost = Math.floor(baseCost * Math.pow(costMultiplier, level - 1));
-    return { newDamage, newCost };
-}
-window.calculateHeroStats = calculateHeroStats;
-
-
-
-
-
+    let heroes = [
+        { name: 'Эльф', level: 0, damage: 1, cost: 15, img: 'hero1.png', hired: false },
+        { name: 'Гном', level: 0, damage: 10, cost: 100, img: 'hero2.png', hired: false },
+        { name: 'хоббит', level: 0, damage: 120, cost: 1000, img: 'hero3.png', hired: false },
+        { name: 'Тор', level: 0, damage: 1000, cost: 5000, img: 'hero4.png', hired: false },
+        { name: 'Кузнечик', level: 0, damage: 500, cost: 15000, img: 'hero5.png' , hired: false},
+    ];
 
     function createHeroElement(hero) {
     const heroDiv = document.createElement('div');
@@ -635,34 +603,31 @@ window.createHeroElement = createHeroElement;
         leftCharacterMenu.appendChild(heroElement);
     });
 }
-window.addHeroesToMenu = addHeroesToMenu;
+
+    window.addHeroesToMenu = addHeroesToMenu;
 
 
-
-function hireOrUpgradeHero(hero, heroDiv, hireButton) {
+    function hireOrUpgradeHero(hero, heroDiv, hireButton) {
     if (!hero.hired && gold >= hero.cost) {
         gold -= hero.cost;
         hero.hired = true;
-        const stats = calculateHeroStats(hero.level, hero.baseDamage, hero.baseCost);
-        hero.damage = stats.newDamage;
         totalDamage += hero.damage;
         heroDiv.classList.remove('not-hired');
         heroDiv.classList.add('hired');
         hireButton.textContent = 'Улучшить';
         console.log(`${hero.name} нанят за ${hero.cost} золота! Осталось золота: ${gold}`);
     } else if (hero.hired) {
-        const stats = calculateHeroStats(hero.level + 1, hero.baseDamage, hero.baseCost);
-        const upgradeCost = stats.newCost;
+        const upgradeCost = hero.cost * (hero.level + 1);
         if (gold >= upgradeCost) {
             gold -= upgradeCost;
             totalDamage -= hero.damage;
             hero.level++;
-            hero.damage = stats.newDamage;
+            hero.damage += 10; // Example of damage increase per level
             totalDamage += hero.damage;
             hireButton.textContent = 'Улучшить';
             heroDiv.querySelector('p:nth-child(3)').textContent = `Ур.: ${hero.level}`;
             heroDiv.querySelector('p:nth-child(4)').textContent = `Урон: ${hero.damage}`;
-            updateHeroCost(hero, heroDiv);
+            updateHeroCost(hero, heroDiv); // Update cost before button click
             console.log(`${hero.name} улучшен до уровня ${hero.level} за ${upgradeCost} золота! Осталось золота: ${gold}`);
         } else {
             console.log('Недостаточно золота для улучшения!');
@@ -671,22 +636,17 @@ function hireOrUpgradeHero(hero, heroDiv, hireButton) {
         console.log('Недостаточно золота для найма!');
     }
     updateTotalDamage();
-    localGoldUpdated = true;
-    updateStatusBar();
+    localGoldUpdated = true; // Set flag before updating status bar
+    updateStatusBar(); // Update status bar after hiring/upgrading hero
     saveGoldToDatabase().then(() => {
         console.log(`Gold saved to database after hiring/upgrading hero: ${gold}`);
-    });
-    savePlayerData();
+    }); // Explicitly save gold to the database
+    savePlayerData(); // Save progress after changing hero state
 }
+
+
+
 window.hireOrUpgradeHero = hireOrUpgradeHero;
-
-
-
-
-
-
-
-
 
 
 function saveGoldToDatabase() {
@@ -752,6 +712,7 @@ function startSession(nickname) {
 
 
 
+
 async function saveProgress() {
     if (!nickname || !currentSessionId) {
         console.error('Cannot save progress: no nickname or session ID');
@@ -764,15 +725,13 @@ async function saveProgress() {
         playerHealth,
         weaponPower,
         weaponName,
-        weaponLevel: weaponLevel || 0,
+        weaponLevel,
         heroes,
         levels,
         session: currentSessionId,
-        monsterHealth,
-        rewardMultiplier,
-        rebornCount // Сохранение количества перерождений
+        monsterHealth // Добавляем здоровье монстра для сохранения
     };
-    console.log('Saving progress:', progressData);
+    console.log('Saving progress:', progressData); // Логирование данных перед сохранением
     try {
         const dbRef = ref(database, `players/${nickname}/progress`);
         const sessionRef = ref(database, `players/${nickname}/session`);
@@ -783,12 +742,11 @@ async function saveProgress() {
             return;
         }
         await set(dbRef, progressData);
-        console.log('Data saved successfully:', progressData);
+        console.log('Data saved successfully:', progressData); // Логирование успешного сохранения
     } catch (error) {
         console.error('Error saving progress:', error);
     }
 }
-
 window.saveProgress = saveProgress;
 
 
@@ -823,6 +781,7 @@ function validateData(data) {
     return true;
 }
 
+// Функция для загрузки прогресса
 async function loadProgress(nickname) {
     if (!nickname) {
         console.error('Cannot load progress: no nickname');
@@ -834,14 +793,8 @@ async function loadProgress(nickname) {
         const snapshot = await get(dbRef);
         if (snapshot.exists()) {
             const data = snapshot.val();
-            console.log('Loaded progress:', data);
-
-            data.heroes = migrateHeroData(data.heroes);
-
-            applyProgress(data);
-            saveProgress();
-
-            return data;
+            console.log('Loaded progress:', data); // Логирование загруженных данных
+            return data; // Возвращаем данные, чтобы функция continueGameSetup могла их использовать
         } else {
             console.log('No progress found for', nickname);
             return null;
@@ -852,7 +805,6 @@ async function loadProgress(nickname) {
     }
 }
 
-window.loadProgress = loadProgress;
 
 
 
@@ -864,109 +816,26 @@ function applyProgress(data) {
         playerHealth = data.playerHealth;
         weaponPower = data.weaponPower;
         weaponName = data.weaponName;
-        weaponLevel = data.weaponLevel || 0;
-        heroes = data.heroes.map(hero => ({
-            ...hero,
-            cost: hero.baseCost, // Устанавливаем базовую стоимость для каждого героя
-            damage: calculateHeroStats(hero.level || 1, hero.baseDamage, hero.baseCost).newDamage // Рассчитываем урон на основе уровня и базовых значений
-        }));
+        weaponLevel = data.weaponLevel;
+        heroes = data.heroes || heroes;
         levels = data.levels || levels;
         monsterHealth = data.monsterHealth || baseMonsterHealth; 
-        rewardMultiplier = data.rewardMultiplier || 1; // Загрузка множителя награды
-        rebornCount = data.rebornCount || 0; // Загрузка количества перерождений
-        console.log('Applying progress:', data);
-        console.log(`Gold after applying progress: ${gold}`);
+        console.log('Applying progress:', data); // Логирование применения данных
+        console.log(`Gold after applying progress: ${gold}`); // Логирование значения золота
 
         updateCharacterMenu();
         addHeroesToMenu();
-        updateTotalDamage();
+        updateTotalDamage(); // Recalculate total damage
     }
 }
-
 window.applyProgress = applyProgress;
-
-async function startGame() {
-    const input = document.getElementById('nicknameInput').value;
-    console.log(`Nickname entered: ${input}`);
-    if (input) {
-        nickname = input;
-        const dbRef = ref(database, `players/${nickname}/session`);
-
-        try {
-            const sessionSnapshot = await get(dbRef);
-            if (sessionSnapshot.exists()) {
-                const existingSessionId = sessionSnapshot.val();
-                console.log(`Existing session found for ${nickname}: ${existingSessionId}`);
-                await endSession(nickname, existingSessionId);
-            } else {
-                console.log(`No existing session found for ${nickname}`);
-            }
-
-            const newSessionId = generateSessionId();
-            await set(dbRef, newSessionId);
-            currentSessionId = newSessionId;
-            console.log(`New session started for ${nickname}: ${newSessionId}`);
-            watchSessionChanges();
-
-            // Загружаем прогресс игрока и применяем миграцию данных
-            const progressData = await loadProgress(nickname);
-
-            if (!progressData) {
-                // Устанавливаем начальное количество золота для нового игрока, если прогресс не найден
-                const playerGoldRef = ref(database, `players/${nickname}/gold`);
-                await set(playerGoldRef, 100); // Устанавливаем начальное значение золота
-                console.log('Initial gold set to 100 for new player');
-            }
-
-            continueGameSetup();
-        } catch (error) {
-            console.error('Error starting new session:', error);
-        }
-    } else {
-        alert('Пожалуйста, введите никнейм.');
-    }
-}
-window.startGame = startGame;
-
-async function continueGameSetup() {
-    const data = await loadProgress(nickname);
-    console.log(`Data loaded: ${JSON.stringify(data)}`);
-    applyProgress(data);
-
-    document.getElementById('nicknameMenu').style.display = 'none';
-    document.getElementById('gameCanvas').style.display = 'block';
-    document.getElementById('bottomMenu').style.display = 'flex';
-    currentScreen = 'menu';
-    console.log(`Screen set to: ${currentScreen}`);
-
-    // Убедитесь, что загружаемый прогресс корректен
-    if (data && data.levels) {
-        levels = data.levels;
-    }
-
-    initializeMonster(baseMonsterHealth * Math.pow(1.1, currentLevel - 1));
-    drawMenu();
-}
-window.continueGameSetup = continueGameSetup;
-
-
-
-
-
-
 
 
 
 function updateHeroCost(hero, heroDiv) {
-    const stats = calculateHeroStats(hero.level + 1, hero.baseDamage, hero.baseCost);
-    const upgradeCost = stats.newCost;
+    const upgradeCost = hero.cost * (hero.level + 1);
     heroDiv.querySelector('p:nth-child(5)').textContent = `Стоимость: ${upgradeCost}`;
-    hero.cost = upgradeCost; // Обновляем стоимость героя
 }
-window.updateHeroCost = updateHeroCost;
-
-
-
 
 
 function toggleFullscreen() {
@@ -1060,7 +929,7 @@ window.updateMonsterImage = updateMonsterImage;
     });
 }
 
-let rebornCount = 0; // Переменная для отслеживания количества перерождений
+
         let nickname = '';
         let currentSessionId = null;
         let totalDamage = 10;
@@ -1157,7 +1026,7 @@ function toggleAutoHit() {
             if (currentScreen === 'battle') {
                 hitMonster({ clientX: canvas.width / 2, clientY: canvas.height / 2 });
             }
-        }, 500);
+        }, 1000);
     }
 }
 window.toggleAutoHit = toggleAutoHit;
@@ -1228,7 +1097,51 @@ window.toggleAutoHit = toggleAutoHit;
 
 window.updateGold = updateGold;
 
+async function startGame() {
+    const input = document.getElementById('nicknameInput').value;
+    console.log(`Nickname entered: ${input}`);
+    if (input) {
+        nickname = input;
+        const dbRef = ref(database, `players/${nickname}/session`);
 
+        try {
+            const sessionSnapshot = await get(dbRef);
+            if (sessionSnapshot.exists()) {
+                const existingSessionId = sessionSnapshot.val();
+                console.log(`Existing session found for ${nickname}: ${existingSessionId}`);
+                await endSession(nickname, existingSessionId);
+            } else {
+                console.log(`No existing session found for ${nickname}`);
+            }
+
+            const newSessionId = generateSessionId();
+            await set(dbRef, newSessionId);
+            currentSessionId = newSessionId;
+            console.log(`New session started for ${nickname}: ${newSessionId}`);
+            watchSessionChanges();
+
+            // Загружаем прогресс игрока
+            const progressData = await loadProgress(nickname);
+
+            if (!progressData) {
+                // Устанавливаем начальное количество золота для нового игрока, если прогресс не найден
+                const playerGoldRef = ref(database, `players/${nickname}/gold`);
+                await set(playerGoldRef, 100); // Устанавливаем начальное значение золота
+                console.log('Initial gold set to 100 for new player');
+            }
+
+            continueGameSetup();
+        } catch (error) {
+            console.error('Error starting new session:', error);
+        }
+    } else {
+        alert('Пожалуйста, введите никнейм.');
+    }
+}
+
+
+
+window.startGame = startGame;
 
 async function endSession(nickname, sessionId) {
     const dbRef = ref(database, `players/${nickname}/session`);
@@ -1283,7 +1196,28 @@ function endCurrentSession() {
 }
 window.endCurrentSession = endCurrentSession;
 
+async function continueGameSetup() {
+    const data = await loadProgress(nickname);
+    console.log(`Data loaded: ${JSON.stringify(data)}`);
+    applyProgress(data);
 
+    document.getElementById('nicknameMenu').style.display = 'none';
+    document.getElementById('gameCanvas').style.display = 'block';
+    document.getElementById('bottomMenu').style.display = 'flex';
+    currentScreen = 'menu';
+    console.log(`Screen set to: ${currentScreen}`);
+
+    // Убедитесь, что загружаемый прогресс корректен
+    if (data && data.levels) {
+        levels = data.levels;
+    }
+
+    initializeMonster(baseMonsterHealth * Math.pow(1.1, currentLevel - 1));
+    drawMenu();
+}
+
+
+window.continueGameSetup = continueGameSetup;
 
 
 function showRebornPrompt() {
@@ -1301,12 +1235,10 @@ function confirmReborn() {
     heroes.forEach(hero => {
         hero.level = 0;
         hero.hired = false;
-        hero.damage = calculateHeroStats(1, hero.baseDamage, hero.baseCost).newDamage; // Устанавливаем базовый урон для каждого героя
-        hero.cost = hero.baseCost; // Устанавливаем базовую стоимость для каждого героя
+        hero.damage = hero.name === 'Эльф' ? 1 : (hero.name === 'Гном' ? 10 : 0); // Устанавливаем базовый урон для каждого героя
     });
     currentLevel = 1;
-    rebornCount++; // Увеличиваем количество перерождений
-    rewardMultiplier = Math.min(1 + rebornCount * 0.1, 9999); // Устанавливаем множитель награды
+    rewardMultiplier = 2; // Установите множитель награды
     
     // Обновляем золото и сохраняем прогресс
     updateGold(100).then(() => {
@@ -1314,27 +1246,17 @@ function confirmReborn() {
         updateCharacterMenu();
         addHeroesToMenu(); // Обновляем меню героев
         startLevel(currentLevel);
-        alert(`Вы переродились! Теперь вы будете получать награды за убийство монстров в ${rewardMultiplier.toFixed(1)} раза выше.`);
-        
-        // Сохраняем прогресс сразу после перерождения
-        saveProgress().then(() => {
-            console.log('Progress saved after reborn');
-        }).catch(error => {
-            console.error('Error saving progress after reborn:', error);
-        });
+        alert('Вы переродились! Теперь вы будете получать награды за убийство монстров в два раза выше.');
     }).catch(error => {
         console.error('Error updating gold:', error);
     });
 }
 
 
-window.confirmReborn = confirmReborn;
-
-
-
 
 window.showRebornPrompt = showRebornPrompt;
 window.hideRebornPrompt = hideRebornPrompt;
+window.confirmReborn = confirmReborn;
 
 
 
@@ -1649,11 +1571,12 @@ function hitMonster(event) {
         updateMonsterHealthDisplay();
 
         if (monsterHealth <= 0) {
-            let goldReward = Math.round(10 * currentLevel * rewardMultiplier); // Используем Math.round для округления
+            let goldReward = 10 * currentLevel * rewardMultiplier;
             console.log(`Monster defeated. Awarding gold: ${goldReward}`);
             updateGold(gold + goldReward).then(() => {
                 console.log(`Gold after defeating monster: ${gold}`);
-                document.getElementById('goldAmount').textContent = goldReward;
+                                // Обновляем значение золота в элементе перед вызовом showVictoryMessage
+                                document.getElementById('goldAmount').textContent = goldReward;
                 return saveProgress();
             }).then(() => {
                 showVictoryMessage();
@@ -1664,7 +1587,6 @@ function hitMonster(event) {
         updateCharacterImage();
     }
 }
-
 
 
 
@@ -2297,12 +2219,11 @@ function calculateTotalDamage() {
     let totalDamage = 0;
     heroes.forEach(hero => {
         if (hero.hired) {
-            totalDamage += hero.damage;
+            totalDamage += hero.damage * hero.level;
         }
     });
     return totalDamage;
 }
-
 
 window.calculateTotalDamage = calculateTotalDamage;
 

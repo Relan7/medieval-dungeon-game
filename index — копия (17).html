@@ -573,16 +573,14 @@ function migrateHeroData(oldHeroes) {
     });
 }
 window.migrateHeroData = migrateHeroData;
-
 function calculateHeroStats(level, baseDamage, baseCost) {
-    const damageMultiplier = 1.10; // Коэффициент увеличения урона
+    const damageMultiplier = 1.15; // Коэффициент увеличения урона
     const costMultiplier = 1.2; // Коэффициент увеличения стоимости
     const newDamage = Math.floor(baseDamage * Math.pow(damageMultiplier, level - 1));
     const newCost = Math.floor(baseCost * Math.pow(costMultiplier, level - 1));
     return { newDamage, newCost };
 }
 window.calculateHeroStats = calculateHeroStats;
-
 
 
 
@@ -865,11 +863,7 @@ function applyProgress(data) {
         weaponPower = data.weaponPower;
         weaponName = data.weaponName;
         weaponLevel = data.weaponLevel || 0;
-        heroes = data.heroes.map(hero => ({
-            ...hero,
-            cost: hero.baseCost, // Устанавливаем базовую стоимость для каждого героя
-            damage: calculateHeroStats(hero.level || 1, hero.baseDamage, hero.baseCost).newDamage // Рассчитываем урон на основе уровня и базовых значений
-        }));
+        heroes = data.heroes || [...newHeroes];
         levels = data.levels || levels;
         monsterHealth = data.monsterHealth || baseMonsterHealth; 
         rewardMultiplier = data.rewardMultiplier || 1; // Загрузка множителя награды
@@ -882,7 +876,6 @@ function applyProgress(data) {
         updateTotalDamage();
     }
 }
-
 window.applyProgress = applyProgress;
 
 async function startGame() {
@@ -1315,18 +1308,17 @@ function confirmReborn() {
         addHeroesToMenu(); // Обновляем меню героев
         startLevel(currentLevel);
         alert(`Вы переродились! Теперь вы будете получать награды за убийство монстров в ${rewardMultiplier.toFixed(1)} раза выше.`);
-        
-        // Сохраняем прогресс сразу после перерождения
-        saveProgress().then(() => {
+                // Сохраняем прогресс сразу после перерождения
+                saveProgress().then(() => {
             console.log('Progress saved after reborn');
         }).catch(error => {
             console.error('Error saving progress after reborn:', error);
         });
+        
     }).catch(error => {
         console.error('Error updating gold:', error);
     });
 }
-
 
 window.confirmReborn = confirmReborn;
 
