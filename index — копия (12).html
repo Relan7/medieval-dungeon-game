@@ -82,6 +82,24 @@
             font-size: 16px;
             z-index: 1000;
         }
+    #monsterHealthDisplay {
+    display: none;
+    position: absolute;
+    top: 10px;
+    /* bottom: 60px; */
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(to right, #4144ff 100%, #00000000 100%);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 24px;
+    font-family: 'Roboto', sans-serif;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    letter-spacing: 1px;
+    width: 300px; /* Фиксированная ширина для примера */
+}
 
 
 
@@ -340,38 +358,6 @@
     border: none;
     cursor: pointer;
 }
-#monsterHealthContainer {
-    width: 100%;
-    height: 20px;
-    background-color: grey;
-}
-
-#monsterHealthBar {
-    width: 100%;
-    height: 100%;
-    background-color: green; /* Начальный цвет */
-    transition: width 0.3s, background-color 0.3s; /* Плавный переход */
-}
-
-#monsterHealthDisplay {
-    display: none;
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(to right, #4144ff 100%, #00000000 100%);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 25px;
-    font-size: 24px;
-    font-family: 'Roboto', sans-serif;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    text-align: center;
-    letter-spacing: 1px;
-    width: 300px; /* Фиксированная ширина для примера */
-}
-
-
     </style>
 </head>
 <body>
@@ -395,17 +381,6 @@
         <button id="autoboyButton" onclick="toggleAutoHit()">Автобой</button> 
     </div>
 
-    <div id="monsterHealthContainer">
-        <div id="monsterHealthBar"></div>
-    </div>
-    <div id="monsterHealthDisplay">
-        <span style="font-size: 30px; margin-right: 10px;">❤️</span>
-        Здоровье монстра: <span id="monsterHealthValue">100</span>
-    </div>
-    
-    
-
-
     <!-- Добавляем кнопку с изображением письма -->
     <div id="mailButton" onclick="toggleMailWindow()"></div>
 
@@ -419,13 +394,10 @@
     <div id="rebornButton" onclick="showRebornPrompt()"></div>
     <div id="rebornPrompt">
         <h2>Вы хотите переродиться?</h2>
-        <p>Прогресс уровней, нанятые герои и накопленное золото будут сброшены. Но вы будете получать награды за убийство монстров в два раза выше.</p>
+        <p>Прогресс уровней и нанятые герои будут сброшены. Но вы будете получать награды за убийство монстров в два раза выше.</p>
         <button onclick="confirmReborn()">Да</button>
         <button onclick="hideRebornPrompt()">Нет</button>
     </div>
-    
-    
-    
     
     
 
@@ -504,14 +476,19 @@
     
 </div>
 
-
-
+    
+    <div class="health-bar" id="monsterHealthBarContainer" style="display:none;">
+        <div class="monster-health-bar-inner" id="monsterHealthBar"></div>
+    </div>
     
     <div class="victory-message" id="victoryMessage">
         <p>Shap в печали, что вы его бьете :(</p>
     </div>
     
-
+    <div id="monsterHealthDisplay">
+        <span style="font-size: 30px; margin-right: 10px;">❤️</span>
+        Здоровье монстра: <span id="monsterHealthValue">100</span>
+    </div>
     
     
     <div class="crosshair" id="crosshair"></div>
@@ -777,7 +754,7 @@ async function loadProgress(nickname) {
         if (snapshot.exists()) {
             const data = snapshot.val();
             console.log('Loaded progress:', data);
-            applyProgress(data);
+            return data;
         } else {
             console.log('No progress found for', nickname);
             return null;
@@ -787,7 +764,6 @@ async function loadProgress(nickname) {
         return null;
     }
 }
-
 
 // Функция для применения загруженного прогресса
 function applyProgress(data) {
@@ -1023,21 +999,16 @@ window.toggleAutoHit = toggleAutoHit;
 
         let gold = 100;
 
-        function updateGold(amount) {
-    return new Promise((resolve, reject) => {
-        gold = amount;
-        document.getElementById('statusGold').textContent = gold;
-        const playerGoldRef = ref(database, `players/${nickname}/gold`);
-        set(playerGoldRef, gold).then(() => {
-            console.log(`Gold updated in database: ${gold}`);
-            resolve();
-        }).catch((error) => {
-            console.error('Error updating gold:', error);
-            reject(error);
-        });
+function updateGold(amount) {
+    gold = amount;
+    document.getElementById('statusGold').textContent = gold;
+    const playerGoldRef = ref(database, `players/${nickname}/gold`);
+    set(playerGoldRef, gold).then(() => {
+        console.log(`Gold updated in database: ${gold}`);
+    }).catch((error) => {
+        console.error('Error updating gold:', error);
     });
 }
-
 window.updateGold = updateGold;
 
 async function startGame() {
@@ -1170,7 +1141,7 @@ function hideRebornPrompt() {
 
 function confirmReborn() {
     hideRebornPrompt();
-    // Сбросить прогресс уровней, нанятые герои и золото
+    // Сбросить прогресс уровней и нанятых героев
     levels = new Array(10000).fill().map((_, i) => ({ number: i + 1, stars: 0, completed: false }));
     heroes.forEach(hero => {
         hero.level = 0;
@@ -1178,18 +1149,17 @@ function confirmReborn() {
         hero.damage = hero.name === 'Эльф' ? 1 : (hero.name === 'Гном' ? 10 : 0); // Устанавливаем базовый урон для каждого героя
     });
     currentLevel = 1;
+    gold = 100; // или другое начальное значение
     rewardMultiplier = 2; // Установите множитель награды
-    
-    // Обновляем золото и сохраняем прогресс
-    updateGold(100).then(() => {
-        // Обновление интерфейса
-        updateCharacterMenu();
-        addHeroesToMenu(); // Обновляем меню героев
-        startLevel(currentLevel);
-        alert('Вы переродились! Теперь вы будете получать награды за убийство монстров в два раза выше.');
-    }).catch(error => {
-        console.error('Error updating gold:', error);
-    });
+
+    // Сохранение изменений в базе данных
+    saveProgress();
+
+    // Обновление интерфейса
+    updateCharacterMenu();
+    addHeroesToMenu(); // Добавьте вызов этой функции для обновления меню героев
+    startLevel(currentLevel);
+    alert('Вы переродились! Теперь вы будете получать награды за убийство монстров в два раза выше.');
 }
 
 
@@ -1444,31 +1414,26 @@ function startHourlyReset() {
 
         window.continueGame = continueGame;
 
-        function getHealthColor(percentage) {
-    if (percentage > 50) {
-        return 'green';
-    } else if (percentage > 20) {
-        return 'yellow';
+// Обновление функции отображения здоровья монстра
+function updateMonsterHealthDisplay() {
+    const healthValue = document.getElementById('monsterHealthValue');
+    const healthDisplay = document.getElementById('monsterHealthDisplay');
+    const currentHealth = Math.max(monsterHealth, 0); // Убедитесь, что здоровье не меньше 0
+    const percentageHealth = (currentHealth / baseMonsterHealth) * 100;
+
+    healthValue.textContent = Math.floor(currentHealth); // Преобразование к целому числу
+    healthDisplay.style.display = 'block'; // Сделать элемент видимым
+    healthDisplay.style.background = `linear-gradient(to right, #ff416c ${percentageHealth}%, #ff4b2b ${percentageHealth}%)`;
+
+    if (currentHealth <= 0) {
+        document.getElementById('monsterHealthBarContainer').style.display = 'none';
     } else {
-        return 'red';
+        document.getElementById('monsterHealthBarContainer').style.display = 'block';
     }
 }
 
-function updateMonsterHealthDisplay() {
-    const healthBar = document.getElementById('monsterHealthBar');
-    const healthValue = document.getElementById('monsterHealthValue');
-    if (healthBar) {
-        const healthPercentage = (monsterHealth / baseMonsterHealth) * 100;
-        healthBar.style.width = `${healthPercentage}%`;
-        healthBar.style.backgroundColor = getHealthColor(healthPercentage); // Обновляем цвет фона
-    }
-    if (healthValue) {
-        healthValue.textContent = monsterHealth.toFixed(0); // Обновляем текстовое значение здоровья
-    }
-}
 
 window.updateMonsterHealthDisplay = updateMonsterHealthDisplay;
-window.getHealthColor = getHealthColor;
 
 
 function hitMonster(event) {
@@ -1497,15 +1462,10 @@ function hitMonster(event) {
         console.log(`Monster Health after hit: ${monsterHealth}`); // Логирование здоровья после удара
         hits += 1;
         updateMonsterHealthDisplay(); // Обновление отображения здоровья
-
         if (monsterHealth <= 0) {
             let goldReward = 10 * currentLevel * rewardMultiplier; // Прогрессия награды золота с учетом множителя
-            updateGold(gold + goldReward).then(() => {
-                console.log('Gold updated and saved to database:', gold);
-            }).catch(error => {
-                console.error('Error updating gold:', error);
-            });
-
+            updateGold(gold + goldReward);  // Используем updateGold для обновления значения в базе данных
+            document.getElementById('goldAmount').textContent = goldReward; // Обновление отображения заработанного золота
             if (levels[currentLevel - 1]) {
                 levels[currentLevel - 1].completed = true;
             } else {
@@ -1531,18 +1491,23 @@ function hitMonster(event) {
             console.log("Calling showVictoryMessage()");
             showVictoryMessage();
         }
+        document.getElementById('monsterHealthBar').style.width = `${(monsterHealth / baseMonsterHealth) * 100}%`;
         updateCharacterImage(); // вызов функции для смены изображения
     }
 }
+
+
+
+
 window.hitMonster = hitMonster;
 
 // Начальное создание монстра с базовым здоровьем
 function initializeMonster(initialHealth) {
+    
     monsterHealth = initialHealth;
     console.log('Initializing monster with health:', initialHealth); // Логирование инициализации здоровья
     updateMonsterHealthDisplay();
 }
-
 window.initializeMonster = initializeMonster;
 
 const level = 5;
@@ -1726,20 +1691,18 @@ function calculateStars() {
     }
 }
 
+
 function startLevel(levelNumber) {
     currentLevel = levelNumber;
     monsterHealth = baseMonsterHealth * Math.pow(1.1, levelNumber - 1);
     document.getElementById('monsterHealthBar').style.width = '100%'; // Полная ширина при начале уровня
-    document.getElementById('monsterHealthContainer').style.display = 'block'; // Отображение бара здоровья монстра
-    currentScreen = 'dungeon';
+    document.getElementById('monsterHealthBarContainer').style.display = 'block'; // Отображение бара здоровья монстра
+    currentScreen = 'battle';
     drawBattle();
     updateMonsterHealthDisplay(); // Обновление отображения здоровья при начале уровня
     updateCharacterImage(); // вызов функции для смены изображения
 }
-
 window.startLevel = startLevel;
-
-
 
 function completeLevel(levelNumber, stars) {
     if (levels[levelNumber - 1]) {
@@ -2041,7 +2004,7 @@ function changeScreen(screen) {
     currentScreen = screen;
     document.getElementById('shopMenu').style.display = 'none';
     document.getElementById('statusBar').style.display = 'none';
-    document.getElementById('monsterHealthDisplay').style.display = (screen === 'dungeon') ? 'block' : 'none';
+    document.getElementById('monsterHealthDisplay').style.display = 'none';
     document.getElementById('crosshair').style.display = 'none';
     document.getElementById('mailButton').style.display = (screen === 'castle') ? 'block' : 'none';
     crosshair.style.display = (screen === 'battle' || screen === 'worldBoss') ? 'block' : 'none';
