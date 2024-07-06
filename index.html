@@ -2076,7 +2076,10 @@ function changeScreen(screen) {
     document.getElementById('mailButton').style.display = (screen === 'castle') ? 'block' : 'none';
     crosshair.style.display = (screen === 'battle' || screen === 'worldBoss') ? 'block' : 'none';
     document.getElementById('rebornButton').style.display = (screen === 'dungeon') ? 'block' : 'none'; // Отображаем кнопку только на экране "battle"
-
+    // Hide the monster health bar when changing screens
+    if (screen !== 'dungeon' && screen !== 'battle') {
+        document.getElementById('monsterHealthContainer').style.display = 'none';
+    }
     if (screen === 'worldBoss') {
         document.getElementById('worldBossScreen').style.display = 'block';
         document.getElementById('statusBar').style.display = 'block';
