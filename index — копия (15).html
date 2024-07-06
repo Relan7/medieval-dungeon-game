@@ -638,26 +638,21 @@ window.createHeroElement = createHeroElement;
     updateTotalDamage();
     localGoldUpdated = true; // Устанавливаем флаг перед обновлением статус бара
     updateStatusBar(); // Обновление статус бара после найма/улучшения героя
-    saveGoldToDatabase().then(() => {
-        console.log(`Gold saved to database after hiring/upgrading hero: ${gold}`);
-    }); // Явное сохранение золота в базу данных
+    saveGoldToDatabase(); // Явное сохранение золота в базу данных
     savePlayerData(); // Сохранение прогресса после изменения состояния героя
 }
-
 
 window.hireOrUpgradeHero = hireOrUpgradeHero;
 
 
 function saveGoldToDatabase() {
     const playerGoldRef = ref(database, `players/${nickname}/gold`);
-    return set(playerGoldRef, gold).then(() => {
+    set(playerGoldRef, gold).then(() => {
         console.log(`Gold saved to database: ${gold}`);
     }).catch((error) => {
         console.error('Error saving gold to database:', error);
-        throw error;
     });
 }
-
 
 
 
@@ -791,8 +786,8 @@ async function loadProgress(nickname) {
         const snapshot = await get(dbRef);
         if (snapshot.exists()) {
             const data = snapshot.val();
-            console.log('Loaded progress:', data); // Логирование загруженных данных
-            return data; // Возвращаем данные, чтобы функция continueGameSetup могла их использовать
+            console.log('Loaded progress:', data);
+            applyProgress(data);
         } else {
             console.log('No progress found for', nickname);
             return null;
@@ -802,8 +797,6 @@ async function loadProgress(nickname) {
         return null;
     }
 }
-
-
 
 
 // Функция для применения загруженного прогресса
@@ -819,15 +812,12 @@ function applyProgress(data) {
         levels = data.levels || levels;
         monsterHealth = data.monsterHealth || baseMonsterHealth; // Восстанавливаем здоровье монстра
 
-        console.log('Applying progress:', data); // Логирование применения данных
-        console.log(`Gold after applying progress: ${gold}`); // Логирование значения золота
+        console.log('Loaded progress:', data); // Логирование загруженных данных
 
         updateCharacterMenu();
         addHeroesToMenu();
     }
 }
-window.applyProgress = applyProgress;
-
 
 
 function updateHeroCost(hero, heroDiv) {
@@ -895,7 +885,7 @@ window.getMonsterImage = getMonsterImage;
 function updateMonsterImage(level) {
     const imageSrc = getMonsterImage(level);
     monsterImage.src = imageSrc;
-    //console.log(`Updated monster image to: ${imageSrc} for level ${level}`);
+    console.log(`Updated monster image to: ${imageSrc} for level ${level}`);
 }
 window.updateMonsterImage = updateMonsterImage;
 
@@ -932,7 +922,7 @@ window.updateMonsterImage = updateMonsterImage;
         let currentSessionId = null;
         let totalDamage = 10;
         let currentLevel = 1;
-        let gold = 100;
+        
         let playerHealth = 100;
         let weaponPower = 10;
         let weaponName = 'Кулаки';
@@ -1074,11 +1064,10 @@ window.toggleAutoHit = toggleAutoHit;
         }
         window.drawShop = drawShop;
 
-
+        let gold = 100;
 
         function updateGold(amount) {
     return new Promise((resolve, reject) => {
-        console.log(`Updating gold: current gold = ${gold}, new gold = ${amount}`);
         gold = amount;
         document.getElementById('statusGold').textContent = gold;
         const playerGoldRef = ref(database, `players/${nickname}/gold`);
@@ -1091,7 +1080,6 @@ window.toggleAutoHit = toggleAutoHit;
         });
     });
 }
-
 
 window.updateGold = updateGold;
 
@@ -1125,7 +1113,6 @@ async function startGame() {
                 // Устанавливаем начальное количество золота для нового игрока, если прогресс не найден
                 const playerGoldRef = ref(database, `players/${nickname}/gold`);
                 await set(playerGoldRef, 100); // Устанавливаем начальное значение золота
-                console.log('Initial gold set to 100 for new player');
             }
 
             continueGameSetup();
@@ -1136,7 +1123,6 @@ async function startGame() {
         alert('Пожалуйста, введите никнейм.');
     }
 }
-
 
 
 window.startGame = startGame;
@@ -1213,7 +1199,6 @@ async function continueGameSetup() {
     initializeMonster(baseMonsterHealth * Math.pow(1.1, currentLevel - 1));
     drawMenu();
 }
-
 
 window.continueGameSetup = continueGameSetup;
 
@@ -1511,14 +1496,14 @@ function startHourlyReset() {
     } else {
         color = 'red';
     }
-   // console.log(`Health percentage: ${percentage}, Color: ${color}`);
+    console.log(`Health percentage: ${percentage}, Color: ${color}`);
     return color;
 }
 
 function updateMonsterHealthDisplay() {
     const healthBar = document.getElementById('monsterHealthBar');
     const healthValue = document.getElementById('monsterHealthValue');
-    //console.log('Current monsterHealth:', monsterHealth);
+    console.log('Current monsterHealth:', monsterHealth);
 
     if (healthBar) {
         const maxHealth = 100 * Math.pow(1.1, currentLevel - 1);
@@ -1526,13 +1511,13 @@ function updateMonsterHealthDisplay() {
         const color = getHealthColor(healthPercentage);
         healthBar.style.width = `${Math.min(healthPercentage, 100)}%`;
         healthBar.style.backgroundColor = color; // Обновляем цвет фона
-        //console.log(`Updated monster health bar: Width: ${healthPercentage}%, Color: ${color}`);
-       // console.log(`Health bar style:`, healthBar.style);
+        console.log(`Updated monster health bar: Width: ${healthPercentage}%, Color: ${color}`);
+        console.log(`Health bar style:`, healthBar.style);
     }
 
     if (healthValue) {
         healthValue.textContent = monsterHealth.toFixed(0); // Обновляем текстовое значение здоровья
-        //console.log(`Updated monster health value: ${monsterHealth.toFixed(0)}`);
+        console.log(`Updated monster health value: ${monsterHealth.toFixed(0)}`);
     }
 }
 
@@ -1545,7 +1530,7 @@ window.getHealthColor = getHealthColor;
 
 function hitMonster(event) {
     if (currentScreen !== 'battle') return;
-    if (monsterHealth <= 0) return;
+    if (monsterHealth <= 0) return; // Если жизни монстра меньше или равны нулю, не обрабатываем удар
 
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
@@ -1560,34 +1545,52 @@ function hitMonster(event) {
         mouseY <= monsterY + monsterImage.height
     ) {
         showHitAnimation();
-        const totalDamage = calculateTotalDamage();
+        const totalDamage = calculateTotalDamage(); // Получение общего урона
+        console.log(`Monster Health before hit: ${monsterHealth}, Total Damage: ${totalDamage}`);
         monsterHealth -= totalDamage;
         if (monsterHealth < 0) {
             monsterHealth = 0;
         }
+        console.log(`Monster Health after hit: ${monsterHealth}`); // Логирование здоровья после удара
         hits += 1;
-        updateMonsterHealthDisplay();
+        updateMonsterHealthDisplay(); // Обновление отображения здоровья
 
         if (monsterHealth <= 0) {
-            let goldReward = 10 * currentLevel * rewardMultiplier;
-            console.log(`Monster defeated. Awarding gold: ${goldReward}`);
+            let goldReward = 10 * currentLevel * rewardMultiplier; // Прогрессия награды золота с учетом множителя
             updateGold(gold + goldReward).then(() => {
-                console.log(`Gold after defeating monster: ${gold}`);
-                                // Обновляем значение золота в элементе перед вызовом showVictoryMessage
-                                document.getElementById('goldAmount').textContent = goldReward;
-                return saveProgress();
-            }).then(() => {
-                showVictoryMessage();
+                console.log('Gold updated and saved to database:', gold);
             }).catch(error => {
-                console.error('Error updating gold and saving progress:', error);
+                console.error('Error updating gold:', error);
             });
+
+            if (levels[currentLevel - 1]) {
+                levels[currentLevel - 1].completed = true;
+            } else {
+                console.error(`Level ${currentLevel} is not defined in levels array.`);
+            }
+
+            // Логирование прогресса перед сохранением
+            console.log('Saving progress after monster kill:', {
+                currentLevel,
+                gold,
+                playerHealth,
+                weaponPower,
+                weaponName,
+                weaponLevel,
+                heroes,
+                levels,
+                monsterHealth // Добавляем здоровье монстра для сохранения
+            });
+
+            // Сохранение прогресса после убийства монстра
+            saveProgress();
+
+            console.log("Calling showVictoryMessage()");
+            showVictoryMessage();
         }
-        updateCharacterImage();
+        updateCharacterImage(); // вызов функции для смены изображения
     }
 }
-
-
-
 
 window.hitMonster = hitMonster;
 
@@ -1862,8 +1865,8 @@ function drawLevelsScreen() {
 
 
         function drawLevelMap() {
-            //console.log(levels);  // Вывод данных уровней в консоль
-           // console.log('Drawing level map');
+            console.log(levels);  // Вывод данных уровней в консоль
+            console.log('Drawing level map');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(mapImage, 0, 0, canvas.width, canvas.height);
 
