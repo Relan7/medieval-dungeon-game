@@ -149,7 +149,8 @@
             font-size: 16px;
         }
         .status-bar p {
-            margin: 5px 0;
+            margin: 8px 0;
+            font-size: 18px; /* Установите желаемый размер шрифта */
         }
         .health-bar {
             background: #555;
@@ -504,15 +505,16 @@
         <button onclick="toggleTopPlayers()">Закрыть</button>
     </div>
 
-<div class="status-bar" id="statusBar" style="display:none;">
-    <div class="health-bar">
-        <div class="health-bar-inner" id="playerHealthBar"></div>
+    <div class="status-bar" id="statusBar" style="display:none;">
+        <div class="health-bar">
+            <div class="health-bar-inner" id="playerHealthBar"></div>
+        </div>
+        <p>Уровень: <span id="statusLevel"></span></p>
+        <p> <img src="gold_icon.png" alt="Gold Icon" style="width: 30px; height: 30px; vertical-align: middle;"> <span id="statusGold"></span></p>
+        <p> <img src="damage_icon.png" alt="Gold Icon" style="width: 30px; height: 30px; vertical-align: middle;"> <span id="statusDamage"></span></p>
+        <p>Множитель награды: <span id="statusRewardMultiplier"></span></p> <!-- Новый элемент для отображения множителя награды -->
     </div>
-    <p>Уровень: <span id="statusLevel"></span></p>
-    <p>Золото: <img src="gold_icon.png" alt="Gold Icon" style="width: 20px; height: 20px; vertical-align: middle;"> <span id="statusGold"></span></p>
-    <p>Урон: <img src="damage_icon.png" alt="Gold Icon" style="width: 20px; height: 20px; vertical-align: middle;"> <span id="statusDamage"></span></p>
     
-</div>
 
 
 
@@ -551,7 +553,7 @@ let rewardMultiplier = 1; // Начальное значение множите�
     let newHeroes = [
     { name: 'Эльф', level: 1, baseDamage: 5, baseCost: 50, damage: 5, cost: 50, img: 'hero1.png', hired: false },
     { name: 'Гном', level: 1, baseDamage: 10, baseCost: 100, damage: 10, cost: 100, img: 'hero2.png', hired: false },
-    { name: 'Хоббит', level: 1, baseDamage: 20, baseCost: 250, damage: 20, cost: 250, img: 'hero3.png', hired: false },
+    { name: 'хоббит', level: 1, baseDamage: 20, baseCost: 250, damage: 20, cost: 250, img: 'hero3.png', hired: false },
     { name: 'Тор', level: 1, baseDamage: 30, baseCost: 500, damage: 30, cost: 500, img: 'hero4.png', hired: false },
     { name: 'Кузнечик', level: 1, baseDamage: 40, baseCost: 1000, damage: 40, cost: 1000, img: 'hero5.png', hired: false },
 ];
@@ -575,8 +577,8 @@ function migrateHeroData(oldHeroes) {
 window.migrateHeroData = migrateHeroData;
 
 function calculateHeroStats(level, baseDamage, baseCost) {
-    const damageMultiplier = 1.10; // Коэффициент увеличения урона
-    const costMultiplier = 1.2; // Коэффициент увеличения стоимости
+    const damageMultiplier = 1.10;
+    const costMultiplier = 1.2;
     const newDamage = Math.floor(baseDamage * Math.pow(damageMultiplier, level - 1));
     const newCost = Math.floor(baseCost * Math.pow(costMultiplier, level - 1));
     return { newDamage, newCost };
@@ -816,12 +818,11 @@ function savePlayerData() {
 
 
 function validateData(data) {
-    if (!data || !data.heroes || !Array.isArray(data.heroes)) {
-        console.error('Invalid data format:', data);
-        return false;
-    }
+    if (!data || typeof data !== 'object') return false;
+    if (!Array.isArray(data.heroes)) return false;
     return true;
 }
+
 
 async function loadProgress(nickname) {
     if (!nickname) {
@@ -865,21 +866,33 @@ function applyProgress(data) {
         weaponPower = data.weaponPower;
         weaponName = data.weaponName;
         weaponLevel = data.weaponLevel || 0;
-        heroes = data.heroes.map(hero => ({
-            ...hero,
-            cost: hero.baseCost, // Устанавливаем базовую стоимость для каждого героя
-            damage: calculateHeroStats(hero.level || 1, hero.baseDamage, hero.baseCost).newDamage // Рассчитываем урон на основе уровня и базовых значений
-        }));
+
+        heroes = data.heroes.map(hero => {
+            const baseDamage = hero.baseDamage !== undefined ? hero.baseDamage : 0;
+            const baseCost = hero.baseCost !== undefined ? hero.baseCost : 0;
+            const level = hero.level || 1;
+
+            return {
+                ...hero,
+                baseDamage: baseDamage,
+                baseCost: baseCost,
+                cost: isNaN(hero.cost) || hero.cost === undefined ? baseCost : hero.cost,
+                damage: isNaN(hero.damage) || hero.damage === undefined ? calculateHeroStats(level, baseDamage, baseCost).newDamage : hero.damage,
+                level: level
+            };
+        });
+
         levels = data.levels || levels;
         monsterHealth = data.monsterHealth || baseMonsterHealth; 
-        rewardMultiplier = data.rewardMultiplier || 1; // Загрузка множителя награды
-        rebornCount = data.rebornCount || 0; // Загрузка количества перерождений
+        rewardMultiplier = data.rewardMultiplier || 1;
+        rebornCount = data.rebornCount || 0;
         console.log('Applying progress:', data);
         console.log(`Gold after applying progress: ${gold}`);
 
         updateCharacterMenu();
         addHeroesToMenu();
         updateTotalDamage();
+        updateStatusBar();
     }
 }
 
@@ -1299,10 +1312,13 @@ function confirmReborn() {
     // Сбросить прогресс уровней, нанятые герои и золото
     levels = new Array(10000).fill().map((_, i) => ({ number: i + 1, stars: 0, completed: false }));
     heroes.forEach(hero => {
+        const baseDamage = hero.baseDamage || 0;
+        const baseCost = hero.baseCost || 0;
+
         hero.level = 0;
         hero.hired = false;
-        hero.damage = calculateHeroStats(1, hero.baseDamage, hero.baseCost).newDamage; // Устанавливаем базовый урон для каждого героя
-        hero.cost = hero.baseCost; // Устанавливаем базовую стоимость для каждого героя
+        hero.damage = calculateHeroStats(1, baseDamage, baseCost).newDamage; // Устанавливаем базовый урон для каждого героя
+        hero.cost = baseCost; // Устанавливаем базовую стоимость для каждого героя
     });
     currentLevel = 1;
     rebornCount++; // Увеличиваем количество перерождений
@@ -1319,6 +1335,7 @@ function confirmReborn() {
         // Сохраняем прогресс сразу после перерождения
         saveProgress().then(() => {
             console.log('Progress saved after reborn');
+            updateStatusBar(); // Обновление статус бара
         }).catch(error => {
             console.error('Error saving progress after reborn:', error);
         });
@@ -1326,6 +1343,8 @@ function confirmReborn() {
         console.error('Error updating gold:', error);
     });
 }
+
+
 
 
 window.confirmReborn = confirmReborn;
@@ -2338,6 +2357,7 @@ function updateStatusBar() {
     document.getElementById('statusLevel').textContent = currentLevel;
     document.getElementById('playerHealthBar').style.width = playerHealth + '%'; // Обновление ширины полосы здоровья
     document.getElementById('statusDamage').textContent = calculateTotalDamage(); // Обновление значения урона
+    document.getElementById('statusRewardMultiplier').textContent = rewardMultiplier.toFixed(1); // Обновление множителя награды
 
     //console.log('Status bar updated'); // Логирование обновления статус бара
 }

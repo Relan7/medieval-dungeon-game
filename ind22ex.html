@@ -551,7 +551,7 @@ let rewardMultiplier = 1; // Начальное значение множите�
     let newHeroes = [
     { name: 'Эльф', level: 1, baseDamage: 5, baseCost: 50, damage: 5, cost: 50, img: 'hero1.png', hired: false },
     { name: 'Гном', level: 1, baseDamage: 10, baseCost: 100, damage: 10, cost: 100, img: 'hero2.png', hired: false },
-    { name: 'Хоббит', level: 1, baseDamage: 20, baseCost: 250, damage: 20, cost: 250, img: 'hero3.png', hired: false },
+    { name: 'хоббит', level: 1, baseDamage: 20, baseCost: 250, damage: 20, cost: 250, img: 'hero3.png', hired: false },
     { name: 'Тор', level: 1, baseDamage: 30, baseCost: 500, damage: 30, cost: 500, img: 'hero4.png', hired: false },
     { name: 'Кузнечик', level: 1, baseDamage: 40, baseCost: 1000, damage: 40, cost: 1000, img: 'hero5.png', hired: false },
 ];
@@ -1150,7 +1150,7 @@ function toggleAutoHit() {
             if (currentScreen === 'battle') {
                 hitMonster({ clientX: canvas.width / 2, clientY: canvas.height / 2 });
             }
-        }, 500);
+        }, 300);
     }
 }
 window.toggleAutoHit = toggleAutoHit;
