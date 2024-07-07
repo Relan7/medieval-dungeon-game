@@ -550,14 +550,20 @@ let rewardMultiplier = 1; // Начальное значение множите�
 
 
     // Данные о героях
-    let newHeroes = [
+    let allHeroes = [
     { name: 'Эльф', level: 1, baseDamage: 5, baseCost: 50, damage: 5, cost: 50, img: 'hero1.png', hired: false },
     { name: 'Гном', level: 1, baseDamage: 10, baseCost: 100, damage: 10, cost: 100, img: 'hero2.png', hired: false },
     { name: 'хоббит', level: 1, baseDamage: 20, baseCost: 250, damage: 20, cost: 250, img: 'hero3.png', hired: false },
     { name: 'Тор', level: 1, baseDamage: 30, baseCost: 500, damage: 30, cost: 500, img: 'hero4.png', hired: false },
     { name: 'Кузнечик', level: 1, baseDamage: 40, baseCost: 1000, damage: 40, cost: 1000, img: 'hero5.png', hired: false },
+    { name: 'Лесной зверек', level: 1, baseDamage: 60, baseCost: 2000, damage: 60, cost: 2000, img: 'hero6.png', hired: false },
+    { name: 'Дюймовочка', level: 1, baseDamage: 80, baseCost: 4000, damage: 80, cost: 4000, img: 'hero7.png', hired: false },
+    { name: 'Зевс', level: 1, baseDamage: 100, baseCost: 8000, damage: 100, cost: 8000, img: 'hero8.png', hired: false },
+    { name: 'Аполлон', level: 1, baseDamage: 120, baseCost: 16000, damage: 120, cost: 16000, img: 'hero9.png', hired: false },
+    { name: 'Олимп', level: 1, baseDamage: 200, baseCost: 100000, damage: 200, cost: 100000, img: 'hero10.png', hired: false }
 ];
-let heroes = [...newHeroes];
+let initialHeroes = allHeroes.slice(0, 5); // Начальные герои
+let heroes = [...initialHeroes];
 // Функция для миграции данных героев
 
 function showRebornPrompt() {
@@ -599,9 +605,9 @@ window.showRebornPrompt = showRebornPrompt;
 
 
 
+// Функция для перерождения
 function confirmReborn() {
     hideRebornPrompt();
-    // Сбросить прогресс уровней, нанятые герои и золото
     levels = new Array(10000).fill().map((_, i) => ({ number: i + 1, stars: 0, completed: false }));
     heroes.forEach(hero => {
         const baseDamage = hero.baseDamage || 0;
@@ -609,25 +615,25 @@ function confirmReborn() {
 
         hero.level = 0;
         hero.hired = false;
-        hero.damage = calculateHeroStats(1, baseDamage, baseCost).newDamage; // Устанавливаем базовый урон для каждого героя
-        hero.cost = baseCost; // Устанавливаем базовую стоимость для каждого героя
+        hero.damage = calculateHeroStats(1, baseDamage, baseCost).newDamage;
+        hero.cost = baseCost;
     });
     currentLevel = 1;
-    rebornCount++; // Увеличиваем количество перерождений
-    rewardMultiplier = Math.min(1 + rebornCount * 0.1, 9999); // Устанавливаем множитель награды
+    rebornCount++;
+    rewardMultiplier = Math.min(1 + rebornCount * 0.1, 9999);
     
-    // Обновляем золото и сохраняем прогресс
+    // Обновить список героев для включения новых героев после перерождения
+    heroes = allHeroes;
+
     updateGold(100).then(() => {
-        // Обновление интерфейса
         updateCharacterMenu();
-        addHeroesToMenu(); // Обновляем меню героев
+        addHeroesToMenu();
         startLevel(currentLevel);
         alert(`Вы переродились! Теперь вы будете получать награды за убийство монстров в ${rewardMultiplier.toFixed(1)} раза выше.`);
         
-        // Сохраняем прогресс сразу после перерождения
         saveProgress().then(() => {
             console.log('Progress saved after reborn');
-            updateStatusBar(); // Обновление статус бара
+            updateStatusBar();
         }).catch(error => {
             console.error('Error saving progress after reborn:', error);
         });
@@ -642,9 +648,11 @@ window.confirmReborn = confirmReborn;
 
 
 
+
+// Функция для миграции данных героев
 function migrateHeroData(oldHeroes) {
     return oldHeroes.map(oldHero => {
-        const newHero = newHeroes.find(hero => hero.name === oldHero.name);
+        const newHero = allHeroes.find(hero => hero.name === oldHero.name);
         if (newHero) {
             return {
                 ...newHero,
@@ -949,7 +957,7 @@ async function loadProgress(nickname) {
             const data = snapshot.val();
             console.log('Loaded progress:', data);
 
-            data.heroes = migrateHeroData(data.heroes);
+            data.heroes = migrateHeroData(data.heroes); // Миграция данных героев
 
             applyProgress(data);
             saveProgress();
@@ -964,6 +972,7 @@ async function loadProgress(nickname) {
         return null;
     }
 }
+
 
 window.loadProgress = loadProgress;
 
