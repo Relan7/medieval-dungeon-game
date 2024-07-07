@@ -188,7 +188,7 @@
     }
 
     .hero.not-hired img {
-        filter: brightness(10%);
+        filter: brightness(20%);
     }
 
     .hero.hired img {
@@ -559,89 +559,6 @@ let rewardMultiplier = 1; // Начальное значение множите�
 ];
 let heroes = [...newHeroes];
 // Функция для миграции данных героев
-
-function showRebornPrompt() {
-    const playerLevel = currentLevel;
-    let rebornPossible = false;
-    let nextRebornLevel = 0;
-
-    if (rebornCount === 0 && playerLevel >= 10) {
-        rebornPossible = true;
-        nextRebornLevel = 20;
-    } else if (rebornCount === 1 && playerLevel >= 20) {
-        rebornPossible = true;
-        nextRebornLevel = 30;
-    } else if (rebornCount === 2 && playerLevel >= 30) {
-        rebornPossible = true;
-        nextRebornLevel = 40;
-    } else if (rebornCount === 3 && playerLevel >= 40) {
-        rebornPossible = true;
-        nextRebornLevel = 50;
-    } else if (rebornCount === 4 && playerLevel >= 50) {
-        rebornPossible = true;
-        nextRebornLevel = 60;
-    } else if (rebornCount === 5 && playerLevel >= 60) {
-        rebornPossible = true;
-        nextRebornLevel = 70;
-    } else if (playerLevel >= 100) {
-        rebornPossible = true;
-        nextRebornLevel = playerLevel + 10; // или любое другое значение для следующего перерождения
-    }
-
-    if (rebornPossible) {
-        document.getElementById('rebornPrompt').style.display = 'block';
-        document.getElementById('rebornPrompt').querySelector('p').textContent = `Прогресс уровней, нанятые герои и накопленное золото будут сброшены. Но вы будете получать награды за убийство монстров в ${1 + rebornCount * 0.1} раза выше. Следующее перерождение доступно с уровня ${nextRebornLevel}.`;
-    } else {
-        alert('Ваш уровень недостаточно высок для перерождения.');
-    }
-}
-window.showRebornPrompt = showRebornPrompt;
-
-
-
-function confirmReborn() {
-    hideRebornPrompt();
-    // Сбросить прогресс уровней, нанятые герои и золото
-    levels = new Array(10000).fill().map((_, i) => ({ number: i + 1, stars: 0, completed: false }));
-    heroes.forEach(hero => {
-        const baseDamage = hero.baseDamage || 0;
-        const baseCost = hero.baseCost || 0;
-
-        hero.level = 0;
-        hero.hired = false;
-        hero.damage = calculateHeroStats(1, baseDamage, baseCost).newDamage; // Устанавливаем базовый урон для каждого героя
-        hero.cost = baseCost; // Устанавливаем базовую стоимость для каждого героя
-    });
-    currentLevel = 1;
-    rebornCount++; // Увеличиваем количество перерождений
-    rewardMultiplier = Math.min(1 + rebornCount * 0.1, 9999); // Устанавливаем множитель награды
-    
-    // Обновляем золото и сохраняем прогресс
-    updateGold(100).then(() => {
-        // Обновление интерфейса
-        updateCharacterMenu();
-        addHeroesToMenu(); // Обновляем меню героев
-        startLevel(currentLevel);
-        alert(`Вы переродились! Теперь вы будете получать награды за убийство монстров в ${rewardMultiplier.toFixed(1)} раза выше.`);
-        
-        // Сохраняем прогресс сразу после перерождения
-        saveProgress().then(() => {
-            console.log('Progress saved after reborn');
-            updateStatusBar(); // Обновление статус бара
-        }).catch(error => {
-            console.error('Error saving progress after reborn:', error);
-        });
-    }).catch(error => {
-        console.error('Error updating gold:', error);
-    });
-}
-window.confirmReborn = confirmReborn;
-
-
-
-
-
-
 function migrateHeroData(oldHeroes) {
     return oldHeroes.map(oldHero => {
         const newHero = newHeroes.find(hero => hero.name === oldHero.name);
@@ -659,14 +576,21 @@ function migrateHeroData(oldHeroes) {
 }
 window.migrateHeroData = migrateHeroData;
 
+function calculateHeroStats(level, baseDamage, baseCost) {
+    const damageMultiplier = 1.10;
+    const costMultiplier = 1.2;
+    const newDamage = Math.floor(baseDamage * Math.pow(damageMultiplier, level - 1));
+    const newCost = Math.floor(baseCost * Math.pow(costMultiplier, level - 1));
+    return { newDamage, newCost };
+}
+window.calculateHeroStats = calculateHeroStats;
 
 
 
 
 
 
-
-function createHeroElement(hero) {
+    function createHeroElement(hero) {
     const heroDiv = document.createElement('div');
     heroDiv.className = `hero ${hero.hired ? 'hired' : 'not-hired'}`;
 
@@ -688,7 +612,7 @@ function createHeroElement(hero) {
     heroDiv.appendChild(heroDamage);
 
     const heroCost = document.createElement('p');
-    const upgradeCost = hero.hired ? calculateHeroStats(hero.level + 1, hero.baseDamage, hero.baseCost).newCost : hero.cost;
+    const upgradeCost = hero.hired ? hero.cost * (hero.level + 1) : hero.cost;
     heroCost.textContent = `Стоимость: ${upgradeCost}`;
     heroDiv.appendChild(heroCost);
 
@@ -701,8 +625,8 @@ function createHeroElement(hero) {
 
     return heroDiv;
 }
-window.createHeroElement = createHeroElement;
 
+window.createHeroElement = createHeroElement;
 
     // Функция для добавления героев в меню
     function addHeroesToMenu() {
@@ -718,62 +642,45 @@ window.addHeroesToMenu = addHeroesToMenu;
 
 
 function hireOrUpgradeHero(hero, heroDiv, hireButton) {
-    console.log(`Начало функции hireOrUpgradeHero для ${hero.name}, уровень: ${hero.level}, золото: ${gold}`);
-
     if (!hero.hired && gold >= hero.cost) {
-        // Найм героя
-        console.log(`Найм героя ${hero.name} за ${hero.cost} золота`);
         gold -= hero.cost;
         hero.hired = true;
-        hero.level = 1; // Устанавливаем начальный уровень при найме
         const stats = calculateHeroStats(hero.level, hero.baseDamage, hero.baseCost);
         hero.damage = stats.newDamage;
-        hero.cost = calculateHeroStats(hero.level + 1, hero.baseDamage, hero.baseCost).newCost; // Обновляем стоимость для следующего улучшения
         totalDamage += hero.damage;
-        console.log(`Герой ${hero.name} нанят: уровень ${hero.level}, урон ${hero.damage}, следующая стоимость улучшения ${hero.cost}`);
         heroDiv.classList.remove('not-hired');
         heroDiv.classList.add('hired');
         hireButton.textContent = 'Улучшить';
-        updateHeroElement(hero, heroDiv); // Обновляем элементы героя в интерфейсе
+        console.log(`${hero.name} нанят за ${hero.cost} золота! Осталось золота: ${gold}`);
     } else if (hero.hired) {
-        // Улучшение героя
-        console.log(`Улучшение героя ${hero.name}`);
         const stats = calculateHeroStats(hero.level + 1, hero.baseDamage, hero.baseCost);
         const upgradeCost = stats.newCost;
-        console.log(`Текущая стоимость улучшения: ${hero.cost}, Новая стоимость улучшения: ${upgradeCost}`);
         if (gold >= upgradeCost) {
-            console.log(`Герой ${hero.name} улучшается за ${upgradeCost} золота`);
             gold -= upgradeCost;
             totalDamage -= hero.damage;
             hero.level++;
             hero.damage = stats.newDamage;
-            hero.cost = calculateHeroStats(hero.level + 1, hero.baseDamage, hero.baseCost).newCost; // Обновляем стоимость для следующего улучшения
             totalDamage += hero.damage;
-            console.log(`Герой ${hero.name} улучшен: уровень ${hero.level}, урон ${hero.damage}, следующая стоимость улучшения ${hero.cost}`);
             hireButton.textContent = 'Улучшить';
-            updateHeroElement(hero, heroDiv); // Обновляем элементы героя в интерфейсе
+            heroDiv.querySelector('p:nth-child(3)').textContent = `Ур.: ${hero.level}`;
+            heroDiv.querySelector('p:nth-child(4)').textContent = `Урон: ${hero.damage}`;
+            updateHeroCost(hero, heroDiv);
+            console.log(`${hero.name} улучшен до уровня ${hero.level} за ${upgradeCost} золота! Осталось золота: ${gold}`);
         } else {
             console.log('Недостаточно золота для улучшения!');
         }
     } else {
         console.log('Недостаточно золота для найма!');
     }
-
     updateTotalDamage();
     localGoldUpdated = true;
     updateStatusBar();
     saveGoldToDatabase().then(() => {
-        console.log(`Золото сохранено в базе данных: ${gold}`);
+        console.log(`Gold saved to database after hiring/upgrading hero: ${gold}`);
     });
     savePlayerData();
-    console.log(`Конец функции hireOrUpgradeHero для ${hero.name}, уровень: ${hero.level}, золото: ${gold}`);
 }
 window.hireOrUpgradeHero = hireOrUpgradeHero;
-
-
-
-
-
 
 
 
@@ -794,16 +701,6 @@ function saveGoldToDatabase() {
     });
 }
 
-function updateHeroElement(hero, heroDiv) {
-    console.log(`Обновление элемента героя ${hero.name}: уровень ${hero.level}, урон ${hero.damage}, стоимость ${hero.cost}`);
-    heroDiv.querySelector('p:nth-child(3)').textContent = `Ур.: ${hero.level}`;
-    heroDiv.querySelector('p:nth-child(4)').textContent = `Урон: ${hero.damage}`;
-    heroDiv.querySelector('p:nth-child(5)').textContent = `Стоимость: ${hero.cost}`;
-    console.log(`Элемент героя ${hero.name} обновлен в интерфейсе: уровень ${heroDiv.querySelector('p:nth-child(3)').textContent}, урон ${heroDiv.querySelector('p:nth-child(4)').textContent}, стоимость ${heroDiv.querySelector('p:nth-child(5)').textContent}`);
-}
-window.updateHeroElement = updateHeroElement;
-
-
 
 
 
@@ -818,15 +715,6 @@ function updateTotalDamage() {
 window.updateTotalDamage = updateTotalDamage;
 
 
-function calculateHeroStats(level, baseDamage, baseCost) {
-    const damageMultiplier = 2; // Множитель для урона
-    const costMultiplier = 2.4; // Множитель для стоимости
-    const newDamage = Math.floor(baseDamage * Math.pow(damageMultiplier, level - 1));
-    const newCost = Math.floor(baseCost * Math.pow(costMultiplier, level - 1));
-    console.log(`Расчет новых значений для уровня ${level}: урон ${newDamage}, стоимость ${newCost}`);
-    return { newDamage, newCost };
-}
-window.calculateHeroStats = calculateHeroStats;
 
 
 
@@ -1282,7 +1170,7 @@ function toggleAutoHit() {
             if (currentScreen === 'battle') {
                 hitMonster({ clientX: canvas.width / 2, clientY: canvas.height / 2 });
             }
-        }, 300);
+        }, 500);
     }
 }
 window.toggleAutoHit = toggleAutoHit;
@@ -1411,11 +1299,55 @@ window.endCurrentSession = endCurrentSession;
 
 
 
+function showRebornPrompt() {
+    document.getElementById('rebornPrompt').style.display = 'block';
+}
+
 function hideRebornPrompt() {
     document.getElementById('rebornPrompt').style.display = 'none';
 }
 
+function confirmReborn() {
+    hideRebornPrompt();
+    // Сбросить прогресс уровней, нанятые герои и золото
+    levels = new Array(10000).fill().map((_, i) => ({ number: i + 1, stars: 0, completed: false }));
+    heroes.forEach(hero => {
+        const baseDamage = hero.baseDamage || 0;
+        const baseCost = hero.baseCost || 0;
 
+        hero.level = 0;
+        hero.hired = false;
+        hero.damage = calculateHeroStats(1, baseDamage, baseCost).newDamage; // Устанавливаем базовый урон для каждого героя
+        hero.cost = baseCost; // Устанавливаем базовую стоимость для каждого героя
+    });
+    currentLevel = 1;
+    rebornCount++; // Увеличиваем количество перерождений
+    rewardMultiplier = Math.min(1 + rebornCount * 0.1, 9999); // Устанавливаем множитель награды
+    
+    // Обновляем золото и сохраняем прогресс
+    updateGold(100).then(() => {
+        // Обновление интерфейса
+        updateCharacterMenu();
+        addHeroesToMenu(); // Обновляем меню героев
+        startLevel(currentLevel);
+        alert(`Вы переродились! Теперь вы будете получать награды за убийство монстров в ${rewardMultiplier.toFixed(1)} раза выше.`);
+        
+        // Сохраняем прогресс сразу после перерождения
+        saveProgress().then(() => {
+            console.log('Progress saved after reborn');
+            updateStatusBar(); // Обновление статус бара
+        }).catch(error => {
+            console.error('Error saving progress after reborn:', error);
+        });
+    }).catch(error => {
+        console.error('Error updating gold:', error);
+    });
+}
+
+
+
+
+window.confirmReborn = confirmReborn;
 
 
 
