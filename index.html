@@ -418,6 +418,24 @@
     color: white;
     cursor: pointer;
 }
+/* Основные стили кнопок */
+button.upgrade-button, button.hire-button {
+    background: linear-gradient(to right, #ff416c, #ff4b2b); /* Градиентный фон */
+    border: none;
+    border-radius: 10px; /* Скругленные углы */
+    color: white;
+    cursor: pointer;
+    font-size: 18px; /* Увеличенный размер шрифта */
+    padding: 10px 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4); /* Тень для кнопок */
+}
+
+/* Эффект наведения на кнопку */
+button.upgrade-button:hover, button.hire-button:hover {
+    transform: scale(1.05); /* Легкое увеличение кнопки */
+    box-shadow: 0 6px 20px rgba(255, 75, 43, 0.6); /* Более яркая тень при наведении */
+}
 
 
     </style>
@@ -754,6 +772,7 @@ function createHeroElement(hero) {
     heroDiv.appendChild(heroCost);
 
     const hireButton = document.createElement('button');
+    hireButton.className = hero.hired ? 'upgrade-button' : 'hire-button'; // Присваиваем класс кнопке
     hireButton.textContent = hero.hired ? 'Улучшить' : 'Нанять';
     hireButton.onclick = () => {
         hireOrUpgradeHero(hero, heroDiv, hireButton);
@@ -762,6 +781,7 @@ function createHeroElement(hero) {
 
     return heroDiv;
 }
+
 window.createHeroElement = createHeroElement;
 
 
@@ -1123,7 +1143,7 @@ async function continueGameSetup() {
     document.getElementById('nicknameMenu').style.display = 'none';
     document.getElementById('gameCanvas').style.display = 'block';
     document.getElementById('bottomMenu').style.display = 'flex';
-    currentScreen = 'menu';
+    currentScreen = 'dungeon';
     console.log(`Screen set to: ${currentScreen}`);
 
     // Убедитесь, что загружаемый прогресс корректен
@@ -1133,6 +1153,8 @@ async function continueGameSetup() {
 
     initializeMonster(baseMonsterHealth * Math.pow(1.1, currentLevel - 1));
     drawMenu();
+    changeScreen('dungeon'); // Переключение на экран подземелья
+    updateStatusBar(); // Отображение status bar
 }
 window.continueGameSetup = continueGameSetup;
 
@@ -2348,6 +2370,7 @@ function changeScreen(screen) {
     // Hide the monster health bar when changing screens
     if (screen !== 'dungeon' && screen !== 'battle') {
         document.getElementById('monsterHealthContainer').style.display = 'none';
+        updateStatusBar();
     }
     if (screen === 'worldBoss') {
         document.getElementById('worldBossScreen').style.display = 'block';
@@ -2364,7 +2387,7 @@ function changeScreen(screen) {
         showHealthBar(); // Показать полоску здоровья на экране dungeon
         drawDungeonEntrance();
         document.getElementById('statusBar').style.display = 'block';
-        updateStatusBar();
+        //updateStatusBar();
     } else if (screen === 'arena') {
         arena();
     } else if (screen === 'castle') {
