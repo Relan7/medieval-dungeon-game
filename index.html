@@ -29,6 +29,7 @@
         #bottomMenu {
             position: fixed;
             bottom: 0;
+            left: 210px;
             width: 100%;
             height: 60px;
             background: #333;
@@ -436,12 +437,25 @@ button.upgrade-button:hover, button.hire-button:hover {
     transform: scale(1.05); /* Легкое увеличение кнопки */
     box-shadow: 0 6px 20px rgba(255, 75, 43, 0.6); /* Более яркая тень при наведении */
 }
+#toggleAutoboyButton {
+    position: fixed;
+    bottom: 100px; /* Расположение кнопки над кнопкой "Полноэкранный режим" */
+    right: 0px;
+    padding: 10px 20px;
+    background: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 1000;
+}
 
 
     </style>
 </head>
 <body>
     <button id="fullscreenButton" onclick="toggleFullscreen()">Полноэкранный режим</button>
+    <button id="toggleAutoboyButton" onclick="toggleAutoboy()">Отключить автобой</button>
     <div id="nicknameMenu">
         <h2>Введите свой никнейм</h2>
         <input type="text" id="nicknameInput" placeholder="Ваш никнейм">
@@ -458,7 +472,7 @@ button.upgrade-button:hover, button.hire-button:hover {
         <div onclick="changeScreen('worldBoss')">Мировой Босс</div>
         <div onclick="toggleShop()">Магазин</div>
         <div onclick="toggleTopPlayers()">Топ игроки</div>
-        <button id="autoboyButton" onclick="toggleAutoHit()">Автобой</button> 
+       
     </div>
 
     <div id="chatContainer">
@@ -507,8 +521,7 @@ button.upgrade-button:hover, button.hire-button:hover {
     </div>
     
     
-    
-    
+
     
 
     <div id="worldBossScreen" style="display:none;">
@@ -1176,6 +1189,38 @@ window.updateHeroCost = updateHeroCost;
 
 
 
+// Установка начального состояния автобоя
+let isAutoHitting = true; // Автобой включен по умолчанию
+let autoHitInterval;
+
+function startAutoHit() {
+    if (isAutoHitting) {
+        autoHitInterval = setInterval(() => {
+            if (currentScreen === 'battle') {
+                hitMonster({ clientX: canvas.width / 2, clientY: canvas.height / 2 });
+            }
+        }, 300);
+    }
+}
+window.startAutoHit = startAutoHit;
+function stopAutoHit() {
+    clearInterval(autoHitInterval);
+}
+window.stopAutoHit = stopAutoHit;
+function toggleAutoboy() {
+    if (isAutoHitting) {
+        stopAutoHit();
+        isAutoHitting = false;
+        document.getElementById('toggleAutoboyButton').textContent = 'Включить автобой';
+    } else {
+        isAutoHitting = true;
+        startAutoHit();
+        document.getElementById('toggleAutoboyButton').textContent = 'Отключить автобой';
+    }
+}
+window.toggleAutoboy = toggleAutoboy;
+// Запуск автобоя при загрузке страницы
+window.addEventListener('load', startAutoHit);
 
 
 function toggleFullscreen() {
@@ -1298,8 +1343,7 @@ let rebornCount = 0; // Переменная для отслеживания к�
 let worldBossHealth = 1000000;
 let playersDamage = {};
 let isUpdating = false;
-let isAutoHitting = false;
-let autoHitInterval;
+
 
 
         const canvas = document.getElementById('gameCanvas');
@@ -1354,22 +1398,6 @@ let autoHitInterval;
 
 
 
-function toggleAutoHit() {
-    if (isAutoHitting) {
-        clearInterval(autoHitInterval);
-        isAutoHitting = false;
-        document.getElementById('autoboyButton').textContent = 'Автобой';
-    } else {
-        isAutoHitting = true;
-        document.getElementById('autoboyButton').textContent = 'Стоп Автобой';
-        autoHitInterval = setInterval(() => {
-            if (currentScreen === 'battle') {
-                hitMonster({ clientX: canvas.width / 2, clientY: canvas.height / 2 });
-            }
-        }, 300);
-    }
-}
-window.toggleAutoHit = toggleAutoHit;
 
 
 
