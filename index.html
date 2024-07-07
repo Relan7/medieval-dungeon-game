@@ -377,8 +377,47 @@
     background-color: rgba(0, 0, 0, 0.3); /* Полупрозрачный фон */
 }
 
+#chatContainer {
+    position: fixed;
+    bottom: 60px;
+    left: 210px;
+    width: 300px;
+    max-height: 400px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 5px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
 
+#chatMessages {
+    flex-grow: 1;
+    overflow-y: auto;
+}
 
+#chatInput {
+    display: flex;
+    margin-top: 10px;
+}
+
+#chatInput input {
+    flex-grow: 1;
+    padding: 5px;
+    border: none;
+    border-radius: 3px;
+}
+
+#chatInput button {
+    margin-left: 5px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+}
 
 
     </style>
@@ -403,6 +442,20 @@
         <div onclick="toggleTopPlayers()">Топ игроки</div>
         <button id="autoboyButton" onclick="toggleAutoHit()">Автобой</button> 
     </div>
+
+    <div id="chatContainer">
+        <div id="chatMessages"></div>
+        <div id="chatInput">
+            <input type="text" id="chatMessageInput" placeholder="Введите сообщение...">
+            <button onclick="sendMessage()">Отправить</button>
+        </div>
+    </div>
+    
+    
+    
+    
+
+
 
     <div id="monsterHealthContainer">
         <div id="monsterHealthBar"></div>
@@ -841,7 +894,7 @@ window.calculateHeroStats = calculateHeroStats;
 
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
-import { getDatabase, ref, set, get, child, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+import { getDatabase, ref, set, get, child, runTransaction, onValue, push } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCPQFqbWCL3XaM-sLYDWgWMdslhS7O7WC8",
@@ -2566,6 +2619,51 @@ window.updateStatusBar = updateStatusBar;
     updateMonsterHealthDisplay();
     
 }
+
+
+
+
+
+// Функция для отправки сообщений
+function sendMessage() {
+    const chatMessageInput = document.getElementById('chatMessageInput');
+    const message = chatMessageInput.value.trim();
+    if (message && nickname) {
+        const messageData = {
+            text: message,
+            timestamp: new Date().toISOString(),
+            nickname: nickname
+        };
+        const newMessageRef = push(ref(database, 'chat/messages'));
+        set(newMessageRef, messageData);
+        chatMessageInput.value = '';
+    } else if (!nickname) {
+        alert('Пожалуйста, введите никнейм, прежде чем отправлять сообщение.');
+    }
+}
+
+// Слушатель для отправки сообщений при нажатии на Enter
+document.getElementById('chatMessageInput').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+});
+window.sendMessage = sendMessage;
+// Слушатель для новых сообщений
+const chatMessages = document.getElementById('chatMessages');
+onValue(ref(database, 'chat/messages'), function(snapshot) {
+    chatMessages.innerHTML = '';
+    snapshot.forEach(function(childSnapshot) {
+        const message = childSnapshot.val();
+        const messageElement = document.createElement('div');
+        messageElement.innerHTML = `<strong>${message.nickname}:</strong> ${message.text}`;
+        chatMessages.appendChild(messageElement);
+    });
+    chatMessages.scrollTop = chatMessages.scrollHeight; // Прокрутка вниз для новых сообщений
+});
+
+
+
 
     </script>
 </body>
