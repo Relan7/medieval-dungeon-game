@@ -5,15 +5,12 @@
     <title>Средневековое Подземелье</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-body, html {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
-    background: url('background.png') no-repeat center center fixed;
-    background-size: cover;
-}
-
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
         canvas {
             display: block;
             background: #000;
@@ -72,7 +69,6 @@ body, html {
         max-width: calc(100vw - 20px);
         max-height: calc(100vh - 20px);
         overflow: auto;
-        display: none; /* Скрываем по умолчанию */
     }
         /* Добавляем стили для новой кнопки */
         #fullscreenButton {
@@ -395,7 +391,6 @@ body, html {
     display: flex;
     flex-direction: column;
     padding: 10px;
-    display: none; /* Скрыть по умолчанию */
 }
 
 #chatMessages {
@@ -453,75 +448,14 @@ button.upgrade-button:hover, button.hire-button:hover {
     cursor: pointer;
     font-size: 16px;
     z-index: 1000;
-    display: none; /* Скрываем по умолчанию */
 }
-#pvpButton {
-            position: fixed;
-            bottom: 210px;
-            left: 790px;
-            width: 200px;
-            height: 200px;
-            background: url('Sworddouble.png') no-repeat center;
-            background-size: contain;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            display: none; /* Скрываем по умолчанию */
-        }
 
-        #pvpButton:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
-        }
-        
-        /* Стиль для окна регистрации на PvP */
-        #pvpRegistration {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            z-index: 2000;
-        }
-
-        #pvpRegistration button {
-            margin: 10px;
-            padding: 10px;
-            background: #fff;
-            border: none;
-            cursor: pointer;
-        }
-        #pvpBattle {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            z-index: 2000;
-        }
-        #pvpBattle button {
-            margin: 10px;
-            padding: 10px;
-            background: #fff;
-            border: none;
-            cursor: pointer;
-        }
 
     </style>
 </head>
 <body>
     <button id="fullscreenButton" onclick="toggleFullscreen()">Полноэкранный режим</button>
     <button id="toggleAutoboyButton" onclick="toggleAutoboy()">Отключить автобой</button>
-    <div id="pvpButton" onclick="openPvpRegistration()"></div>
     <div id="nicknameMenu">
         <h2>Введите свой никнейм</h2>
         <input type="text" id="nicknameInput" placeholder="Ваш никнейм">
@@ -548,17 +482,12 @@ button.upgrade-button:hover, button.hire-button:hover {
             <button onclick="sendMessage()">Отправить</button>
         </div>
     </div>
+    
+    
+    
+    
 
-    <div id="pvpRegistration">
-        <h2>Хотите зарегистрироваться на бой PvP?</h2>
-        <button>Да</button> <button onclick="closePvpRegistration()">Нет</button> 
-      </div>
-    <div id="pvpBattle" style="display:none;">
-        <h2>Бой PvP</h2>
-        <div id="pvpOpponentInfo"></div>
-        <div id="pvpFightLog"></div>
-        <button onclick="endPvpBattle()">Завершить бой</button>
-    </div>
+
 
     <div id="monsterHealthContainer">
         <div id="monsterHealthBar"></div>
@@ -569,7 +498,7 @@ button.upgrade-button:hover, button.hire-button:hover {
         Здоровье монстра <span id="monsterHealthValue"></span>
     </div>
     
-
+    
     
 
 
@@ -997,8 +926,8 @@ window.calculateHeroStats = calculateHeroStats;
 
 
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.4/firebase-app.js";
-import { getDatabase, ref, set, get, child, runTransaction, onValue, push, off, remove } from "https://www.gstatic.com/firebasejs/9.8.4/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+import { getDatabase, ref, set, get, child, runTransaction, onValue, push } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCPQFqbWCL3XaM-sLYDWgWMdslhS7O7WC8",
@@ -1198,7 +1127,6 @@ async function startGame() {
             currentSessionId = newSessionId;
             console.log(`New session started for ${nickname}: ${newSessionId}`);
             watchSessionChanges();
-            listenForOpponent(); // Call listenForOpponent once here
 
             // Загружаем прогресс игрока и применяем миграцию данных
             const progressData = await loadProgress(nickname);
@@ -1209,7 +1137,7 @@ async function startGame() {
                 await set(playerGoldRef, 100); // Устанавливаем начальное значение золота
                 console.log('Initial gold set to 100 for new player');
             }
-            
+
             continueGameSetup();
         } catch (error) {
             console.error('Error starting new session:', error);
@@ -1224,13 +1152,10 @@ async function continueGameSetup() {
     const data = await loadProgress(nickname);
     console.log(`Data loaded: ${JSON.stringify(data)}`);
     applyProgress(data);
-    //document.getElementById('leftCharacterMenu ').style.display = 'none';
+
     document.getElementById('nicknameMenu').style.display = 'none';
     document.getElementById('gameCanvas').style.display = 'block';
     document.getElementById('bottomMenu').style.display = 'flex';
-    document.getElementById('leftCharacterMenu').style.display = 'block'; // Показываем меню персонажа
-    document.getElementById('chatContainer').style.display = 'flex'; // Показываем чат
-    
     currentScreen = 'dungeon';
     console.log(`Screen set to: ${currentScreen}`);
 
@@ -1392,10 +1317,10 @@ window.updateMonsterImage = updateMonsterImage;
 let rebornCount = 0; // Переменная для отслеживания количества перерождений
         let nickname = '';
         let currentSessionId = null;
-        
+        let totalDamage = 10;
         let currentLevel = 1;
         let gold = 100;
-        
+        let playerHealth = 100;
         let weaponPower = 10;
         let weaponName = 'Кулаки';
         let weaponLevel = 0;
@@ -1544,7 +1469,6 @@ window.updateGold = updateGold;
 
 async function endSession(nickname, sessionId) {
     const dbRef = ref(database, `players/${nickname}/session`);
-    console.log(`В endSession, nickname: ${nickname}, sessionid: ${sessionId}`);
     try {
         const result = await runTransaction(dbRef, (currentSession) => {
             if (currentSession === null) {
@@ -1893,525 +1817,6 @@ function updateMonsterHealthDisplay() {
 
 window.updateMonsterHealthDisplay = updateMonsterHealthDisplay;
 window.getHealthColor = getHealthColor;
-
-
-function drawArena() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Очищаем холст
-    ctx.drawImage(arena2, 0, 0, canvas.width, canvas.height); // Рисуем арену
-    //drawStatusBar(); // Рисуем статусную панель
-    // Дополнительный код для рисования элементов арены
-}
-window.drawArena = drawArena;
-
-
-let turnTimeout; // Тайм-аут для управления ходами
-let opponent; // Объявление глобальной переменной для хранения данных о противнике
-let totalDamage = 100; // Урон игрока
-let opponentDamage = 50; // Урон противника
-let opponentHealth = 800; // Здоровье противника
-let playerHealth = 800;
-let currentPlayer = null;
-let battleInProgress = false; // Отслеживает состояние боя
-let playerRef;
-let opponentRef;
-let onValueListener; // Глобальная переменная для хранения ссылки на обработчик
-let turnDuration = 3000; // Продолжительность хода в миллисекундах
-let opponentListenerRef;
-let isFinalizingBattle = false; // Флаг для предотвращения повторных вызовов 
-let isListeningForOpponent = false; 
-let battlePromise = null; // Промис для блокировки listenForOpponent
-let registrationPromise = null; // Промис для блокировки регистрации
-
-// Открытие окна регистрации на PvP
-function openPvpRegistration() {
-    document.getElementById('pvpRegistration').style.display = 'block';
-}
-
-// Закрытие окна регистрации на PvP
-function closePvpRegistration() {
-    document.getElementById('pvpRegistration').style.display = 'none';
-}
-
-// Регистрация на PvP
-async function registerForPvp() {
-  console.log("Попытка регистрации на PvP. Текущее здоровье: ", playerHealth);
-
-  if (battleInProgress) {
-    console.log("Вы уже участвуете в бою!");
-    return;
-  }
-
-  nickname = document.getElementById('nicknameInput').value;
-
-  const inBattle = await isPlayerInBattle(nickname);
-  if (inBattle) {
-    console.log("Вы уже участвуете в бою!");
-    alert("Вы уже участвуете в бою!");
-    return;
-  }
-
-  // Ждем завершения регистрации, если она заблокирована
-  console.log("Ожидание завершения регистрации...");
-  await Promise.resolve(registrationPromise);
-  console.log("Регистрация разблокирована.");
-
-  playerHealth = 800;
-  playerRef = ref(database, 'pvpQueue/' + nickname);
-  console.log(`Регистрация игрока ${nickname} с данными: здоровье ${playerHealth}, урон ${totalDamage}`);
-
-  await set(playerRef, {
-    nickname: nickname,
-    health: playerHealth,
-    damage: totalDamage,
-    inBattle: false,
-    timestamp: Date.now()
-  });
-
-  console.log(`${nickname} зарегистрирован на PvP с данными:`, {
-    nickname: nickname,
-    health: playerHealth,
-    damage: totalDamage,
-    timestamp: Date.now()
-  });
-
-  closePvpRegistration();
-  showWaitingForOpponent();
-}
-
-// Синхронизация очереди PvP
-function listenForOpponent() {
-  console.log("Ожидание завершения предыдущего боя...");
-
-  Promise.resolve(battlePromise)
-    .then(() => {
-      console.log("Предыдущий бой завершен. Запуск прослушивания очереди.");
-
-      const opponentRef = ref(database, 'pvpQueue');
-      opponentListenerRef = onValue(opponentRef, async (snapshot) => {
-        if (snapshot.exists() && !battleInProgress && !isFinalizingBattle) {
-          const queue = snapshot.val();
-          const players = Object.entries(queue)
-            .filter(([key, value]) => key && value && !value.inBattle && key !== nickname);
-          console.log("Изменения в очереди PvP:", queue, "Найденные игроки:", players);
-
-          if (players.length >= 1) {
-            players.sort((a, b) => a[1].timestamp - b[1].timestamp);
-
-            const player1 = [nickname, queue[nickname]];
-            const player2 = players[0];
-
-            if (player1[1] && player2[1]) {
-              console.log("Попытка начать PvP бой между игроками:", player1, player2);
-
-              // Прослушиваем событие сдачи оппонента
-              const opponentSurrenderRef = ref(database, `pvpQueue/${player2[1].nickname}/surrender`);
-              onValue(opponentSurrenderRef, (snapshot) => {
-                if (snapshot.exists() && snapshot.val() === true) {
-                  console.log("Оппонент сдался!");
-                  finalizePvpBattle('player', 'opponent_surrender');
-                }
-              });
-
-              try {
-                const startBattleSuccess = await startPvpBattle(player2[1]);
-                if (startBattleSuccess) {
-                  console.log("PvP бой успешно начат.");
-                } else {
-                  console.warn("Не удалось начать PvP бой. Возможно, другой игрок уже начал бой.");
-                }
-              } catch (error) {
-                console.error("Ошибка при попытке начать PvP бой:", error);
-              }
-            } else {
-              console.log("Не найден подходящий оппонент для боя.");
-            }
-          }
-        } else {
-          console.log("Идет или завершается бой, новые бои не запускаются.");
-        }
-      });
-    });
-}
-
-// Остановка прослушивания очереди после завершения боя
-async function finalizePvpBattle(winner, reason = null) {
-  if (isFinalizingBattle) {
-    console.log("Битва уже завершается.");
-    return;
-  }
-
-  isFinalizingBattle = true;
-
-  if (!battleInProgress) {
-    console.log("Битва уже завершена.");
-    isFinalizingBattle = false;
-    return;
-  }
-
-  console.log(`Завершение битвы. Победитель: ${winner}, Причина: ${reason}`);
-  battleInProgress = false;
-
-  const opponentNickname = opponent ? opponent.nickname : null;
-
-  try {
-    // Блокируем listenForOpponent до завершения транзакции
-    battlePromise = new Promise(resolve => {
-      runTransaction(ref(database, 'pvpQueue'), (queue) => {
-        if (!queue) {
-          console.warn("Очередь PvP пуста.");
-          return undefined;
-        }
-
-        if (!queue[nickname] || (opponentNickname && !queue[opponentNickname])) {
-          console.warn("Один из игроков уже отсутствует в очереди.");
-          return undefined;
-        }
-
-        // Сбрасываем флаги inBattle и обновляем здоровье
-        queue[nickname].inBattle = false;
-        queue[nickname].health = 800;
-        if (opponentNickname) {
-          queue[opponentNickname].inBattle = false;
-          queue[opponentNickname].health = 800;
-        }
-
-        // Удаляем игроков из очереди
-        delete queue[nickname];
-        if (opponentNickname) {
-          delete queue[opponentNickname];
-        }
-
-        return queue;
-      })
-      .then(() => {
-        console.log(`Игроки ${nickname} и ${opponentNickname} удалены из очереди.`);
-        resetBattleState();
-        resolve(); // Разрешаем промис после успешного завершения
-      })
-      .catch(error => {
-        console.error('Ошибка при выполнении транзакции:', error);
-        resolve(); // Разрешаем промис, даже если произошла ошибка
-      });
-    });
-
-    // Дожидаемся завершения транзакции
-    await battlePromise;
-
-    // Обновляем UI (теперь всегда выполнится)
-    if (winner === 'player') {
-      if (reason === 'opponent_surrender') {
-        document.getElementById('pvpFightLog').innerHTML += '<span style="color: green;">Противник сдался! Вы победили!</span><br>';
-      } else {
-        document.getElementById('pvpFightLog').innerHTML += '<span style="color: green;">Вы победили!</span><br>';
-      }
-    } else if (winner === 'opponent') {
-      if (reason === 'player_surrender') {
-        document.getElementById('pvpFightLog').innerHTML += '<span style="color: red;">Вы сдались! Вы проиграли!</span><br>';
-      } else {
-        document.getElementById('pvpFightLog').innerHTML += '<span style="color: red;">Вы проиграли!</span><br>';
-      }
-    }
-// Добавляем задержку перед скрытием pvpBattle
-setTimeout(() => {
-      document.getElementById('pvpBattle').style.display = 'none';
-      const waitingMessage = document.getElementById('waitingMessage');
-      if (waitingMessage) {
-        document.body.removeChild(waitingMessage);
-      }
-    }, 3000); // 3 секунды задержки
-
-    console.log("Данные о завершении боя успешно обновлены.");
-  
-
-  } catch (error) {
-    console.error('Ошибка при завершении боя:', error);
-  } finally {
-    isFinalizingBattle = false;
-    battlePromise = null; // Разблокируем listenForOpponent
-  }
-}
-
-// Завершение PvP боя
-async function startPvpBattle(opponentData) {
-  if (isFinalizingBattle) {
-    console.log("Предыдущий бой еще завершается. Прерывание запуска нового боя.");
-    return false;
-  }
-
-  console.log("Начало битвы. Данные оппонента:", opponentData);
-
-  if (battleInProgress) {
-    console.log("Битва уже идет. Прерывание вызова startPvpBattle.");
-    return false;
-  }
-
-  if (!opponentData || !opponentData.nickname || opponentData.health === undefined || opponentData.damage === undefined) {
-    console.error("Некорректные данные оппонента:", opponentData);
-    return false;
-  }
-
-  try {
-    await runTransaction(ref(database, 'pvpQueue'), (queue) => {
-      if (queue && 
-          queue[nickname] && !queue[nickname].inBattle && 
-          queue[opponentData.nickname] && !queue[opponentData.nickname].inBattle) {
-        queue[nickname].inBattle = true;
-        queue[opponentData.nickname].inBattle = true;
-        return queue;
-      } else {
-        console.warn("Один из игроков уже участвует в бою или данные устарели.", queue);
-        return undefined;
-      }
-    });
-
-    battlePromise = new Promise(resolve => {
-      stopListeningForOpponent();
-
-      opponent = opponentData;
-      opponentRef = ref(database, 'pvpQueue/' + opponent.nickname);
-      opponentHealth = opponent.health;
-      opponentDamage = opponent.damage;
-
-      currentPlayer = (Math.random() > 0.5) ? 'player' : 'opponent';
-      console.log("Начало битвы. Текущий игрок:", currentPlayer);
-
-      document.getElementById('pvpOpponentInfo').innerText = `Противник: ${opponent.nickname}\nЗдоровье: ${opponent.health}\nУрон: ${opponent.damage}`;
-      document.getElementById('pvpFightLog').innerHTML = '';
-      document.getElementById('pvpBattle').style.display = 'block';
-
-      // Устанавливаем battleInProgress = true ПОСЛЕ создания данных
-      battleInProgress = true;
-
-      // Запускаем первый ход 
-      if (currentPlayer === 'player') {
-        playerTurn();
-      } else {
-        opponentTurn();
-      }
-
-      // Блокируем регистрацию во время боя
-      registrationPromise = battlePromise; 
-
-      resolve();
-    });
-
-    return true;
-  } catch (error) {
-    console.error("Ошибка при обновлении флагов inBattle:", error);
-    return false;
-  }
-}
-
-function stopListeningForOpponent() {
-  if (opponentListenerRef) { // Проверяем,  что слушатель еще не отключен
-    off(ref(database, 'pvpQueue'), opponentListenerRef);
-    opponentListenerRef = null;
-    console.log("Прослушивание очереди PvP остановлено.");
-  }
-}
-
-
-// Показ надписи "идет поиск соперника"
-function showWaitingForOpponent() {
-    const waitingMessage = document.createElement('div');
-    waitingMessage.id = 'waitingMessage';
-    waitingMessage.style.position = 'fixed';
-    waitingMessage.style.top = '50%';
-    waitingMessage.style.left = '50%';
-    waitingMessage.style.transform = 'translate(-50%, -50%)';
-    waitingMessage.style.background = 'rgba(0, 0, 0, 0.8)';
-    waitingMessage.style.color = 'white';
-    waitingMessage.style.padding = '20px';
-    waitingMessage.style.borderRadius = '10px';
-    waitingMessage.style.textAlign = 'center';
-    waitingMessage.innerText = 'Идет поиск соперника...';
-    document.body.appendChild(waitingMessage);
-}
-
-
-
-
-
-
-
-
-
-// Завершение PvP боя в ручную по нажатию кнопки завершить бой
-function endPvpBattle() {
-  if (!battleInProgress) {
-    console.log("Битва уже завершена.");
-    return;
-  }
-
-  console.log("Завершение битвы вручную.");
-
-  // Отправляем сообщение о сдаче в базу данных
-  set(ref(database, `pvpQueue/${nickname}/surrender`), true);
-
-  // Завершаем бой на стороне игрока
-  finalizePvpBattle('opponent', 'player_surrender'); 
-}
-
-function resetBattleState() {
-    currentPlayer = null;
-    playerRef = null;
-    opponentRef = null;
-    opponent = null;
-    playerHealth = 800;
-    opponentHealth = 800;
-    battleInProgress = false;
-
-    console.log("Состояние после сброса. Игрок здоровье: ", playerHealth, " Оппонент здоровье: ", opponentHealth);
-}
-
-function playerTurn() {
-    if (!battleInProgress) {
-        console.log("Битва не идет. Прерывание хода игрока.");
-        return;
-    }
-    console.log("Ход игрока. Урон:", totalDamage);
-    opponentHealth -= totalDamage;
-    if (opponentHealth < 0) opponentHealth = 0;
-    console.log(`Урон по оппоненту: ${totalDamage}. Здоровье оппонента: ${opponentHealth}`);
-
-    if (opponentHealth <= 0) {
-        console.log("Оппонент побежден игроком.");
-        finalizePvpBattle('player');
-        return;
-    }
-
-    document.getElementById('pvpFightLog').innerHTML += `<span style="color: green;">Вы нанесли ${totalDamage} урона противнику!</span><br>`;
-    updateOpponentHealth();
-    currentPlayer = 'opponent';
-    console.log("Передача хода оппоненту.");
-    scheduleNextTurn();
-}
-
-function opponentTurn() {
-    if (!battleInProgress) {
-        console.log("Битва не идет. Прерывание хода оппонента.");
-        return;
-    }
-    console.log("Ход оппонента. Урон:", opponentDamage);
-    playerHealth -= opponentDamage;
-    if (playerHealth < 0) playerHealth = 0;
-    console.log(`Урон по игроку: ${opponentDamage}. Здоровье игрока: ${playerHealth}`);
-
-    if (playerHealth <= 0) {
-        console.log("Игрок побежден оппонентом.");
-        finalizePvpBattle('opponent');
-        return;
-    }
-
-    document.getElementById('pvpFightLog').innerHTML += `<span style="color: red;">Противник нанес вам ${opponentDamage} урона!</span><br>`;
-    updatePlayerHealth();
-    currentPlayer = 'player';
-    scheduleNextTurn();
-}
-
-async function updateOpponentHealth() {
-    if (opponent && opponent.nickname) {
-        const opponentHealthRef = ref(database, 'pvpQueue/' + opponent.nickname + '/health');
-        await set(opponentHealthRef, opponentHealth)
-            .then(() => {
-                console.log(`Здоровье противника обновлено: ${opponentHealth}`);
-            })
-            .catch((error) => {
-                console.error(`Ошибка при обновлении здоровья противника:`, error);
-            });
-    } else {
-        console.error("Не удалось обновить здоровье противника: некорректные данные оппонента.");
-    }
-}
-
-async function updatePlayerHealth() {
-    const playerHealthRef = ref(database, 'pvpQueue/' + nickname + '/health');
-    await set(playerHealthRef, playerHealth)
-        .then(() => {
-            console.log(`Здоровье игрока обновлено: ${playerHealth}`);
-        })
-        .catch((error) => {
-            console.error(`Ошибка при обновлении здоровья игрока:`, error);
-        });
-}
-
-function scheduleNextTurn() {
-    if (!battleInProgress) {
-        console.log("Битва не идет. Прерывание scheduleNextTurn.");
-        return;
-    }
-
-    if (currentPlayer === 'player') {
-        setTimeout(playerTurn, turnDuration);
-    } else {
-        setTimeout(opponentTurn, turnDuration);
-    }
-}
-
-// Обновление лога боя с цветовым выделением
-function updateFightLog(message, color) {
-    const logElement = document.getElementById('pvpFightLog');
-    const newMessage = document.createElement('span');
-    newMessage.style.color = color;
-    newMessage.innerHTML = message + '<br>';
-    logElement.appendChild(newMessage);
-}
-
-
-
-
-
-
-
-// Дополнительная функция для проверки, находится ли игрок в бою
-async function isPlayerInBattle(playerNickname) {
-    const battleRef = ref(database, 'pvpQueue/' + playerNickname);
-    try {
-        const snapshot = await get(battleRef);
-        if (snapshot.exists()) {
-            const playerData = snapshot.val();
-            const inBattle = playerData.inBattle;
-            console.log(`Проверка статуса боя игрока ${playerNickname}: ${inBattle}`);
-            return inBattle;
-        }
-        console.log(`Игрок ${playerNickname} не найден в очереди PvP.`);
-        return false;
-    } catch (error) {
-        console.error(`Ошибка при проверке статуса боя игрока ${playerNickname}:`, error);
-        return false;
-    }
-}
-
-
-        window.openPvpRegistration = openPvpRegistration;
-        window.closePvpRegistration = closePvpRegistration;
-        window.endPvpBattle = endPvpBattle;
-        window.stopListeningForOpponent = stopListeningForOpponent;
-
-        // window.registerForPvp = registerForPvp;
-        // window.showWaitingForOpponent = showWaitingForOpponent;
-        // window.startPvpBattle = startPvpBattle;
-        // window.scheduleNextTurn = scheduleNextTurn;
-        // window.opponentTurn = opponentTurn;
-        // window.playerTurn = playerTurn;
-        // window.updateOpponentHealth = updateOpponentHealth;
-        // window.updatePlayerHealth = updatePlayerHealth;
-        // window.finalizePvpBattle = finalizePvpBattle;
-        
-        // window.isPlayerInBattle = isPlayerInBattle;
-            // window.listenForOpponent = listenForOpponent;
-//         function clearQueue() {
-//     const queueRef = ref(database, 'pvpQueue');
-//     set(queueRef, null)
-//     .then(() => {
-//         console.log('Очередь очищена.');
-//     })
-//     .catch((error) => {
-//         console.error('Ошибка при очистке очереди:', error);
-//     });
-// }
-// window.clearQueue = clearQueue;
-
 
 
 
@@ -2990,7 +2395,6 @@ function changeScreen(screen) {
     document.getElementById('mailButton').style.display = (screen === 'castle') ? 'block' : 'none';
     crosshair.style.display = (screen === 'battle' || screen === 'worldBoss') ? 'block' : 'none';
     document.getElementById('rebornButton').style.display = (screen === 'dungeon') ? 'block' : 'none'; // Отображаем кнопку только на экране "battle"
-    document.getElementById('pvpButton').style.display = 'none'; // Скрываем кнопку по умолчанию
     // Hide the monster health bar when changing screens
     if (screen !== 'dungeon' && screen !== 'battle') {
         document.getElementById('monsterHealthContainer').style.display = 'none';
@@ -3013,11 +2417,7 @@ function changeScreen(screen) {
         document.getElementById('statusBar').style.display = 'block';
         //updateStatusBar();
     } else if (screen === 'arena') {
-        //document.getElementById('statusBar').style.display = 'block';
-        drawArena();
-        document.getElementById('pvpButton').style.display = 'block'; // Показываем кнопку на экране арены
         arena();
-        
     } else if (screen === 'castle') {
         drawCastle();
     } else if (screen === 'shop') {
@@ -3046,10 +2446,7 @@ function changeScreen(screen) {
 
 window.changeScreen = changeScreen;
 
-// Пример использования
-document.getElementById('bottomMenu').querySelector('div').addEventListener('click', function() {
-    changeScreen('arena');
-});
+
 
 
 function syncWorldBossHealth() {
@@ -3146,6 +2543,13 @@ function updateStatusBar() {
     //console.log('Status bar updated'); // Логирование обновления статус бара
 }
 window.updateStatusBar = updateStatusBar;
+
+
+
+
+
+
+
 
 
 
@@ -3264,21 +2668,9 @@ window.updateStatusBar = updateStatusBar;
     startUpdating(); // Запуск обновления при старте игры
     startHourlyReset(); // Запуск таймера для сброса здоровья босса
     updateMonsterHealthDisplay();
-    //clearQueue(); // Очистка очереди перед регистрацией
     
 }
 
-// function clearrQueue() {
-//     const queueRef = ref(database, 'pvpQueue');
-//     set(queueRef, null)
-//     .then(() => {
-//         console.log('Очередь очищена.');
-//     })
-//     .catch((error) => {
-//         console.error('Ошибка при очистке очереди:', error);
-//     });
-// }
-// window.clearQueue = clearQueue;
 
 
 
@@ -3321,15 +2713,6 @@ onValue(ref(database, 'chat/messages'), function(snapshot) {
     chatMessages.scrollTop = chatMessages.scrollHeight; // Прокрутка вниз для новых сообщений
 });
 
-// Находим кнопку PvP
-const pvpButton = document.getElementById('pvpButton');
-pvpButton.addEventListener('click', openPvpRegistration); 
-
-// Находим кнопку "Да" в окне регистрации
-const pvpRegistrationButton = document.querySelector('#pvpRegistration button:first-of-type'); // Выбираем первую кнопку
-
-// Привязываем обработчик события "click"
-pvpRegistrationButton.addEventListener('click', registerForPvp); 
 
 
 

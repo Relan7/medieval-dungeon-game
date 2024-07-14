@@ -1908,8 +1908,8 @@ let turnTimeout; // Тайм-аут для управления ходами
 let opponent; // Объявление глобальной переменной для хранения данных о противнике
 let totalDamage = 100; // Урон игрока
 let opponentDamage = 50; // Урон противника
-let opponentHealth = 800; // Здоровье противника
-let playerHealth = 800;
+let opponentHealth = 300; // Здоровье противника
+let playerHealth = 300;
 let currentPlayer = null;
 let battleInProgress = false; // Отслеживает состояние боя
 let playerRef;
@@ -1955,7 +1955,7 @@ async function registerForPvp() {
   await Promise.resolve(registrationPromise);
   console.log("Регистрация разблокирована.");
 
-  playerHealth = 800;
+  playerHealth = 300;
   playerRef = ref(database, 'pvpQueue/' + nickname);
   console.log(`Регистрация игрока ${nickname} с данными: здоровье ${playerHealth}, урон ${totalDamage}`);
 
@@ -2069,10 +2069,10 @@ async function finalizePvpBattle(winner, reason = null) {
 
         // Сбрасываем флаги inBattle и обновляем здоровье
         queue[nickname].inBattle = false;
-        queue[nickname].health = 800;
+        queue[nickname].health = 300;
         if (opponentNickname) {
           queue[opponentNickname].inBattle = false;
-          queue[opponentNickname].health = 800;
+          queue[opponentNickname].health = 300;
         }
 
         // Удаляем игроков из очереди
@@ -2257,8 +2257,8 @@ function resetBattleState() {
     playerRef = null;
     opponentRef = null;
     opponent = null;
-    playerHealth = 800;
-    opponentHealth = 800;
+    playerHealth = 300;
+    opponentHealth = 300;
     battleInProgress = false;
 
     console.log("Состояние после сброса. Игрок здоровье: ", playerHealth, " Оппонент здоровье: ", opponentHealth);
@@ -2400,17 +2400,17 @@ async function isPlayerInBattle(playerNickname) {
         
         // window.isPlayerInBattle = isPlayerInBattle;
             // window.listenForOpponent = listenForOpponent;
-//         function clearQueue() {
-//     const queueRef = ref(database, 'pvpQueue');
-//     set(queueRef, null)
-//     .then(() => {
-//         console.log('Очередь очищена.');
-//     })
-//     .catch((error) => {
-//         console.error('Ошибка при очистке очереди:', error);
-//     });
-// }
-// window.clearQueue = clearQueue;
+        function clearQueue() {
+    const queueRef = ref(database, 'pvpQueue');
+    set(queueRef, null)
+    .then(() => {
+        console.log('Очередь очищена.');
+    })
+    .catch((error) => {
+        console.error('Ошибка при очистке очереди:', error);
+    });
+}
+window.clearQueue = clearQueue;
 
 
 
@@ -3013,7 +3013,6 @@ function changeScreen(screen) {
         document.getElementById('statusBar').style.display = 'block';
         //updateStatusBar();
     } else if (screen === 'arena') {
-        //document.getElementById('statusBar').style.display = 'block';
         drawArena();
         document.getElementById('pvpButton').style.display = 'block'; // Показываем кнопку на экране арены
         arena();
@@ -3264,11 +3263,11 @@ window.updateStatusBar = updateStatusBar;
     startUpdating(); // Запуск обновления при старте игры
     startHourlyReset(); // Запуск таймера для сброса здоровья босса
     updateMonsterHealthDisplay();
-    //clearQueue(); // Очистка очереди перед регистрацией
+    clearQueue(); // Очистка очереди перед регистрацией
     
 }
 
-// function clearrQueue() {
+// function clearQueue() {
 //     const queueRef = ref(database, 'pvpQueue');
 //     set(queueRef, null)
 //     .then(() => {
