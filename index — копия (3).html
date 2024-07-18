@@ -281,7 +281,7 @@ body, html {
 
         #mailButton {
             position: fixed;
-            top: 190px;
+            top: 100px;
             left: 300px;
             width: 150px;
             height: 150px;
@@ -909,6 +909,7 @@ function confirmReborn() {
         addHeroesToMenu();
         startLevel(currentLevel);
         closeRebornMenu(); 
+        //  Отображаем  rebornSuccessMessage  вместо  alert 
         document.getElementById('rebornSuccessMessage').style.display = 'block';
         document.getElementById('rebornSuccessMessageText').textContent = `Вы  переродились! 
                                                                             Теперь вы будете получать  награды за  убийство  монстров  в  ${rewardMultiplier.toFixed(1)} раза выше.`;
@@ -2086,22 +2087,18 @@ window.drawArena = drawArena;
 function switchChat(chat) {
     currentChat = chat; 
     const chatMessages = document.getElementById('chatMessages'); 
-    chatMessages.innerHTML = ''; // Очищаем сообщения 
+    chatMessages.innerHTML = ''; // Очищаем сообщения
     
-    // Подписываемся на  соответствующий  чат в  Firebase
+    // Подписываемся  на  соответствующий чат в Firebase
     if (chat === 'global') {
         listenForGlobalMessages();
-    } else  if (chat ===  'clan'  && currentClan) {
+    } else if (chat === 'clan'  &&  currentClan) {
         listenForClanMessages(currentClan); 
-    } else if (chat  === 'clan' && !currentClan) {
-        // Вместо alert  добавляем  сообщение  в  чат  
-        displayChatMessage({ 
-            nickname:  'System', 
-            text:  'Вы  не  состоите в  клане!'
-        });
+    } else if (chat === 'clan'  && !currentClan) { 
+        alert('Вы не  состоите  в  клане!');
     }
 }
-window.switchChat = switchChat;
+window.switchChat = switchChat; 
 
 // Функция для прослушивания сообщений глобального чата
 function listenForGlobalMessages() {
@@ -2242,21 +2239,17 @@ function closeClanMenu() {
 window.closeClanMenu = closeClanMenu; 
 
 // Обновление списка кланов
-async function updateClanList() {
-    const clanList = document.getElementById('clanList');
-    clanList.innerHTML =  '';
+async  function updateClanList() {
+    const clanList =  document.getElementById('clanList');
+    clanList.innerHTML =  ''; // Очищаем список перед добавлением кланов
 
-    //  Сортируем  кланы по уровню  (в порядке  убывания)
-    const sortedClans = Object.entries(clans).sort(([, a], [, b]) =>  b.level - a.level); 
+    // Сортируем  кланы  по  уровню  (в  порядке убывания)  
+    const sortedClans = Object.entries(clans).sort(([, a], [, b]) => b.level -  a.level); 
 
     for (const [clanName, clan] of sortedClans) {
-        const clanItem =  document.createElement('li');
-        
-        //  Вычисляем вместимость клана  
-        const  clanCapacity  =  clan.level  +  9;  
-        
-        clanItem.textContent = `${clan.name} (Уровень:  ${clan.level}, Игроков:  ${Object.keys(clan.members).length}/${clanCapacity}, Лидер: ${clan.leader})`; // Добавляем вместимость 
-        clanItem.onclick = () =>  { joinClan(clanName);  };
+        const  clanItem =  document.createElement('li');
+        clanItem.textContent = `${clan.name} (Уровень: ${clan.level},  Игроков:  ${Object.keys(clan.members).length},  Лидер:  ${clan.leader})`;
+        clanItem.onclick = () =>  {  joinClan(clanName); };
         clanList.appendChild(clanItem);
     }
 }
@@ -3959,10 +3952,6 @@ window.updateStatusBar = updateStatusBar;
         drawBattle(); // Перерисовка экрана боя
     } else if (currentScreen === 'arena') {
         drawArena(); // Перерисовка арены
-    } else if (currentScreen === 'castle') {
-        drawCastle(); // Перерисовка арены
-    } else if (currentScreen === 'raid') {
-        drawMenu(); // Перерисовка арены
     } else if (currentScreen === 'menu') {
         drawMenu(); // Перерисовка меню
     } else if (currentScreen === 'dungeon') {
@@ -4026,12 +4015,8 @@ function sendMessage() {
             const newMessageRef = push(ref(database,  `clans/${currentClan}/chat`)); 
             set(newMessageRef, messageData); 
         } else { 
-            //  Вместо  alert  добавляем сообщение  в  чат  
-        displayChatMessage({ 
-            nickname:  'System',
-            text:  'Вы  не  состоите в  клане!'  
-        }); 
-        return;
+            alert('Вы не состоите  в клане!'); 
+            return;
         }
 
         chatMessageInput.value = ''; 
@@ -4049,7 +4034,6 @@ document.getElementById('chatMessageInput').addEventListener('keypress',  functi
     } 
 });
 
-
 // Слушатель для новых сообщений
 const chatMessages = document.getElementById('chatMessages');
 onValue(ref(database, 'chat/messages'), function(snapshot) {
@@ -4062,16 +4046,6 @@ onValue(ref(database, 'chat/messages'), function(snapshot) {
     });
     chatMessages.scrollTop = chatMessages.scrollHeight; // Прокрутка вниз для новых сообщений
 });
-
-//  Функция  для добавления  сообщения  в чат  
-function displayChatMessage(message) {
-    const  chatMessages  = document.getElementById('chatMessages');
-    const  messageElement  = document.createElement('div'); 
-    messageElement.innerHTML =  `<strong>${message.nickname}:</strong>  ${message.text}`;
-    chatMessages.appendChild(messageElement);
-    chatMessages.scrollTop = chatMessages.scrollHeight; //  Прокрутка вниз
-}
-
 
 // Находим кнопку PvP
 const pvpButton = document.getElementById('pvpButton');
