@@ -539,7 +539,7 @@ button.upgrade-button:hover, button.hire-button:hover {
   color: white;
   padding: 20px;
   border-radius: 5px;
-  z-index: 1001;
+  z-index: 1003;
 }
 #rebornMenu  {
   display:  none; 
@@ -811,7 +811,7 @@ button.upgrade-button:hover, button.hire-button:hover {
         <button onclick="closeItemDetail()">Закрыть</button>
     </div>
     <div id="continuePrompt">
-        <img id="victoryImage" src="win2.png" alt="Вы победили" style="display: none; width: 700px; height: auto; position: relative; z-index: 3000;">
+        <img id="victoryImage" src="win2.png" alt="Вы победили" style="display: none; width: 10px; height: 10px; position: relative; z-index: 3000;">
         <p>Shap в печали, что вы его бьете :(</p>
         <p>Вы хотите продолжить унижать Shap и убить следующего монстра?</p>
         <div id="goldEarned" style="display: none; font-size: 24px; color: gold; font-family: 'Comic Sans MS', cursive, sans-serif;">Золото: <span id="goldAmount"></span></div>
@@ -2182,7 +2182,7 @@ window.updateClanMemberData = updateClanMemberData;
 
 
 function calculateClanDamageBonus(clanLevel)  {
-  return 10 * Math.pow(5,  clanLevel - 1); // 10  урона  на 1  уровне,  х5  на  каждом  следующем
+  return 10 * Math.pow(2,  clanLevel - 1); // 10  урона  на 1  уровне,  х5  на  каждом  следующем
 }
 window.calculateClanDamageBonus = calculateClanDamageBonus;
 
@@ -3411,7 +3411,7 @@ window.continueToNextLevel = continueToNextLevel;
     victoryImage.id = 'victoryImage';
     victoryImage.src = 'win2.png';
     victoryImage.alt = 'Вы победили';
-    victoryImage.style.width = '700px';
+    victoryImage.style.width = '400px';
     victoryImage.style.height = 'auto';
     victoryImage.onclick = () => {
         document.body.removeChild(victoryMessage);
