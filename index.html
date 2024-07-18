@@ -184,6 +184,7 @@ body, html {
             border-radius: 5px;
             text-align: center;
             display: none;
+            z-index: 2001;
         }
         .hero img {
         width: 175px;
@@ -577,9 +578,27 @@ button.upgrade-button:hover, button.hire-button:hover {
     border-radius: 5px;
     z-index: 1001;
 }
+#gameMessage  {
+  display:  none;
+  position:  fixed;
+  top:  50%; 
+  left:  50%;
+  transform:  translate(-50%,  -50%); 
+  background:  rgba(0,  0,  0,  0.8);
+  color:  rgb(240, 9, 9);
+  padding:  20px; 
+  border-radius:  5px; 
+  z-index:  9999; 
+  text-align:  center; /*  Центрируем  текст */ 
+  font-weight:  bold; /*  Делаем  текст  жирным  */
+}
     </style>
 </head>
 <body>
+
+    <div  id="gameMessage"  style="display:  none;">
+        <p  id="gameMessageText"></p>
+    </div>
 
     <div id="clanDonateMenu" style="display: none;"> 
         <h3>Пожертвование в клан</h3>
@@ -792,7 +811,7 @@ button.upgrade-button:hover, button.hire-button:hover {
         <button onclick="closeItemDetail()">Закрыть</button>
     </div>
     <div id="continuePrompt">
-        <img id="victoryImage" src="win2.png" alt="Вы победили" style="display: none; width: 700px; height: auto;">
+        <img id="victoryImage" src="win2.png" alt="Вы победили" style="display: none; width: 700px; height: auto; position: relative; z-index: 3000;">
         <p>Shap в печали, что вы его бьете :(</p>
         <p>Вы хотите продолжить унижать Shap и убить следующего монстра?</p>
         <div id="goldEarned" style="display: none; font-size: 24px; color: gold; font-family: 'Comic Sans MS', cursive, sans-serif;">Золото: <span id="goldAmount"></span></div>
@@ -859,7 +878,7 @@ function showRebornPrompt() {
     }
 
     if (rebornPossible) {
-        // Вместо  alert  используем  rebornMenu 
+        
         document.getElementById('rebornMenu').style.display = 'block'; 
         document.getElementById('rebornMessage').textContent = `Прогресс  уровней, нанятые  герои  и  накопленное золото  будут  сброшены.  Но вы  будете получать  награды  за  убийство монстров  в  ${1  +  rebornCount * 0.1}  раза  выше. 
                                                                   Также будут доступны  новые  герои  для  найма. Следующее перерождение  доступно с  уровня  ${nextRebornLevel}.`; 
@@ -932,7 +951,18 @@ function closeRebornSuccessMessage() {
 window.closeRebornSuccessMessage = closeRebornSuccessMessage;
 
 
+function showGameMessage(message) {
+  const gameMessage = document.getElementById('gameMessage');
+  const gameMessageText = document.getElementById('gameMessageText');
+  gameMessageText.textContent = message;
+  gameMessage.style.display = 'block';
 
+  // Скрываем сообщение  через  3  секунды
+  setTimeout(()  =>  {
+    gameMessage.style.display = 'none'; 
+  },  3000);
+}
+window.showGameMessage = showGameMessage; 
 
 
 // Функция для миграции данных героев
@@ -1266,13 +1296,16 @@ async function loadProgress(nickname) {
             applyProgress(data);
             saveProgress();
 
-            // Загружаем данные о кланах после загрузки прогресса игрока
-            const clansSnapshot = await get(ref(database, 'clans'));
-            if (clansSnapshot.exists()) {
-                clans = clansSnapshot.val();
-            } else {
-                clans = {};
-            }
+    // Загружаем данные  о кланах  после загрузки  прогресса  игрока
+    const  clansSnapshot =  await get(ref(database, 'clans')); 
+    if (clansSnapshot.exists()) {
+        clans =  clansSnapshot.val();
+    } else {
+        clans = {};
+    }
+
+    //  Вызываем  resetClanIfInvalid  после  загрузки  clans
+    await resetClanIfInvalid(nickname,  data); // Передаем  data
             
 
             
@@ -2094,7 +2127,6 @@ function switchChat(chat) {
     } else  if (chat ===  'clan'  && currentClan) {
         listenForClanMessages(currentClan); 
     } else if (chat  === 'clan' && !currentClan) {
-        // Вместо alert  добавляем  сообщение  в  чат  
         displayChatMessage({ 
             nickname:  'System', 
             text:  'Вы  не  состоите в  клане!'
@@ -2149,6 +2181,45 @@ async function updateClanMemberData(memberNickname, data) {
 window.updateClanMemberData = updateClanMemberData;
 
 
+function calculateClanDamageBonus(clanLevel)  {
+  return 10 * Math.pow(5,  clanLevel - 1); // 10  урона  на 1  уровне,  х5  на  каждом  следующем
+}
+window.calculateClanDamageBonus = calculateClanDamageBonus;
+
+async  function  resetClanIfInvalid(nickname,  data) { //  Добавляем  data  в  аргументы
+    console.log("Проверка валидности клана  для  игрока", nickname);
+
+    //  Проверка, был ли установлен currentClan  вообще  
+    if (data.currentClan) { 
+        const clansSnapshot = await  get(ref(database, 'clans')); 
+        if (clansSnapshot.exists()) {
+            const clansData = clansSnapshot.val(); 
+            let clanFound = false; 
+
+            for (const  clanName in  clansData)  { 
+                if (nickname  in clansData[clanName].members) {
+                    console.log("Клан найден, currentClan:",  currentClan);
+                    clanFound = true;
+                    break;
+                } 
+            } 
+
+            //  Если клан не  найден,  сбрасываем  currentClan  
+            if (!clanFound)  {
+                console.log("Клан не найден,  сбрасываем  currentClan");
+                currentClan =  null;
+
+                //  Обновляем  данные игрока  в  базе  данных,  чтобы  убрать несуществующий currentClan
+                const playerProgressRef = ref(database,  `players/${nickname}/progress`); 
+                await  set(playerProgressRef, {  ...(await get(playerProgressRef)).val(), currentClan: null }); 
+
+                showGameMessage('Вы были  удалены из клана, поскольку  он  больше  не  существует.'); 
+            } 
+        }
+    }
+}
+window.resetClanIfInvalid = resetClanIfInvalid;
+
 // Структура данных для клана
 function Clan(name, leader) {
     this.name = name;
@@ -2157,6 +2228,7 @@ function Clan(name, leader) {
     this.level = 1;
     this.upgradeCost = 10000; // Стоимость первого улучшения
     this.members[leader] = { rank: 'leader', level: currentLevel, damage: calculateTotalDamage() }; // Добавляем лидера в клан
+    this.damageBonus = 10; 
 }
 
 // Возможные ранги в клане
@@ -2174,19 +2246,19 @@ async function createClan(clanName) {
 
     // Проверка на достаточное количество золота
     if (gold < 1000) {
-        alert('Недостаточно золота для создания клана!');
+        showGameMessage('Недостаточно  золота для создания клана!');
         return;
     }
 
     // Проверка на существование клана с таким именем
     if (clanName in clans) {
-        alert('Клан с таким именем уже существует!');
+        showGameMessage('Клан  с  таким именем  уже существует!');
         return;
     }
 
     // Проверка, состоит ли игрок уже в клане
     if (await isPlayerInClan(nickname)) {
-        alert('Вы уже состоите в клане!');
+        showGameMessage('Вы  уже  состоите  в  клане!');
         return;
     }
 
@@ -2279,54 +2351,58 @@ function updateClanInterface() {
         // Очищаем список членов клана
         clanMembersElement.innerHTML = '';
 
-        // Добавляем каждого члена клана в список
+        // Отображаем  бонус  к  урону
+        const  damageBonusElement =  document.createElement('p');
+        damageBonusElement.textContent =  `Бонус  к урону: ${calculateClanDamageBonus(clans[currentClan].level)}`;
+        clanMembersElement.appendChild(damageBonusElement);
+
+        //  Добавляем каждого члена  клана  в список
         for (const memberNickname in clans[currentClan].members) {
             const member = clans[currentClan].members[memberNickname];
 
-            // Пропускаем лидера в цикле, если это текущий игрок
-            if (memberNickname === nickname && member.rank === 'leader') {
-                continue; 
+            // Пропускаем  лидера  в  цикле, если это  текущий  игрок
+            if (memberNickname ===  nickname  && member.rank  ===  'leader')  { 
+                continue;
             }
 
             const memberItem = document.createElement('li');
             memberItem.textContent = `${memberNickname} (${clanRanks[member.rank]}, Уровень: ${member.level}, Урон: ${member.damage})`;
 
-            // Проверка, является ли текущий игрок лидером клана 
-            if (clans[currentClan].leader === nickname) {
-                // Добавляем кнопки управления 
-                const appointDeputyButton = document.createElement('button');
-                appointDeputyButton.textContent = 'Назначить заместителем';
-                appointDeputyButton.onclick = () => {
-                    const selectedMember = prompt('Введите никнейм участника для назначения заместителем:');
-                    if (selectedMember) {
-                        appointDeputy(selectedMember);
+            //  Проверка,  является  ли текущий игрок  лидером  клана  
+            if  (clans[currentClan].leader ===  nickname)  { 
+                //  Добавляем  кнопки  управления  
+                const appointDeputyButton = document.createElement('button'); 
+                appointDeputyButton.textContent = 'Назначить  заместителем'; 
+                appointDeputyButton.onclick =  ()  =>  {
+                    const selectedMember =  prompt('Введите никнейм участника для  назначения заместителем:');
+                    if  (selectedMember)  { 
+                        appointDeputy(selectedMember); 
                     }
-                };
-                memberItem.appendChild(appointDeputyButton);
+                }; 
+                memberItem.appendChild(appointDeputyButton); 
 
-                const kickMemberButton = document.createElement('button');
-                kickMemberButton.textContent = 'Исключить';
-                kickMemberButton.onclick = () => {
-                    const selectedMember = prompt('Введите никнейм участника для исключения:');
-                    if (selectedMember) {
+                const  kickMemberButton =  document.createElement('button'); 
+                kickMemberButton.textContent = 'Исключить'; 
+                kickMemberButton.onclick =  () =>  {
+                    const  selectedMember = prompt('Введите никнейм  участника для исключения:'); 
+                    if  (selectedMember)  {
                         kickMember(selectedMember);
                     }
                 };
-                memberItem.appendChild(kickMemberButton);
-            } 
-            // Добавление кнопки исключения, если игрок - заместитель
-            else if (member.rank === 'deputy' && memberNickname === nickname) {
-                const kickMemberButton = document.createElement('button');
-                kickMemberButton.textContent = 'Исключить';
-                kickMemberButton.onclick = () => {
-                    const selectedMember = prompt('Введите никнейм участника для исключения:');
-                    if (selectedMember) {
+                memberItem.appendChild(kickMemberButton); 
+            }
+            //  Добавление  кнопки  исключения, если  игрок  -  заместитель
+            else  if (member.rank  === 'deputy'  &&  memberNickname  ===  nickname)  {
+                const  kickMemberButton =  document.createElement('button'); 
+                kickMemberButton.textContent =  'Исключить';
+                kickMemberButton.onclick =  ()  => {
+                    const selectedMember = prompt('Введите  никнейм  участника  для исключения:'); 
+                    if (selectedMember)  { 
                         kickMember(selectedMember);
-                    }
+                    } 
                 };
                 memberItem.appendChild(kickMemberButton);
             }
-
             clanMembersElement.appendChild(memberItem);
         }
     } else {
@@ -2360,12 +2436,12 @@ async function isPlayerInClan(playerNickname) {
 
 async function joinClan(clanName) {
     if (Object.keys(clans[clanName].members).length >= clans[clanName].level + 9) {
-        alert('Клан уже полон!');
+        showGameMessage('Клан уже полон!');
         return;
     }
 
     if (await isPlayerInClan(nickname)) {
-        alert('Вы уже состоите в клане!');
+        showGameMessage('Вы уже состоите в клане!');
         return;
     }
     clans[clanName].members[nickname] = { 
@@ -2409,12 +2485,12 @@ async function leaveClan() {
 
             // 2. Уведомляем участников
             if (newLeader) {
-                alert(`Лидер клана ${currentClan} покинул клан. Новым лидером назначен ${newLeader}.`);
+                showGameMessage(`Лидер клана ${currentClan} покинул клан. Новым лидером назначен ${newLeader}.`);
             } else {
                 // Нет других участников, удаляем клан
                 delete clans[currentClan];
                 await remove(ref(database, 'clans/' + currentClan));
-                alert(`Клан ${currentClan} расформирован.`);
+                showGameMessage(`Клан ${currentClan} расформирован.`);
             }
 
             // Удаляем текущего лидера из клана
@@ -2426,7 +2502,7 @@ async function leaveClan() {
             delete clans[currentClan].members[nickname];
             await set(ref(database, 'clans/' + currentClan), clans[currentClan]); 
             currentClan = null;
-            alert(`Вы покинули клан ${currentClan}.`); 
+            showGameMessage(`Вы покинули клан ${currentClan}.`); 
         }
 
         //  Отписываемся  от  чата  клана
@@ -2471,13 +2547,14 @@ async function donateToClan() {
         }); 
         document.getElementById('clanCurrentDonations').textContent = donateAmount; // Обновляем  отображение 
         document.getElementById('clanDonateAmount').value =  '';  // Очищаем  поле  ввода
-        alert('Спасибо  за  ваше  пожертвование!');
+        showGameMessage('Спасибо  за  ваше  пожертвование!');
     } else {
-        alert('Некорректная  сумма  или  недостаточно  золота!');
+        showGameMessage('Некорректная  сумма  или  недостаточно  золота!');
     }
 }
 window.donateToClan = donateToClan;
 
+//  Обновленная функция upgradeClan
 //  Обновленная функция upgradeClan
 async function upgradeClan() {
     if (currentClan && nickname in clans[currentClan].members) {
@@ -2487,7 +2564,7 @@ async function upgradeClan() {
         const nextCapacity = currentLevel + 10; 
 
         if (currentLevel >= maxLevel) {
-            alert(`Ваш клан уже достиг максимального уровня (${maxLevel}).`); 
+            showGameMessage(`Ваш клан уже достиг максимального уровня (${maxLevel}).`); 
             return;
         }
 
@@ -2498,32 +2575,37 @@ async function upgradeClan() {
 
         // Проверка, может ли лидер улучшить клан
         if (clans[currentClan].members[nickname].rank === 'leader'  &&  currentDonations >= cost) { 
-            if (confirm(`Улучшить клан до уровня ${currentLevel  +  1}? \n` +
+            if (confirm(`Улучшить клан до уровня ${currentLevel  +  1}?  \n` +
                         `Текущая вместимость: ${currentLevel  +  9} участников\n` +
-                        `Вместимость после улучшения: ${nextCapacity} участников`)) {
-                //  Вычитаем стоимость улучшения  из пожертвований 
-                currentDonations -= cost;  
+                        `Вместимость после улучшения:  ${nextCapacity} участников`)) {
+                // Вычитаем стоимость улучшения из пожертвований
+                currentDonations -= cost;
 
-                //  Обновляем clans[currentClan].donations 
-                clans[currentClan].donations = currentDonations;
+                // Обновляем clans[currentClan].donations
+                clans[currentClan].donations = currentDonations; 
 
-                //  Сохраняем обновленную  сумму  пожертвований
-                await set(clanDonationsRef,  currentDonations); 
+                // Сохраняем обновленную сумму пожертвований
+                await set(clanDonationsRef, currentDonations);
 
                 clans[currentClan].level++;
-                clans[currentClan].upgradeCost *= 2;
+                clans[currentClan].upgradeCost *= 2; 
+                
+                // Обновляем бонус к урону 
+                clans[currentClan].damageBonus = calculateClanDamageBonus(clans[currentClan].level);
+
                 await set(ref(database, 'clans/' + currentClan), clans[currentClan]); 
                 updateClanInterface(); 
             }
-        } else if (clans[currentClan].members[nickname].rank !== 'leader') {
-            alert(`Только лидер клана может улучшить клан!`)
+        } else  if (clans[currentClan].members[nickname].rank !== 'leader') {
+            showGameMessage(`Только лидер клана может улучшить клан!`)
         } else {
-            //  Отображаем информацию  о пожертвованиях  в  интерфейсе 
+            // Отображаем информацию о пожертвованиях в интерфейсе 
             openClanDonateMenu();
         }
     }
 }
-window.upgradeClan = upgradeClan;
+window.upgradeClan = upgradeClan; 
+
 
 async function appointDeputy(memberNickname) {
     if (currentClan && clans[currentClan].members[nickname].rank === 'leader') {
@@ -2532,7 +2614,7 @@ async function appointDeputy(memberNickname) {
             await set(ref(database, 'clans/' + currentClan), clans[currentClan]); // Сохраняем данные клана
             updateClanInterface();
         } else {
-            alert('Выбран неверный участник клана!');
+            showGameMessage('Выбран неверный участник клана!');
         }
     }
 }
@@ -2548,10 +2630,10 @@ async function kickMember(memberNickname) {
                 await set(ref(database, 'clans/' + currentClan), clans[currentClan]); // Сохраняем данные клана
                 updateClanInterface();
             } else {
-                alert('Вы не можете исключить лидера клана!');
+                showGameMessage('Вы не можете исключить лидера клана!');
             }
         } else {
-            alert('Выбран неверный участник клана!');
+            showGameMessage('Выбран неверный участник клана!');
         }
     }
 }
@@ -2640,7 +2722,7 @@ async function registerForPvp() {
   const inBattle = await isPlayerInBattle(nickname);
   if (inBattle) {
     console.log("Вы уже участвуете в бою!");
-    alert("Вы уже участвуете в бою!");
+    showGameMessage("Вы уже участвуете в бою!");
     return;
   }
 
@@ -3821,9 +3903,13 @@ function calculateTotalDamage() {
             totalDamage += hero.damage;
         }
     });
+
+    // Проверяем существование  клана перед  добавлением  бонуса 
+    if (currentClan && clans[currentClan]) {
+        totalDamage += calculateClanDamageBonus(clans[currentClan].level);
+    }
     return totalDamage;
 }
-
 
 window.calculateTotalDamage = calculateTotalDamage;
 
@@ -4026,7 +4112,6 @@ function sendMessage() {
             const newMessageRef = push(ref(database,  `clans/${currentClan}/chat`)); 
             set(newMessageRef, messageData); 
         } else { 
-            //  Вместо  alert  добавляем сообщение  в  чат  
         displayChatMessage({ 
             nickname:  'System',
             text:  'Вы  не  состоите в  клане!'  
