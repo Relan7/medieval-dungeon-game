@@ -4072,13 +4072,21 @@ window.updateStatusBar = updateStatusBar;
     startUpdating(); 
     startHourlyReset(); 
     updateMonsterHealthDisplay(); 
-    //  Добавьте  код обновления  бонусов  здесь  👇
-    await updateClanBonuses();
-
     // Добавьте await  перед  updateClanList  
     await updateClanList(); 
 };
 
+// function clearrQueue() {
+//     const queueRef = ref(database, 'pvpQueue');
+//     set(queueRef, null)
+//     .then(() => {
+//         console.log('Очередь очищена.');
+//     })
+//     .catch((error) => {
+//         console.error('Ошибка при очистке очереди:', error);
+//     });
+// }
+// window.clearQueue = clearQueue;
 
 
 
