@@ -745,6 +745,20 @@ button.upgrade-button:hover, button.hire-button:hover {
         transform: scale(0.6); /* Уменьшить масштаб до 30% */
         transform-origin: top left; /* Указать точку начала масштабирования */
     }
+    .health-bar {
+            background: #555;
+            border-radius: 5px;
+            overflow: hidden;
+            width: 200px;
+            height: 20px;
+            margin-bottom: 10px;
+            transform: scale(0.6); /* Уменьшить масштаб до 30% */
+        }
+        .health-bar-inner {
+            height: 100%;
+            background: #0f0;
+            transform: scale(0.6); /* Уменьшить масштаб до 30% */
+        }
     #characterMenu {
         right: 0;
         top: 0;
@@ -756,7 +770,7 @@ button.upgrade-button:hover, button.hire-button:hover {
     }
 
     .status-bar {
-        left: 0;
+        left: 40px;
         right: 0;
         width: 20%;
         font-size: 14px;
