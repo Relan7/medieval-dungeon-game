@@ -720,126 +720,115 @@ button.upgrade-button:hover, button.hire-button:hover {
 
 
 
-/* Стили для полноэкранного режима на мобильных устройствах */
+/* Медиазапросы для мобильной версии */
 @media (max-width: 768px) {
     /* Вертикальная ориентация */
-    @media (orientation: portrait) {
-        #fullscreenButton {
-            bottom: 10px;
-            right: 10px;
-        }
+    .portrait #bottomMenu {
+        left: 0;
+        width: 100%;
+        flex-direction: column;
+        height: auto;
+        font-size: 14px;
+    }
 
-        #bottomMenu {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            flex-direction: column;
-            height: auto;
-            font-size: 14px;
-        }
+    #characterMenu {
+        display: none; /* Скрыть элемент в мобильной версии */
+    }
 
-        #characterMenu {
-            right: 0;
-            top: 0;
-            width: 100%;
-            height: auto;
-            font-size: 14px;
-            display: none;
-        }
+    .portrait .status-bar {
+        left: 0;
+        right: 0;
+        width: auto;
+        font-size: 14px;
+    }
 
-        .status-bar {
-            left: 0;
-            right: 0;
-            width: auto;
-            font-size: 14px;
-        }
+    .portrait .crosshair {
+        width: 40px;
+        height: 40px;
+    }
 
-        .crosshair {
-            width: 40px;
-            height: 40px;
-        }
+    .portrait #mailButton {
+        width: 100px;
+        height: 100px;
+    }
 
-        #mailButton {
-            width: 100px;
-            height: 100px;
-        }
+    .portrait #rebornButton {
+        width: 100px;
+        height: 100px;
+        right: 10px;
+    }
 
-        #rebornButton {
-            width: 100px;
-            height: 100px;
-            right: 10px;
-        }
+    .portrait #monsterHealthContainer {
+        width: 80%;
+    }
 
-        #monsterHealthContainer {
-            width: 80%;
-        }
+    .portrait #chatContainer {
+        width: 90%;
+        left: 5%;
+    }
 
-        #chatContainer {
-            width: 90%;
-            left: 5%;
-        }
+    .portrait #shopMenu {
+        width: 90%;
+        left: 5%;
+    }
 
-        #shopMenu {
-            width: 90%;
-            left: 5%;
-        }
+    /* Элементы, которые будут скрыты в мобильной версии */
+    .portrait .hide-on-mobile {
+        display: none;
     }
 
     /* Горизонтальная ориентация */
-    @media (orientation: landscape) {
-        #bottomMenu {
-            left: 0;
-            width: 100%;
-            flex-direction: row;
-            height: 60px;
-            font-size: 14px;
-        }
+    .landscape #bottomMenu {
+        left: 0;
+        width: 100%;
+        flex-direction: row;
+        height: 60px;
+        font-size: 14px;
+    }
+    #characterMenu {
+        display: none; /* Скрыть элемент в мобильной версии */
+    }
 
-        #characterMenu {
-            right: 1px;
-            top: 0;
-            width: 100%;
-            height: auto;
-            font-size: 14px;
-            display: none;
-        }
+    .landscape .status-bar {
+        left: 0;
+        right: 0;
+        width: auto;
+        font-size: 14px;
+    }
 
-        .status-bar {
-            left: 0;
-            right: 0;
-            width: auto;
-            font-size: 14px;
-        }
+    .landscape .crosshair {
+        width: 40px;
+        height: 40px;
+    }
 
-        .crosshair {
-            width: 40px;
-            height: 40px;
-        }
+    .landscape #mailButton {
+        width: 100px;
+        height: 100px;
+    }
 
-        #mailButton {
-            width: 100px;
-            height: 100px;
-        }
+    .landscape #rebornButton {
+        width: 100px;
+        height: 100px;
+        right: 10px;
+    }
 
-        #rebornButton {
-            width: 100px;
-            height: 100px;
-            right: 10px;
-        }
+    .landscape #monsterHealthContainer {
+        width: 80%;
+    }
 
-        #monsterHealthContainer {
-            width: 80%;
-        }
+    .landscape #chatContainer {
+        width: 90%;
+        left: 5%;
+    }
 
-        #chatContainer {
-            width: 90%;
-            left: 5%;
-        }
+    .landscape #shopMenu {
+        width: 90%;
+        left: 5%;
+    }
 
-        #shopMenu {
-            width: 90%;
-            left: 5%;
-        }
+    /* Элементы, которые будут скрыты в мобильной версии */
+    .landscape .hide-on-mobile {
+        display: none;
     }
 }
 
@@ -1063,7 +1052,9 @@ button.upgrade-button:hover, button.hire-button:hover {
         <button onclick="closeErrorMessage()">Закрыть</button> 
     </div>
 
-
+    <div id="someElement" class="hide-on-mobile">
+        Этот элемент будет скрыт в мобильной версии.
+    </div>
     
     <div class="victory-message" id="victoryMessage">
         <p>Shap в печали, что вы его бьете :(</p>
