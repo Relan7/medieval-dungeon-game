@@ -720,60 +720,124 @@ button.upgrade-button:hover, button.hire-button:hover {
 
 
 
-/* Медиазапросы для мобильной версии */
+/* Стили для полноэкранного режима на мобильных устройствах */
 @media (max-width: 768px) {
-    #bottomMenu {
-        left: 0;
-        width: 100%;
-        flex-direction: column;
-        height: auto;
-        font-size: 14px;
+    /* Вертикальная ориентация */
+    @media (orientation: portrait) {
+        #fullscreenButton {
+            bottom: 10px;
+            right: 10px;
+        }
+
+        #bottomMenu {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            flex-direction: column;
+            height: auto;
+            font-size: 14px;
+        }
+
+        #characterMenu {
+            right: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+            font-size: 14px;
+        }
+
+        .status-bar {
+            left: 0;
+            right: 0;
+            width: auto;
+            font-size: 14px;
+        }
+
+        .crosshair {
+            width: 40px;
+            height: 40px;
+        }
+
+        #mailButton {
+            width: 100px;
+            height: 100px;
+        }
+
+        #rebornButton {
+            width: 100px;
+            height: 100px;
+            right: 10px;
+        }
+
+        #monsterHealthContainer {
+            width: 80%;
+        }
+
+        #chatContainer {
+            width: 90%;
+            left: 5%;
+        }
+
+        #shopMenu {
+            width: 90%;
+            left: 5%;
+        }
     }
 
-    #characterMenu {
-        right: 0;
-        top: 0;
-        width: 100%;
-        height: auto;
-        font-size: 14px;
-    }
+    /* Горизонтальная ориентация */
+    @media (orientation: landscape) {
+        #bottomMenu {
+            left: 0;
+            width: 100%;
+            flex-direction: row;
+            height: 60px;
+            font-size: 14px;
+        }
 
-    .status-bar {
-        left: 0;
-        right: 0;
-        width: auto;
-        font-size: 14px;
-    }
+        #characterMenu {
+            right: 1px;
+            top: 0;
+            width: 100%;
+            height: auto;
+            font-size: 14px;
+        }
 
-    /* Дополнительные изменения для мобильной версии */
-    .crosshair {
-        width: 40px;
-        height: 40px;
-    }
+        .status-bar {
+            left: 0;
+            right: 0;
+            width: auto;
+            font-size: 14px;
+        }
 
-    #mailButton {
-        width: 100px;
-        height: 100px;
-    }
+        .crosshair {
+            width: 40px;
+            height: 40px;
+        }
 
-    #rebornButton {
-        width: 100px;
-        height: 100px;
-        right: 10px;
-    }
+        #mailButton {
+            width: 100px;
+            height: 100px;
+        }
 
-    #monsterHealthContainer {
-        width: 80%;
-    }
+        #rebornButton {
+            width: 100px;
+            height: 100px;
+            right: 10px;
+        }
 
-    #chatContainer {
-        width: 90%;
-        left: 5%;
-    }
+        #monsterHealthContainer {
+            width: 80%;
+        }
 
-    #shopMenu {
-        width: 90%;
-        left: 5%;
+        #chatContainer {
+            width: 90%;
+            left: 5%;
+        }
+
+        #shopMenu {
+            width: 90%;
+            left: 5%;
+        }
     }
 }
 
@@ -4571,24 +4635,46 @@ window.updateStatusBar = updateStatusBar;
         }
 
         window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    if (currentScreen === 'battle') {
-        drawBattle(); // Перерисовка экрана боя
-    } else if (currentScreen === 'arena') {
-        drawArena(); // Перерисовка арены
-    } else if (currentScreen === 'castle') {
-        drawCastle(); // Перерисовка арены
-    } else if (currentScreen === 'raid') {
-        drawMenu(); // Перерисовка арены
-    } else if (currentScreen === 'menu') {
-        drawMenu(); // Перерисовка меню
-    } else if (currentScreen === 'dungeon') {
-        drawDungeonEntrance(); // Перерисовка подземелья
-    } else if (currentScreen === 'worldBoss') {
-        drawWorldBossBattle(); // Перерисовка боя с мировым боссом
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Обработка изменения ориентации экрана
+        if (window.innerHeight > window.innerWidth) {
+            // Вертикальная ориентация
+            document.body.classList.add('portrait');
+            document.body.classList.remove('landscape');
+        } else {
+            // Горизонтальная ориентация
+            document.body.classList.add('landscape');
+            document.body.classList.remove('portrait');
+        }
+
+        // Перерисовка экрана в зависимости от текущего состояния
+        if (currentScreen === 'battle') {
+            drawBattle(); // Перерисовка экрана боя
+        } else if (currentScreen === 'arena') {
+            drawArena(); // Перерисовка арены
+        } else if (currentScreen === 'castle') {
+            drawCastle(); // Перерисовка замка
+        } else if (currentScreen === 'raid') {
+            drawMenu(); // Перерисовка рейда
+        } else if (currentScreen === 'menu') {
+            drawMenu(); // Перерисовка меню
+        } else if (currentScreen === 'dungeon') {
+            drawDungeonEntrance(); // Перерисовка подземелья
+        } else if (currentScreen === 'worldBoss') {
+            drawWorldBossBattle(); // Перерисовка боя с мировым боссом
+        }
+    });
+
+    // Инициализация классов ориентации при загрузке страницы
+    if (window.innerHeight > window.innerWidth) {
+        document.body.classList.add('portrait');
+        document.body.classList.remove('landscape');
+    } else {
+        document.body.classList.add('landscape');
+        document.body.classList.remove('portrait');
     }
-});
 
 
 
