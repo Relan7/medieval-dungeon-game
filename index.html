@@ -720,6 +720,20 @@ button.upgrade-button:hover, button.hire-button:hover {
 
 /* Медиазапросы для мобильной версии */
 @media (max-width: 768px) {
+          
+            #fullscreenButton {
+            position: fixed;
+            bottom: 60px;
+            right: 0px;
+            padding: 10px 20px;
+            background: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1000;
+            transform: scale(0.5); /* Уменьшить масштаб до 30% */
+        }
     #bottomMenu {
         left: 0;
         width: 100%;
@@ -829,8 +843,8 @@ button.upgrade-button:hover, button.hire-button:hover {
     #chatContainer {
         width: 100%;
         left: 0;
-        top: 55%;
-        max-height: 15vh; /* Максимальная высота 100% высоты экрана */
+        top: 59%;
+        max-height: 14vh; /* Максимальная высота 100% высоты экрана */
     }
     #chatMessages {
     flex-grow: 1;
