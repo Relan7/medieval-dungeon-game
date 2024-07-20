@@ -45,7 +45,7 @@ body, html {
         #characterMenu {
     position: fixed;
     top: 0px;
-    right: 1px;
+    right: 10px;
     background: rgba(0, 0, 0, 0.8);
     color: white;
     padding: 10px;
@@ -201,8 +201,8 @@ body, html {
         filter: brightness(100%);
     }
         #characterImage {
-            width: 250px;
-            height: 420px;
+            width: 297px;
+            height: 500px;
         }
         #nicknameMenu {
             display: block;
@@ -312,10 +312,10 @@ body, html {
         }
         #rebornButton {
     position: fixed;
-    top: 0px; /* Отступ сверху */
-    right: calc(21px + 250px); /* Отступ справа от экрана с учетом ширины #characterMenu */
-    width: 150px;
-    height: 150px;
+    top: 5px;
+    right: 325px;
+    width: 200px;
+    height: 200px;
     background: url('reborn.png') no-repeat center;
     background-size: contain;
     cursor: pointer;
@@ -689,94 +689,18 @@ button.upgrade-button:hover, button.hire-button:hover {
     text-align:  center;  
 }
 #dailyQuestsButton {
-    position: fixed; /* Фиксированное положение относительно окна браузера */
-    top: 445px; /* Отступ от верхнего края экрана, соответствующий высоте #characterMenu */
-    right: 1px; /* Совпадает с правым отступом #characterMenu */
-    cursor: pointer;
+    position:  fixed; 
+    top: 500px;
+    right: 300px; 
+    width:  50px;
+    height:  50px;
+    cursor: pointer; 
 }
-    
+
 #dailyQuestsButton img  {
     width: 100%;
     height: 100%;
 }
-.daily-quests-text {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: rgba(0, 0, 0, 0.8); /* Полупрозрачный фон */
-    color: white; /* Цвет текста */
-    font-size: 18px; /* Размер шрифта */
-    font-weight: bold; /* Жирный текст */
-    border: 2px solid white; /* Белая рамка */
-    border-radius: 10px; /* Скругленные углы */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Тень для текста */
-    cursor: pointer; /* Курсор указателя */
-    transition: transform 0.3s, box-shadow 0.3s; /* Переходы для эффекта наведения */
-}
-
-.daily-quests-text:hover {
-    transform: scale(1.05); /* Легкое увеличение при наведении */
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Светлая тень при наведении */
-}
-
-
-
-/* Медиазапросы для мобильной версии */
-@media (max-width: 768px) {
-    #bottomMenu {
-        left: 0;
-        width: 100%;
-        flex-direction: column;
-        height: auto;
-        font-size: 14px;
-    }
-
-    #characterMenu {
-        right: 0;
-        top: 0;
-        width: 100%;
-        height: auto;
-        font-size: 14px;
-    }
-
-    .status-bar {
-        left: 0;
-        right: 0;
-        width: auto;
-        font-size: 14px;
-    }
-
-    /* Дополнительные изменения для мобильной версии */
-    .crosshair {
-        width: 40px;
-        height: 40px;
-    }
-
-    #mailButton {
-        width: 100px;
-        height: 100px;
-    }
-
-    #rebornButton {
-        width: 100px;
-        height: 100px;
-        right: 10px;
-    }
-
-    #monsterHealthContainer {
-        width: 80%;
-    }
-
-    #chatContainer {
-        width: 90%;
-        left: 5%;
-    }
-
-    #shopMenu {
-        width: 90%;
-        left: 5%;
-    }
-}
-
     </style>
 </head>
 <body>
@@ -794,8 +718,8 @@ button.upgrade-button:hover, button.hire-button:hover {
     </div>
 
 <!-- Кнопка  для ежедневных  заданий --> 
-<div id="dailyQuestsButton" onclick="openDailyQuestsMenu()"> 
-    <span class="daily-quests-text">Ежедневные задания</span>
+<div  id="dailyQuestsButton"  onclick="openDailyQuestsMenu()"> 
+    <img  src="daily_quest_icon.png" alt="Daily Quests"> 
 </div>
 
     <div  id="gameMessage"  style="display:  none;">
@@ -1104,28 +1028,33 @@ function showRebornPrompt() {
         nextRebornLevel = 50;
     } else if (rebornCount === 4 && playerLevel >= 50) {
         rebornPossible = true;
-        nextRebornLevel = 50; // 5-е перерождение тоже требует 50 уровень
-    } else if (rebornCount === 5 && playerLevel >= 50) {
+        nextRebornLevel = 60;
+    } else if (rebornCount === 5 && playerLevel >= 60) {
         rebornPossible = true;
-        nextRebornLevel = 50; // 6-е перерождение тоже требует 50 уровень
-    } else if (rebornCount >= 6 && playerLevel >= 50) { // Все последующие перерождения требуют 50 уровень
+        nextRebornLevel = 70;
+    } else if (playerLevel >= 100) {
         rebornPossible = true;
-        nextRebornLevel = 50;
-    } else {
+        nextRebornLevel = playerLevel + 10; // или любое другое значение для следующего перерождения
+    }
+     else {  //  Добавьте  это  условие 👇
         rebornPossible = false;
-        nextRebornLevel = (rebornCount < 5) ? (rebornCount + 1) * 10 + 10 : 50;
+        //  Устанавливаем  nextRebornLevel  в  соответствии с  логикой  вашей игры 
+        nextRebornLevel =  rebornCount * 10 + 10; 
     }
 
     if (rebornPossible) {
-        document.getElementById('rebornMenu').style.display = 'block';
-        document.getElementById('rebornMessage').textContent = `Прогресс уровней, нанятые герои и накопленное золото будут сброшены. Но вы будете получать награды за убийство монстров в ${1 + rebornCount * 0.1} раза выше. Также будут доступны новые герои для найма. Следующее перерождение доступно с уровня ${nextRebornLevel}.`;
+        
+        document.getElementById('rebornMenu').style.display = 'block'; 
+        document.getElementById('rebornMessage').textContent = `Прогресс  уровней, нанятые  герои  и  накопленное золото  будут  сброшены.  Но вы  будете получать  награды  за  убийство монстров  в  ${1  +  rebornCount * 0.1}  раза  выше. 
+                                                                  Также будут доступны  новые  герои  для  найма. Следующее перерождение  доступно с  уровня  ${nextRebornLevel}.`; 
     } else {
-        document.getElementById('errorMessage').style.display = 'block';
-        document.getElementById('errorMessageText').textContent = `Ваш уровень слишком низок для перерождения! Требуется уровень: ${nextRebornLevel}.`;
+        //  Отображаем  требуемый  уровень 
+        document.getElementById('errorMessage').style.display = 'block'; 
+        document.getElementById('errorMessageText').textContent = `Ваш  уровень  слишком  низок  для  перерождения!  
+                                                                    Требуется  уровень:  ${nextRebornLevel}.`; 
     }
 }
 window.showRebornPrompt = showRebornPrompt;
-
 
 // Функция  для  закрытия  окна  сообщения  об  ошибке 
 function closeErrorMessage() {

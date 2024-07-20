@@ -45,7 +45,7 @@ body, html {
         #characterMenu {
     position: fixed;
     top: 0px;
-    right: 1px;
+    right: 10px;
     background: rgba(0, 0, 0, 0.8);
     color: white;
     padding: 10px;
@@ -201,8 +201,8 @@ body, html {
         filter: brightness(100%);
     }
         #characterImage {
-            width: 250px;
-            height: 420px;
+            width: 297px;
+            height: 500px;
         }
         #nicknameMenu {
             display: block;
@@ -312,10 +312,10 @@ body, html {
         }
         #rebornButton {
     position: fixed;
-    top: 0px; /* Отступ сверху */
-    right: calc(21px + 250px); /* Отступ справа от экрана с учетом ширины #characterMenu */
-    width: 150px;
-    height: 150px;
+    top: 5px;
+    right: 325px;
+    width: 200px;
+    height: 200px;
     background: url('reborn.png') no-repeat center;
     background-size: contain;
     cursor: pointer;
@@ -652,151 +652,10 @@ button.upgrade-button:hover, button.hire-button:hover {
     1px 1px  0  green;
 }
 
-#dailyQuestsMenu {
-    display: none;
-    position:  fixed;
-    top: 50%;
-    left: 50%; 
-    transform:  translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.8); 
-    color: white; 
-    padding:  20px;
-    border-radius: 5px;
-    z-index: 1001;
-    text-align:  center; 
-    font-size:  16px;  /*  Уменьшаем размер шрифта  */ 
-}
-
-#dailyQuestsList {
-    list-style-type:  none;  
-    padding: 0;
-    text-align:  left;  
-    max-height:  300px; /*   Ограничиваем высоту  списка */ 
-    overflow-y:  auto;  /*  Добавляем полосу прокрутки */ 
-}
-
-#dailyQuestsList  li {
-    margin-bottom: 5px; 
-    /*  Добавляем фон  и  рамку  для  лучшей  читаемости */ 
-    background-color: rgba(0, 0, 0, 0.5);  
-    border: 1px solid white;  
-    padding:  8px;  /*  Добавляем  отступы  */
-}
-
-#dailyQuestResetTime {
-    margin-top: 10px; 
-    font-size: 14px;
-    text-align:  center;  
-}
-#dailyQuestsButton {
-    position: fixed; /* Фиксированное положение относительно окна браузера */
-    top: 445px; /* Отступ от верхнего края экрана, соответствующий высоте #characterMenu */
-    right: 1px; /* Совпадает с правым отступом #characterMenu */
-    cursor: pointer;
-}
-    
-#dailyQuestsButton img  {
-    width: 100%;
-    height: 100%;
-}
-.daily-quests-text {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: rgba(0, 0, 0, 0.8); /* Полупрозрачный фон */
-    color: white; /* Цвет текста */
-    font-size: 18px; /* Размер шрифта */
-    font-weight: bold; /* Жирный текст */
-    border: 2px solid white; /* Белая рамка */
-    border-radius: 10px; /* Скругленные углы */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Тень для текста */
-    cursor: pointer; /* Курсор указателя */
-    transition: transform 0.3s, box-shadow 0.3s; /* Переходы для эффекта наведения */
-}
-
-.daily-quests-text:hover {
-    transform: scale(1.05); /* Легкое увеличение при наведении */
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Светлая тень при наведении */
-}
-
-
-
-/* Медиазапросы для мобильной версии */
-@media (max-width: 768px) {
-    #bottomMenu {
-        left: 0;
-        width: 100%;
-        flex-direction: column;
-        height: auto;
-        font-size: 14px;
-    }
-
-    #characterMenu {
-        right: 0;
-        top: 0;
-        width: 100%;
-        height: auto;
-        font-size: 14px;
-    }
-
-    .status-bar {
-        left: 0;
-        right: 0;
-        width: auto;
-        font-size: 14px;
-    }
-
-    /* Дополнительные изменения для мобильной версии */
-    .crosshair {
-        width: 40px;
-        height: 40px;
-    }
-
-    #mailButton {
-        width: 100px;
-        height: 100px;
-    }
-
-    #rebornButton {
-        width: 100px;
-        height: 100px;
-        right: 10px;
-    }
-
-    #monsterHealthContainer {
-        width: 80%;
-    }
-
-    #chatContainer {
-        width: 90%;
-        left: 5%;
-    }
-
-    #shopMenu {
-        width: 90%;
-        left: 5%;
-    }
-}
-
+/*  Добавьте  стили для  остальных  битв (4-10)  с  разными  цветами */ 
     </style>
 </head>
 <body>
-
-    <div id="dailyQuestsMenu" style="display: none;">
-        <h2>Ежедневные задания</h2>
-    
-        <!--  Кнопки  для  переключения  категорий -->
-        <div  id="dailyQuestCategories">
-            <!--  Кнопки будут  динамически  добавлены сюда  --> 
-        </div>
-    
-        <ul  id="dailyQuestsList"></ul> 
-        <button onclick="closeDailyQuestsMenu()">Закрыть</button>
-    </div>
-
-<!-- Кнопка  для ежедневных  заданий --> 
-<div id="dailyQuestsButton" onclick="openDailyQuestsMenu()"> 
-    <span class="daily-quests-text">Ежедневные задания</span>
-</div>
 
     <div  id="gameMessage"  style="display:  none;">
         <p  id="gameMessageText"></p>
@@ -1049,41 +908,6 @@ let currentChat = 'global'; // Текущий чат (глобальный по 
 let initialHeroes = allHeroes.slice(0, 5); // Начальные герои
 let heroes = [...initialHeroes];
 // Функция для миграции данных героев
-let  currentQuestCategory  =  'Убийство монстров'; //  Текущая категория  
-
-const questCategories = {
-    'Убийство монстров': [
-        { description: 'Убить 10 монстров', goal: 10, progress: 0, reward: 500, completed: false, claimed: false },
-        { description: 'Убить 30 монстров', goal: 30, progress: 0, reward: 1000, completed: false, claimed: false },
-        { description: 'Убить 60 монстров', goal: 60, progress: 0, reward: 2500, completed: false, claimed: false },
-        { description: 'Убить 100 монстров', goal: 100, progress: 0, reward: 5000, completed: false, claimed: false },
-        { description: 'Убить 150 монстров', goal: 150, progress: 0, reward: 8000, completed: false, claimed: false },
-        { description: 'Убить 210 монстров', goal: 210, progress: 0, reward: 12000, completed: false, claimed: false },
-        { description: 'Убить 280 монстров', goal: 280, progress: 0, reward: 17000, completed: false, claimed: false },
-        { description: 'Убить 360 монстров', goal: 360, progress: 0, reward: 23000, completed: false, claimed: false },
-        { description: 'Убить 450 монстров', goal: 450, progress: 0, reward: 30000, completed: false, claimed: false },
-        { description: 'Убить 550 монстров', goal: 550, progress: 0, reward: 40000, completed: false, claimed: false }
-    ],
-    'Трата золота': [
-        { description: 'Потратить 1000 золота', goal: 1000, progress: 0, reward: 200, completed: false, claimed: false },
-        { description: 'Потратить 3000 золота', goal: 3000, progress: 0, reward: 500, completed: false, claimed: false },
-        { description: 'Потратить 6000 золота', goal: 6000, progress: 0, reward: 1200, completed: false, claimed: false },
-        { description: 'Потратить 10000 золота', goal: 10000, progress: 0, reward: 2500, completed: false, claimed: false },
-        { description: 'Потратить 15000 золота', goal: 15000, progress: 0, reward: 4000, completed: false, claimed: false },
-        { description: 'Потратить 21000 золота', goal: 21000, progress: 0, reward: 6000, completed: false, claimed: false },
-        { description: 'Потратить 28000 золота', goal: 28000, progress: 0, reward: 8500, completed: false, claimed: false },
-        { description: 'Потратить 36000 золота', goal: 36000, progress: 0, reward: 11500, completed: false, claimed: false },
-        { description: 'Потратить 45000 золота', goal: 45000, progress: 0, reward: 15000, completed: false, claimed: false },
-        { description: 'Потратить 55000 золота', goal: 55000, progress: 0, reward: 20000, completed: false, claimed: false }
-    ]
-};
-
-//  Функция для  переключения  категории  заданий  
-function  switchQuestCategory(category)  { 
-    currentQuestCategory  = category; 
-    updateDailyQuestsUI();
-}
-window.switchQuestCategory  =  switchQuestCategory;
 
 function showRebornPrompt() {
     const playerLevel = currentLevel;
@@ -1104,28 +928,33 @@ function showRebornPrompt() {
         nextRebornLevel = 50;
     } else if (rebornCount === 4 && playerLevel >= 50) {
         rebornPossible = true;
-        nextRebornLevel = 50; // 5-е перерождение тоже требует 50 уровень
-    } else if (rebornCount === 5 && playerLevel >= 50) {
+        nextRebornLevel = 60;
+    } else if (rebornCount === 5 && playerLevel >= 60) {
         rebornPossible = true;
-        nextRebornLevel = 50; // 6-е перерождение тоже требует 50 уровень
-    } else if (rebornCount >= 6 && playerLevel >= 50) { // Все последующие перерождения требуют 50 уровень
+        nextRebornLevel = 70;
+    } else if (playerLevel >= 100) {
         rebornPossible = true;
-        nextRebornLevel = 50;
-    } else {
+        nextRebornLevel = playerLevel + 10; // или любое другое значение для следующего перерождения
+    }
+     else {  //  Добавьте  это  условие 👇
         rebornPossible = false;
-        nextRebornLevel = (rebornCount < 5) ? (rebornCount + 1) * 10 + 10 : 50;
+        //  Устанавливаем  nextRebornLevel  в  соответствии с  логикой  вашей игры 
+        nextRebornLevel =  rebornCount * 10 + 10; 
     }
 
     if (rebornPossible) {
-        document.getElementById('rebornMenu').style.display = 'block';
-        document.getElementById('rebornMessage').textContent = `Прогресс уровней, нанятые герои и накопленное золото будут сброшены. Но вы будете получать награды за убийство монстров в ${1 + rebornCount * 0.1} раза выше. Также будут доступны новые герои для найма. Следующее перерождение доступно с уровня ${nextRebornLevel}.`;
+        
+        document.getElementById('rebornMenu').style.display = 'block'; 
+        document.getElementById('rebornMessage').textContent = `Прогресс  уровней, нанятые  герои  и  накопленное золото  будут  сброшены.  Но вы  будете получать  награды  за  убийство монстров  в  ${1  +  rebornCount * 0.1}  раза  выше. 
+                                                                  Также будут доступны  новые  герои  для  найма. Следующее перерождение  доступно с  уровня  ${nextRebornLevel}.`; 
     } else {
-        document.getElementById('errorMessage').style.display = 'block';
-        document.getElementById('errorMessageText').textContent = `Ваш уровень слишком низок для перерождения! Требуется уровень: ${nextRebornLevel}.`;
+        //  Отображаем  требуемый  уровень 
+        document.getElementById('errorMessage').style.display = 'block'; 
+        document.getElementById('errorMessageText').textContent = `Ваш  уровень  слишком  низок  для  перерождения!  
+                                                                    Требуется  уровень:  ${nextRebornLevel}.`; 
     }
 }
 window.showRebornPrompt = showRebornPrompt;
-
 
 // Функция  для  закрытия  окна  сообщения  об  ошибке 
 function closeErrorMessage() {
@@ -1185,198 +1014,6 @@ function closeRebornSuccessMessage() {
     document.getElementById('rebornSuccessMessage').style.display = 'none';
 }
 window.closeRebornSuccessMessage = closeRebornSuccessMessage;
-
-
-
-//  Функция для открытия меню ежедневных заданий  
-function  openDailyQuestsMenu()  { 
-    document.getElementById('dailyQuestsMenu').style.display = 'block';
-    updateDailyQuestsUI(); 
-}
-window.openDailyQuestsMenu  = openDailyQuestsMenu;
-
-// Функция для закрытия меню  ежедневных заданий  
-function  closeDailyQuestsMenu()  { 
-    document.getElementById('dailyQuestsMenu').style.display =  'none'; 
-} 
-window.closeDailyQuestsMenu  = closeDailyQuestsMenu;
-
-// Функция  для обновления UI  ежедневных заданий 
-function updateDailyQuestsUI() {
-    const dailyQuestsList = document.getElementById('dailyQuestsList');
-    dailyQuestsList.innerHTML = ''; // Очищаем список 
-
-    const currentQuests = questCategories[currentQuestCategory]; 
-
-    currentQuests.forEach((quest, index) => { 
-        // Отображаем задание, только если оно НЕ выполнено ИЛИ выполнено, но награда не получена
-        if (!quest.completed || (quest.completed && !quest.claimed)) { 
-            const questItem = document.createElement('li');
-            questItem.textContent = `${quest.description} (${quest.progress}/${quest.goal}) - Награда: ${quest.reward} золота`; 
-
-            // Добавляем кнопку "Получить награду", если задание выполнено И награда еще не забрана
-            if (quest.completed && !quest.claimed) { 
-                const claimRewardButton = document.createElement('button');
-                claimRewardButton.textContent = 'Получить награду'; 
-                claimRewardButton.onclick =  () => {  
-                    if (currentQuestCategory === 'Убийство монстров')  {
-                        claimDailyQuestReward(index);
-                    } else if (currentQuestCategory === 'Трата золота')  { 
-                        claimDailyQuestReward(index);
-                    } 
-                    // ...  обработка для других категорий  ... 
-                };
-                questItem.appendChild(claimRewardButton); 
-            }
-
-            dailyQuestsList.appendChild(questItem); 
-        }
-    });
-
-    // Добавляем информацию  о  сбросе  заданий 
-    const resetTimeElement = document.createElement('p'); 
-    resetTimeElement.id = 'dailyQuestResetTime';
-    resetTimeElement.textContent = `Сброс через: ${getTimeUntilDailyQuestReset()}`;
-    dailyQuestsList.appendChild(resetTimeElement);
-}
-
-//  Функция для  динамического  создания кнопок  категорий 
-function createCategoryButtons()  {
-    const  categoriesContainer  =  document.getElementById('dailyQuestCategories'); 
-    categoriesContainer.innerHTML  =  ''; //  Очищаем  контейнер
-
-    for  (const  category  in questCategories)  {
-        const  button  =  document.createElement('button');
-        button.textContent =  category; 
-        button.onclick = ()  => switchQuestCategory(category); 
-        categoriesContainer.appendChild(button);
-    }
-}
-
-// function handleGoldSpendingQuest(questIndex) {
-//     const goldSpendingQuests = questCategories['Трата золота'];
-    
-//     if (!goldSpendingQuests || !goldSpendingQuests[questIndex]) {
-//         console.error("Invalid quest index:", questIndex);
-//         return;
-//     }
-
-//     const quest = goldSpendingQuests[questIndex];
-
-//     // Проверяем,  было ли  уже потрачено достаточно золота  
-//     if  (quest.progress  >=  quest.goal) {
-//         showGameMessage('Это  задание  уже выполнено!');
-//         return; 
-//     }
-
-//     // Проверяем,  выполнено  ли  задание  
-//     if  (quest.completed  &&  !quest.claimed)  {
-//         console.log("Получение награды  за  задание:",  quest.description);
-//         console.log("Награда:", quest.reward); 
-
-//         updateGold(gold  +  quest.reward) 
-//             .then(()  => { 
-//                 console.log("Золото  обновлено.  Текущее  золото:", gold);
-
-//                 //  Помечаем,  что  награда  забрана
-//                 quest.claimed = true;  
-
-//                 updateDailyQuestsUI(); 
-//                 saveProgress();  
-//                 console.log("Задание обновлено и прогресс сохранен.");
-//             }) 
-//             .catch((error) => {
-//                 console.error("Ошибка  при  обновлении  золота:",  error); 
-//             });
-//     } else  if (!quest.completed) {
-//         showGameMessage('Задание  еще  не  выполнено!');
-//     } else if (quest.completed &&  quest.claimed) { 
-//         showGameMessage('Награда  за  это  задание  уже  получена!');
-//     }
-// }
-// window.handleGoldSpendingQuest =  handleGoldSpendingQuest;
-
-
-
-
-
-//  Функция для  получения награды за  задание
-function claimDailyQuestReward(questIndex) {
-    const quest = questCategories[currentQuestCategory][questIndex];
-
-    if (quest.completed && !quest.claimed) { // Проверяем, забрана ли  уже награда
-        console.log("Получение награды  за задание:", quest.description);
-        console.log("Награда:", quest.reward); 
-
-        updateGold(gold + quest.reward)
-            .then(() => {
-                console.log("Золото обновлено.  Текущее золото:", gold); 
-
-                // Помечаем, что награда  забрана 
-                quest.claimed = true;  
-                
-                updateDailyQuestsUI();
-                saveProgress();
-                console.log('Задание  обновлено  и прогресс  сохранен.');
-            }) 
-            .catch((error) => {
-                console.error("Ошибка  при  обновлении  золота:",  error); 
-            });
-            quest.claimed =  true; 
-            updateDailyQuestsUI(); 
-    }
-}
-window.claimDailyQuestReward = claimDailyQuestReward;
-
-
-
-// Функция для сброса ежедневных заданий 
-async function resetDailyQuests() {
-    console.log("Сброс ежедневных заданий..."); 
-
-    for (const category in questCategories) { 
-        questCategories[category].forEach(quest => {
-            quest.progress = 0; 
-            quest.completed = false; 
-            quest.claimed = false; 
-        }); 
-    } 
-
-    await saveProgress(); //  Сохранение прогресса  заданий
-
-    updateDailyQuestsUI();  // Обновляем UI  после сброса
-
-    console.log("Ежедневные  задания сброшены!"); 
-}
-window.resetDailyQuests = resetDailyQuests;
-//  Запускаем  таймер  для  ежедневного сброса заданий  
-setInterval(resetDailyQuests,  1000  *  60  * 60  * 24);  //  Вызываем  каждые  24 часа
-
-
-//  Функция для расчета времени  до  сброса  ежедневных заданий
-function  getTimeUntilDailyQuestReset()  {
-    const now  =  new  Date(); 
-    const  resetHour  =  0;  //  Час  сброса  (00:00  UTC)  
-    const resetTime = new Date(now);
-    resetTime.setUTCHours(resetHour, 0,  0,  0); 
-
-    // Если время  сброса уже  прошло сегодня,  устанавливаем  его  на  завтра
-    if  (now  >=  resetTime)  { 
-        resetTime.setUTCDate(resetTime.getUTCDate()  +  1);
-    }
-
-    const  timeDifference  = resetTime.getTime()  - now.getTime();
-    const  hours =  Math.floor(timeDifference  / (1000  *  60  *  60)); 
-    const minutes  = Math.floor((timeDifference  %  (1000  *  60  *  60)) /  (1000  *  60));
-
-    return `${hours} ч ${minutes}  мин`; 
-}
-
-
-
-
-
-
 
 
 function showGameMessage(message) {
@@ -2429,47 +2066,33 @@ window.claimReward = claimReward;
 
 function spendGold(amount) {
     const playerGoldRef = ref(database, `players/${nickname}/gold`);
-    console.log("questCategories:", questCategories); 
-
-    // Обновление прогресса ежедневных заданий на трату золота
-    // Перемещаем этот код ВВЕРХ 
-    questCategories['Трата золота'].forEach(quest => {
-        if (!quest.completed && !quest.claimed) {
-            quest.progress += amount;
-            if (quest.progress >= quest.goal) {
-                quest.completed = true; 
-                showGameMessage(`Задание "${quest.description}" выполнено!`);
-            }
-        } 
-    }); 
 
     get(playerGoldRef).then((snapshot) => {
-        let currentGold = snapshot.val() || 0; 
+        let currentGold = snapshot.val() || 0;
         if (currentGold >= amount) {
-            updateGold(currentGold - amount);
+            updateGold(currentGold - amount); 
 
-            set(playerGoldRef, currentGold - amount).then(() => {
+            set(playerGoldRef, currentGold - amount).then(() => { 
                 console.log(`Gold spent: ${amount}, remaining gold: ${currentGold - amount}`);
 
-                // Обновляем глобальную переменную золота
-                gold = currentGold - amount;
+                //  Добавьте эту  строку 👇 
+                gold = currentGold - amount;  
 
-                document.getElementById('statusGold').textContent = gold;
-                saveProgress(); 
-                updateStatusBar(); 
-            }).catch((error) => { 
-                console.error('Error updating gold:', error); 
-            }); 
+                document.getElementById('statusGold').textContent = gold; 
+                saveProgress();
+                updateStatusBar();
+            }).catch((error) => {
+                console.error('Error updating gold:', error);
+            });
         } else {
-            console.log('Not enough gold to spend.'); 
-            showGameMessage('Недостаточно золота!');
-        } 
-    })
-    .catch((error) => { 
-        console.error('Error getting current gold:', error); 
-    }); 
+            console.log('Not enough gold to spend.');
+        }
+    }).catch((error) => {
+        console.error('Error getting current gold:', error);
+    });
 }
 window.spendGold = spendGold;
+
 
 
 
@@ -2586,36 +2209,25 @@ function startHourlyReset() {
 function updateMonsterHealthDisplay() {
     const healthBar = document.getElementById('monsterHealthBar');
     const healthValue = document.getElementById('monsterHealthValue');
+    //console.log('Current monsterHealth:', monsterHealth);
 
     if (healthBar) {
-        let currentHealth, maxHealth;
-        
-        // Выбираем  правильное  здоровье  в зависимости  от  экрана
-        if (currentScreen === 'worldBoss') {
-            currentHealth = worldBossHealth;
-            maxHealth = 1000000;  // Максимальное  здоровье  мирового босса
-        } else {
-            currentHealth = monsterHealth;
-            maxHealth = 100 * Math.pow(1.1, currentLevel - 1); 
-        }
-
-        const healthPercentage = (currentHealth / maxHealth) * 100; 
+        const maxHealth = 100 * Math.pow(1.1, currentLevel - 1);
+        const healthPercentage = (monsterHealth / maxHealth) * 100;
         const color = getHealthColor(healthPercentage);
         healthBar.style.width = `${Math.min(healthPercentage, 100)}%`;
-        healthBar.style.backgroundColor = color;
+        healthBar.style.backgroundColor = color; // Обновляем цвет фона
+        //console.log(`Updated monster health bar: Width: ${healthPercentage}%, Color: ${color}`);
+       // console.log(`Health bar style:`, healthBar.style);
     }
 
     if (healthValue) {
-        // Выбираем  правильное  здоровье  в  зависимости  от  экрана
-        if (currentScreen === 'worldBoss')  {
-            healthValue.textContent =  worldBossHealth.toFixed(0);
-        }  else {
-            healthValue.textContent =  monsterHealth.toFixed(0); 
-        }
+        healthValue.textContent = monsterHealth.toFixed(0); // Обновляем текстовое значение здоровья
+        //console.log(`Updated monster health value: ${monsterHealth.toFixed(0)}`);
     }
 }
-window.updateMonsterHealthDisplay =  updateMonsterHealthDisplay;
 
+window.updateMonsterHealthDisplay = updateMonsterHealthDisplay;
 window.getHealthColor = getHealthColor;
 
 
@@ -3742,7 +3354,8 @@ function hitMonster(event) {
     const monsterX = canvas.width / 2 - monsterImage.width / 2;
     const monsterY = canvas.height / 2 - monsterImage.height / 2;
 
-    if (mouseX >= monsterX &&
+    if (
+        mouseX >= monsterX &&
         mouseX <= monsterX + monsterImage.width &&
         mouseY >= monsterY &&
         mouseY <= monsterY + monsterImage.height
@@ -3750,45 +3363,34 @@ function hitMonster(event) {
         showHitAnimation();
         const totalDamage = calculateTotalDamage();
         monsterHealth -= totalDamage;
-
         if (monsterHealth < 0) {
             monsterHealth = 0;
         }
-
         hits += 1;
         updateMonsterHealthDisplay();
 
         if (monsterHealth <= 0) {
-            let goldReward = Math.round(10 * currentLevel * rewardMultiplier);
+            let goldReward = Math.round(10 * currentLevel * rewardMultiplier); // Используем Math.round для округления
             console.log(`Monster defeated. Awarding gold: ${goldReward}`);
-            updateGold(gold + goldReward)
-                .then(() => {
-                    console.log(`Gold after defeating monster: ${gold}`);
-                    document.getElementById('goldAmount').textContent = goldReward;
-                    return saveProgress();
-                })
-                .then(() => {
-                    showVictoryMessage();
-                })
-                .catch(error => {
-                    console.error('Error updating gold and saving progress:', error);
-                });
-
-            // Обновление прогресса ежедневных заданий 
-            questCategories[currentQuestCategory].forEach(quest => {
-                if (quest.description.includes('Убить') && !quest.completed) {
-                    quest.progress++;
-                    if (quest.progress >= quest.goal) {
-                        quest.completed = true;
-                        showGameMessage(`Задание "${quest.description}" выполнено!`);
-                    }
-                }
-            }); 
-        } 
+            updateGold(gold + goldReward).then(() => {
+                console.log(`Gold after defeating monster: ${gold}`);
+                document.getElementById('goldAmount').textContent = goldReward;
+                return saveProgress();
+            }).then(() => {
+                showVictoryMessage();
+            }).catch(error => {
+                console.error('Error updating gold and saving progress:', error);
+            });
+        }
         updateCharacterImage();
     }
 }
-window.hitMonster = hitMonster; 
+
+
+
+
+
+window.hitMonster = hitMonster;
 
 
 // Начальное создание монстра с базовым здоровьем
@@ -4000,7 +3602,6 @@ function startLevel(levelNumber) {
     drawBattle();
     updateMonsterHealthDisplay(); // Обновление отображения здоровья при начале уровня
     updateCharacterImage(); // вызов функции для смены изображения
-    //showHealthBar();  //  Показываем полоску  здоровья 
 }
 
 window.startLevel = startLevel;
@@ -4164,6 +3765,21 @@ function updateWorldBossData() {
     // Устанавливаем координаты текста выше босса и проверяем, что они в пределах экрана
     const healthTextY = bossY - 40 > 0 ? bossY - 40 : 40;
 
+    // Добавляем лог для проверки координат
+    //console.log(`Drawing health text at: ${canvas.width / 2}, ${healthTextY}`);
+
+    // Добавляем отображение здоровья босса над его изображением с жирным шрифтом и обводкой
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 32px Comic Sans MS';
+    ctx.textAlign = 'center';
+    
+    // Обводка текста
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 4;
+    ctx.strokeText(`Здоровье: ${worldBossHealth}`, canvas.width / 2, healthTextY);
+    
+    // Основной текст
+    ctx.fillText(`Здоровье: ${worldBossHealth}`, canvas.width / 2, healthTextY);
 
     // Рисуем полоску здоровья
     drawHealthBar(worldBossHealth, canvas.width - 210, 10, 200, 20, 'red');
@@ -4195,7 +3811,6 @@ const playersListStartY = canvas.height - 700; // смещение на 100 пи
     });
 
     updateStatusBar();
-    updateMonsterHealthDisplay();
 }
 
 
@@ -4278,7 +3893,6 @@ function hitWorldBoss(playerName, damage) {
     updateDamageList();
     syncWorldBossHealth();
     syncPlayersDamage();
-    updateMonsterHealthDisplay(); //  Добавьте  вызов  здесь
 
     if (worldBossHealth <= 0) {
         // Вызов функции отправки наград при смерти босса
@@ -4310,9 +3924,8 @@ function changeScreen(screen) {
     document.getElementById('rebornButton').style.display = (screen === 'dungeon') ? 'block' : 'none'; // Отображаем кнопку только на экране "battle"
     document.getElementById('pvpButton').style.display = 'none'; // Скрываем кнопку по умолчанию
     document.getElementById('pvpLastBattles').style.display  =  'none';
-    document.getElementById('dailyQuestsMenu').style.display  = 'none'; //  Скрываем меню  квестов 
     // Hide the monster health bar when changing screens
-    if (screen !== 'dungeon' && screen !== 'battle') {  
+    if (screen !== 'dungeon' && screen !== 'battle') {
         document.getElementById('monsterHealthContainer').style.display = 'none';
         updateStatusBar();
     }
@@ -4321,7 +3934,6 @@ function changeScreen(screen) {
         document.getElementById('statusBar').style.display = 'block';
         updateStatusBar();
         drawWorldBossBattle();
-        showWorldBossHealthBar();
     } else {
         document.getElementById('worldBossScreen').style.display = 'none';
     }
@@ -4374,15 +3986,6 @@ document.getElementById('bottomMenu').querySelector('div').addEventListener('cli
     changeScreen('arena');
 });
 
-function showWorldBossHealthBar() {
-    const healthContainer =  document.getElementById('monsterHealthContainer'); 
-    if (currentScreen === 'worldBoss') { //  Отображаем  полоску  только  на  экране  босса  
-        healthContainer.style.display  =  'block'; 
-    } else {
-        healthContainer.style.display = 'none'; // Скрываем на  других  экранах 
-    }
-}
-window.showWorldBossHealthBar = showWorldBossHealthBar; 
 
 function syncWorldBossHealth() {
     set(ref(database, 'worldBoss/health'), worldBossHealth);
@@ -4606,9 +4209,6 @@ window.updateStatusBar = updateStatusBar;
     updateMonsterHealthDisplay(); 
     // Добавьте await  перед  updateClanList  
     await updateClanList(); 
-    createCategoryButtons();  //  Создаем кнопки  для  категорий  заданий
-    // Запускаем  таймер для  ежедневного  сброса  заданий  
-    setInterval(resetDailyQuests,  1000  *  60  *  60 *  24);  //  Вызываем  каждые  24  часа  
 };
 
 // function clearrQueue() {
