@@ -782,8 +782,28 @@ button.upgrade-button:hover, button.hire-button:hover {
     z-index: 1001;
     text-align:  center; 
     font-size:  16px;  /*  Уменьшаем размер шрифта  */ 
-    transform: scale(0.2); /* Уменьшить масштаб до 30% */
+    transform: scale(0.8); /* Уменьшить масштаб до 30% */
         transform-origin: top right; /* Указать точку начала масштабирования */
+}
+.daily-quests-text {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: rgba(0, 0, 0, 0.8); /* Полупрозрачный фон */
+    color: white; /* Цвет текста */
+    font-size: 18px; /* Размер шрифта */
+    font-weight: bold; /* Жирный текст */
+    border: 2px solid white; /* Белая рамка */
+    border-radius: 10px; /* Скругленные углы */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Тень для текста */
+    cursor: pointer; /* Курсор указателя */
+    transition: transform 0.3s, box-shadow 0.3s; /* Переходы для эффекта наведения */
+    transform: scale(0.7); /* Уменьшить масштаб до 30% */
+}
+
+.daily-quests-text:hover {
+    transform: scale(1.05); /* Легкое увеличение при наведении */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Светлая тень при наведении */
+    transform: scale(0.7); /* Уменьшить масштаб до 30% */
 }
     /* Дополнительные изменения для мобильной версии */
     .crosshair {
@@ -809,7 +829,7 @@ button.upgrade-button:hover, button.hire-button:hover {
     #chatContainer {
         width: 100%;
         left: 0;
-        top: 70%;
+        top: 55%;
         max-height: 30vh; /* Максимальная высота 100% высоты экрана */
     }
     #chatMessages {
