@@ -739,25 +739,18 @@ button.upgrade-button:hover, button.hire-button:hover {
         font-size: 16px;
         text-align: center;
         max-width: calc(100vw - 20px);
-        /* max-height: calc(100vh - 20px); */
+        height: 100vh; /* Установить высоту 100% высоты экрана */
+        max-height: 100vh; /* Максимальная высота 100% высоты экрана */
         overflow: auto;
         display: none; /* Скрываем по умолчанию */
         transform: scale(0.6); /* Уменьшить масштаб до 30% */
         transform-origin: top left; /* Указать точку начала масштабирования */
     }
     .health-bar {
-            background: #555;
-            border-radius: 5px;
-            overflow: hidden;
-            width: 200px;
-            height: 20px;
-            margin-bottom: 10px;
-            transform: scale(0.6); /* Уменьшить масштаб до 30% */
+        display: none; /* Скрываем по умолчанию */
         }
         .health-bar-inner {
-            height: 100%;
-            background: #0f0;
-            transform: scale(0.6); /* Уменьшить масштаб до 30% */
+            display: none; /* Скрываем по умолчанию */
         }
     #characterMenu {
         right: 0;
@@ -765,12 +758,13 @@ button.upgrade-button:hover, button.hire-button:hover {
         width: 100%;
         height: auto;
         font-size: 14px;
-        transform: scale(0.1); /* Уменьшить масштаб до 30% */
+        transform: scale(0.7); /* Уменьшить масштаб до 30% */
         transform-origin: top right; /* Указать точку начала масштабирования */
     }
 
     .status-bar {
-        left: 40px;
+        left: 100px;
+        top: 80px;
         right: 0;
         width: 20%;
         font-size: 14px;
@@ -788,8 +782,8 @@ button.upgrade-button:hover, button.hire-button:hover {
     }
 
     #rebornButton {
-        width: 30px;
-        height: 30px;
+        width: 60px;
+        height: 60px;
         right: 10px;
     }
 
