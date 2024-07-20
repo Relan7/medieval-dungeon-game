@@ -742,14 +742,17 @@ button.upgrade-button:hover, button.hire-button:hover {
         max-height: calc(100vh - 20px);
         overflow: auto;
         display: none; /* Скрываем по умолчанию */
-        width: 30%;
+        transform: scale(0.3); /* Уменьшить масштаб до 30% */
+        transform-origin: top left; /* Указать точку начала масштабирования */
     }
     #characterMenu {
         right: 0;
         top: 0;
-        width: 10%;
+        width: 100%;
         height: auto;
         font-size: 14px;
+        transform: scale(0.1); /* Уменьшить масштаб до 30% */
+        transform-origin: top right; /* Указать точку начала масштабирования */
     }
 
     .status-bar {
