@@ -718,12 +718,9 @@ button.upgrade-button:hover, button.hire-button:hover {
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Светлая тень при наведении */
 }
 
-
-
 /* Медиазапросы для мобильной версии */
 @media (max-width: 768px) {
-    /* Вертикальная ориентация */
-    .portrait #bottomMenu {
+    #bottomMenu {
         left: 0;
         width: 100%;
         flex-direction: column;
@@ -732,106 +729,51 @@ button.upgrade-button:hover, button.hire-button:hover {
     }
 
     #characterMenu {
-        display: none; /* Скрыть элемент в мобильной версии */
-    }
-
-    .portrait .status-bar {
-        left: 0;
         right: 0;
-        width: auto;
+        top: 0;
+        width: 10%;
+        height: auto;
         font-size: 14px;
     }
 
-    .portrait .crosshair {
+    .status-bar {
+        left: 0;
+        right: 0;
+        width: 20%;
+        font-size: 14px;
+    }
+
+    /* Дополнительные изменения для мобильной версии */
+    .crosshair {
         width: 40px;
         height: 40px;
     }
 
-    .portrait #mailButton {
+    #mailButton {
         width: 100px;
         height: 100px;
     }
 
-    .portrait #rebornButton {
-        width: 100px;
-        height: 100px;
+    #rebornButton {
+        width: 30px;
+        height: 30px;
         right: 10px;
     }
 
-    .portrait #monsterHealthContainer {
-        width: 80%;
+    #monsterHealthContainer {
+        width: 40%;
     }
 
-    .portrait #chatContainer {
-        width: 90%;
+    #chatContainer {
+        width: 50%;
         left: 5%;
     }
 
-    .portrait #shopMenu {
+    #shopMenu {
         width: 90%;
         left: 5%;
-    }
-
-    /* Элементы, которые будут скрыты в мобильной версии */
-    .portrait .hide-on-mobile {
-        display: none;
-    }
-
-    /* Горизонтальная ориентация */
-    .landscape #bottomMenu {
-        left: 0;
-        width: 100%;
-        flex-direction: row;
-        height: 60px;
-        font-size: 14px;
-    }
-    #characterMenu {
-        display: none; /* Скрыть элемент в мобильной версии */
-    }
-
-    .landscape .status-bar {
-        left: 0;
-        right: 0;
-        width: auto;
-        font-size: 14px;
-    }
-
-    .landscape .crosshair {
-        width: 40px;
-        height: 40px;
-    }
-
-    .landscape #mailButton {
-        width: 100px;
-        height: 100px;
-    }
-
-    .landscape #rebornButton {
-        width: 100px;
-        height: 100px;
-        right: 10px;
-    }
-
-    .landscape #monsterHealthContainer {
-        width: 80%;
-    }
-
-    .landscape #chatContainer {
-        width: 90%;
-        left: 5%;
-    }
-
-    .landscape #shopMenu {
-        width: 90%;
-        left: 5%;
-    }
-
-    /* Элементы, которые будут скрыты в мобильной версии */
-    .landscape .hide-on-mobile {
-        display: none;
     }
 }
-
     </style>
 </head>
 <body>
@@ -1052,9 +994,7 @@ button.upgrade-button:hover, button.hire-button:hover {
         <button onclick="closeErrorMessage()">Закрыть</button> 
     </div>
 
-    <div id="someElement" class="hide-on-mobile">
-        Этот элемент будет скрыт в мобильной версии.
-    </div>
+
     
     <div class="victory-message" id="victoryMessage">
         <p>Shap в печали, что вы его бьете :(</p>
