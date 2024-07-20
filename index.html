@@ -725,7 +725,7 @@ button.upgrade-button:hover, button.hire-button:hover {
         width: 100%;
         flex-direction: column;
         height: auto;
-        font-size: 30px;
+        font-size: 20px;
     }
     #leftCharacterMenu {
         position: fixed;
@@ -914,7 +914,7 @@ button.upgrade-button:hover, button.hire-button:hover {
         <div onclick="openClanListMenu()">Кланы</div>
         <div onclick="changeScreen('worldBoss')">Мировой Босс</div>
         <div onclick="toggleShop()">Магазин</div>
-        <div onclick="toggleTopPlayers()">Топ игроки</div>
+        <!-- <div onclick="toggleTopPlayers()">Топ игроки</div> -->
        
     </div>
 
@@ -1042,9 +1042,9 @@ button.upgrade-button:hover, button.hire-button:hover {
             
         </div>
     </div>
-    <div id="topPlayersMenu">
+    <!-- <div id="topPlayersMenu">
         <button onclick="toggleTopPlayers()">Закрыть</button>
-    </div>
+    </div> -->
 
     <div class="status-bar" id="statusBar" style="display:none;">
         <div class="health-bar">
@@ -4553,26 +4553,26 @@ window.updateStatusBar = updateStatusBar;
 
 
 
-        function toggleTopPlayers() {
-    const menu = document.getElementById('topPlayersMenu');
-    if (menu.style.display === 'block') {
-        menu.style.display = 'none';
-    } else {
-        displayTopPlayers().then(topPlayers => {
-            let topListHTML = '<h2>Топ игроки</h2>';
-            // Преобразование объекта в массив и сортировка по уровню
-            const sortedPlayers = Object.values(topPlayers).sort((a, b) => b.level - a.level);
-            sortedPlayers.forEach(player => {
-                topListHTML += `<p>${player.nickname} - Уровень ${player.level}</p>`;
-            });
-            document.getElementById('topPlayersMenu').innerHTML = topListHTML;
-            menu.style.display = 'block';
-        });
-    }
-}
+//         function toggleTopPlayers() {
+//     const menu = document.getElementById('topPlayersMenu');
+//     if (menu.style.display === 'block') {
+//         menu.style.display = 'none';
+//     } else {
+//         displayTopPlayers().then(topPlayers => {
+//             let topListHTML = '<h2>Топ игроки</h2>';
+//             // Преобразование объекта в массив и сортировка по уровню
+//             const sortedPlayers = Object.values(topPlayers).sort((a, b) => b.level - a.level);
+//             sortedPlayers.forEach(player => {
+//                 topListHTML += `<p>${player.nickname} - Уровень ${player.level}</p>`;
+//             });
+//             document.getElementById('topPlayersMenu').innerHTML = topListHTML;
+//             menu.style.display = 'block';
+//         });
+//     }
+// }
 
 
-        window.toggleTopPlayers = toggleTopPlayers;
+//         window.toggleTopPlayers = toggleTopPlayers;
 
 
 
