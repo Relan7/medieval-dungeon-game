@@ -1626,7 +1626,7 @@ function hireOrUpgradeHero(hero, heroDiv, hireButton) {
     if (!hero.hired && gold >= hero.cost) {
         // Найм героя
         console.log(`Найм героя ${hero.name} за ${hero.cost} золота`);
-        gold -= hero.cost;
+        spendGold(hero.cost);
         hero.hired = true;
         hero.level = 1; 
         const stats = calculateHeroStats(hero.level, hero.baseDamage, hero.baseCost);
@@ -1652,7 +1652,7 @@ function hireOrUpgradeHero(hero, heroDiv, hireButton) {
         console.log(`Текущая стоимость улучшения: ${hero.cost}, Новая стоимость улучшения: ${upgradeCost}`);
         if (gold >= upgradeCost) {
             console.log(`Герой ${hero.name} улучшается за ${upgradeCost} золота`);
-            gold -= upgradeCost;
+            spendGold(upgradeCost);
             totalDamage -= hero.damage;
             hero.level++;
             hero.damage = stats.newDamage;
@@ -1677,9 +1677,9 @@ function hireOrUpgradeHero(hero, heroDiv, hireButton) {
     updateTotalDamage();
     localGoldUpdated = true;
     updateStatusBar();
-    saveGoldToDatabase().then(() => {
-        console.log(`Золото сохранено в базе данных: ${gold}`);
-    });
+    // saveGoldToDatabase().then(() => {
+    //     console.log(`Золото сохранено в базе данных: ${gold}`);
+    // });
     savePlayerData();
     console.log(`Конец функции hireOrUpgradeHero для ${hero.name}, уровень: ${hero.level}, золото: ${gold}`);
 }
@@ -1916,6 +1916,7 @@ window.loadProgress = loadProgress;
 
 
 // Функция для применения загруженного прогресса
+// Функция для применения загруженного прогресса
 function applyProgress(data) {
     if (data && validateData(data)) {
         currentLevel = data.currentLevel;
@@ -1941,7 +1942,7 @@ function applyProgress(data) {
         });
 
         levels = data.levels || levels;
-        monsterHealth = data.monsterHealth || baseMonsterHealth; 
+        monsterHealth = data.monsterHealth || baseMonsterHealth;
         rewardMultiplier = data.rewardMultiplier || 1;
         rebornCount = data.rebornCount || 0;
 
@@ -1950,19 +1951,34 @@ function applyProgress(data) {
             currentClan = data.currentClan;
         }
 
+        // Обновляем  ссылки на  объекты quest  в questCategories
+        if (data.dailyQuests) { 
+            for (const category in  data.dailyQuests) {
+                questCategories[category] = data.dailyQuests[category].map((loadedQuest,  index) => { 
+                    // Если  квест  уже  существует,  обновляем  его  данные
+                    if (questCategories[category][index]) { 
+                        return { ...questCategories[category][index],  ...loadedQuest  }; 
+                    } else  {
+                        // Если  квеста  нет, добавляем  его  
+                        return loadedQuest;
+                    } 
+                }); 
+            }
+        }
+
         console.log('Applying progress:', data);
         console.log(`Gold after applying progress: ${gold}`);
         console.log(`currentClan after applying progress: ${currentClan}`);
 
 
-        updateCharacterMenu();
+        updateCharacterMenu(); 
         addHeroesToMenu();
         updateTotalDamage(); 
         updateStatusBar();
+
         
     }
 }
-
 window.applyProgress = applyProgress;
 
 async function startGame() {
@@ -2530,45 +2546,44 @@ window.claimReward = claimReward;
 
 function spendGold(amount) {
     const playerGoldRef = ref(database, `players/${nickname}/gold`);
-    console.log("questCategories:", questCategories); 
-
-    // Обновление прогресса ежедневных заданий на трату золота
-    // Перемещаем этот код ВВЕРХ 
-    questCategories['Трата золота'].forEach(quest => {
-        if (!quest.completed && !quest.claimed) {
-            quest.progress += amount;
-            if (quest.progress >= quest.goal) {
-                quest.completed = true; 
-                showGameMessage(`Задание "${quest.description}" выполнено!`);
-            }
-        } 
-    }); 
+    console.log("questCategories:", questCategories);
 
     get(playerGoldRef).then((snapshot) => {
-        let currentGold = snapshot.val() || 0; 
+        let currentGold = snapshot.val() || 0;
         if (currentGold >= amount) {
             updateGold(currentGold - amount);
 
             set(playerGoldRef, currentGold - amount).then(() => {
                 console.log(`Gold spent: ${amount}, remaining gold: ${currentGold - amount}`);
 
+                // Обновление прогресса ежедневных заданий на трату золота
+                questCategories['Трата золота'].forEach(quest => {
+                    if (!quest.completed && !quest.claimed) {
+                        quest.progress += amount;
+                        if (quest.progress >= quest.goal) {
+                            quest.completed = true;
+                            showGameMessage(`Задание "${quest.description}" выполнено!`);
+                        }
+                    }
+                });
+
                 // Обновляем глобальную переменную золота
                 gold = currentGold - amount;
 
                 document.getElementById('statusGold').textContent = gold;
-                saveProgress(); 
-                updateStatusBar(); 
-            }).catch((error) => { 
-                console.error('Error updating gold:', error); 
-            }); 
+                saveProgress();
+                updateStatusBar();
+            }).catch((error) => {
+                console.error('Error updating gold:', error);
+            });
         } else {
-            console.log('Not enough gold to spend.'); 
+            console.log('Not enough gold to spend.');
             showGameMessage('Недостаточно золота!');
-        } 
+        }
     })
-    .catch((error) => { 
-        console.error('Error getting current gold:', error); 
-    }); 
+    .catch((error) => {
+        console.error('Error getting current gold:', error);
+    });
 }
 window.spendGold = spendGold;
 
