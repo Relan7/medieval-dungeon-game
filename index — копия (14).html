@@ -1177,13 +1177,6 @@ let questCategories = {
         { description: 'Убить 450 монстров', goal: 450, progress: 0, reward: 30000, completed: false, claimed: false },
         { description: 'Убить 550 монстров', goal: 550, progress: 0, reward: 40000, completed: false, claimed: false }
     ],
-    'Убийство редких монстров': [ // *** Новая категория ***
-        { description: 'Победить 1 Эпического монстра', goal: 1, progress: 0, reward: 1000, completed: false, claimed: false },
-        { description: 'Победить 2 Эпических монстров', goal: 2, progress: 0, reward: 5000, completed: false, claimed: false },
-        { description: 'Победить 3 Эпических монстров', goal: 3, progress: 0, reward: 10000, completed: false, claimed: false },
-        { description: 'Победить 4 Эпических монстров', goal: 4, progress: 0, reward: 20000, completed: false, claimed: false },
-        { description: 'Победить 5 Эпических монстров', goal: 5, progress: 0, reward: 50000, completed: false, claimed: false }
-    ],
     'Трата золота': [
         { description: 'Потратить 1000 золота', goal: 1000, progress: 0, reward: 200, completed: false, claimed: false },
         { description: 'Потратить 3000 золота', goal: 3000, progress: 0, reward: 500, completed: false, claimed: false },
@@ -1200,7 +1193,6 @@ let questCategories = {
 
 //  Функция для  переключения  категории  заданий  
 function  switchQuestCategory(category)  { 
-    console.log(`Переключение категории  на  ${category}`); // *** ДОБАВЬТЕ ЛОГИРОВАНИЕ *** 
     currentQuestCategory  = category; 
     updateDailyQuestsUI();
 }
@@ -1310,7 +1302,7 @@ window.closeRebornSuccessMessage = closeRebornSuccessMessage;
 
 // Функция для проверки встречи с редким монстром
 function checkForRareMonster() {
-  return Math.random() <= 0.1; // 10% шанс
+  return Math.random() <= 0.3; // 30% шанс
 }
 
 // Функция для начала боя с редким монстром
@@ -1363,12 +1355,7 @@ function updateDailyQuestsUI() {
     const dailyQuestsList = document.getElementById('dailyQuestsList');
     dailyQuestsList.innerHTML = ''; // Очищаем список 
 
-    // ПРОВЕРКА НА UNDEFINED
-    const currentQuests = questCategories[currentQuestCategory];
-    if (!currentQuests) { 
-      console.error(`Категория ${currentQuestCategory} не найдена в questCategories!`); 
-      return; // Прекращаем выполнение функции, если категория не найдена
-    }
+    const currentQuests = questCategories[currentQuestCategory]; 
 
     currentQuests.forEach((quest, index) => { 
         // Отображаем задание, только если оно НЕ выполнено ИЛИ выполнено, но награда не получена
@@ -1381,7 +1368,12 @@ function updateDailyQuestsUI() {
                 const claimRewardButton = document.createElement('button');
                 claimRewardButton.textContent = 'Получить награду'; 
                 claimRewardButton.onclick =  () => {  
-                    claimDailyQuestReward(index); 
+                    if (currentQuestCategory === 'Убийство монстров')  {
+                        claimDailyQuestReward(index);
+                    } else if (currentQuestCategory === 'Трата золота')  { 
+                        claimDailyQuestReward(index);
+                    } 
+                    // ...  обработка для других категорий  ... 
                 };
                 questItem.appendChild(claimRewardButton); 
             }
@@ -1390,7 +1382,7 @@ function updateDailyQuestsUI() {
         }
     });
 
-    // Добавляем информацию о сбросе заданий 
+    // Добавляем информацию  о  сбросе  заданий 
     const resetTimeElement = document.createElement('p'); 
     resetTimeElement.id = 'dailyQuestResetTime';
     resetTimeElement.textContent = `Сброс через: ${getTimeUntilDailyQuestReset()}`;
@@ -1398,17 +1390,62 @@ function updateDailyQuestsUI() {
 }
 
 //  Функция для  динамического  создания кнопок  категорий 
-function createCategoryButtons() {
-    const categoriesContainer = document.getElementById('dailyQuestCategories'); 
-    categoriesContainer.innerHTML = ''; 
+function createCategoryButtons()  {
+    const  categoriesContainer  =  document.getElementById('dailyQuestCategories'); 
+    categoriesContainer.innerHTML  =  ''; //  Очищаем  контейнер
 
-    for (const category in questCategories) {
-        const button = document.createElement('button');
-        button.textContent = category; 
-        button.onclick = () => switchQuestCategory(category);
+    for  (const  category  in questCategories)  {
+        const  button  =  document.createElement('button');
+        button.textContent =  category; 
+        button.onclick = ()  => switchQuestCategory(category); 
         categoriesContainer.appendChild(button);
     }
 }
+
+// function handleGoldSpendingQuest(questIndex) {
+//     const goldSpendingQuests = questCategories['Трата золота'];
+    
+//     if (!goldSpendingQuests || !goldSpendingQuests[questIndex]) {
+//         console.error("Invalid quest index:", questIndex);
+//         return;
+//     }
+
+//     const quest = goldSpendingQuests[questIndex];
+
+//     // Проверяем,  было ли  уже потрачено достаточно золота  
+//     if  (quest.progress  >=  quest.goal) {
+//         showGameMessage('Это  задание  уже выполнено!');
+//         return; 
+//     }
+
+//     // Проверяем,  выполнено  ли  задание  
+//     if  (quest.completed  &&  !quest.claimed)  {
+//         console.log("Получение награды  за  задание:",  quest.description);
+//         console.log("Награда:", quest.reward); 
+
+//         updateGold(gold  +  quest.reward) 
+//             .then(()  => { 
+//                 console.log("Золото  обновлено.  Текущее  золото:", gold);
+
+//                 //  Помечаем,  что  награда  забрана
+//                 quest.claimed = true;  
+
+//                 updateDailyQuestsUI(); 
+//                 saveProgress();  
+//                 console.log("Задание обновлено и прогресс сохранен.");
+//             }) 
+//             .catch((error) => {
+//                 console.error("Ошибка  при  обновлении  золота:",  error); 
+//             });
+//     } else  if (!quest.completed) {
+//         showGameMessage('Задание  еще  не  выполнено!');
+//     } else if (quest.completed &&  quest.claimed) { 
+//         showGameMessage('Награда  за  это  задание  уже  получена!');
+//     }
+// }
+// window.handleGoldSpendingQuest =  handleGoldSpendingQuest;
+
+
 
 
 
@@ -1986,18 +2023,6 @@ function applyProgress(data) {
                 }); 
             }
         }
-
-                                // Добавляем новую категорию заданий, если ее нет у старых игроков
-                             if (!data.dailyQuests || !data.dailyQuests['Убийство редких монстров']) {
-                                 questCategories['Убийство редких монстров'] = [ 
-                                { description: 'Победить 1 Эпического монстра', goal: 1, progress: 0, reward: 1000, completed: false, claimed: false },
-                                { description: 'Победить 2 Эпических монстров', goal: 2, progress: 0, reward: 5000, completed: false, claimed: false },
-                                { description: 'Победить 3 Эпических монстров', goal: 3, progress: 0, reward: 10000, completed: false, claimed: false },
-                                { description: 'Победить 4 Эпических монстров', goal: 4, progress: 0, reward: 20000, completed: false, claimed: false },
-                                { description: 'Победить 5 Эпических монстров', goal: 5, progress: 0, reward: 50000, completed: false, claimed: false }
-                                 ];
-                                 console.log("Добавлена новая категория заданий для старого игрока.");
-                                 }
 
         console.log('Applying progress:', data);
         console.log(`Gold after applying progress: ${gold}`);
@@ -2739,28 +2764,27 @@ function updateMonsterHealthDisplay() {
     if (healthBar) {
         let currentHealth, maxHealth;
         
+        // Выбираем  правильное  здоровье  в зависимости  от  экрана
         if (currentScreen === 'worldBoss') {
             currentHealth = worldBossHealth;
-            maxHealth = 1000000;  // Максимальное здоровье мирового босса
-        } else if (isRareMonsterEncountered) {  // *** Проверка на редкого монстра ***
-            currentHealth = monsterHealth;
-            maxHealth = baseMonsterHealth * Math.pow(1.1, currentLevel - 1) * 2; // Максимальное здоровье редкого монстра
+            maxHealth = 1000000;  // Максимальное  здоровье  мирового босса
         } else {
             currentHealth = monsterHealth;
-            maxHealth = baseMonsterHealth * Math.pow(1.1, currentLevel - 1);
+            maxHealth = 100 * Math.pow(1.1, currentLevel - 1); 
         }
 
         const healthPercentage = (currentHealth / maxHealth) * 100; 
         const color = getHealthColor(healthPercentage);
         healthBar.style.width = `${Math.min(healthPercentage, 100)}%`;
-        healthBar.style.backgroundColor = color; 
+        healthBar.style.backgroundColor = color;
     }
 
     if (healthValue) {
+        // Выбираем  правильное  здоровье  в  зависимости  от  экрана
         if (currentScreen === 'worldBoss')  {
-            healthValue.textContent = worldBossHealth.toFixed(0);
+            healthValue.textContent =  worldBossHealth.toFixed(0);
         }  else {
-            healthValue.textContent = monsterHealth.toFixed(0);
+            healthValue.textContent =  monsterHealth.toFixed(0); 
         }
     }
 }
@@ -3908,7 +3932,7 @@ function hitMonster(event) {
     hits += 1; 
     updateMonsterHealthDisplay();
 
-    // Проверка на редкого монстра
+    // Проверка на  редкого  монстра
     if (monsterHealth <= 0 && isRareMonsterEncountered) {
       clearInterval(rareMonsterTimerInterval);
       document.getElementById('rareMonsterTimer').style.display = 'none';
@@ -3916,20 +3940,9 @@ function hitMonster(event) {
 
       // Награда за редкого монстра 
       let goldReward = Math.round(100 * currentLevel * rewardMultiplier); 
-      showGameMessage(`Вы победили редкого монстра! Получено: ${goldReward} золота`);
+      showGameMessage(`Вы  победили редкого монстра! Получено: ${goldReward} золота`);
       updateGold(gold + goldReward); 
       saveProgress(); 
-
-      // Обновляем прогресс заданий на убийство редких монстров
-      questCategories['Убийство редких монстров'].forEach(quest => {
-        if (!quest.completed) {
-          quest.progress++; 
-          if (quest.progress >= quest.goal) {
-            quest.completed = true;
-            showGameMessage(`Задание "${quest.description}" выполнено!`);
-          }
-        }
-      });
 
       // Продолжаем игру с обычными монстрами
       showContinuePrompt();
@@ -3949,8 +3962,8 @@ function hitMonster(event) {
           console.error('Error updating gold and saving progress:', error);
         });
 
-      // Обновление прогресса заданий на убийство обычных монстров
-      questCategories['Убийство монстров'].forEach(quest => {
+      // Обновление прогресса ежедневных заданий 
+      questCategories[currentQuestCategory].forEach(quest => {
         if (quest.description.includes('Убить') && !quest.completed) {
           quest.progress++;
           if (quest.progress >= quest.goal) {
