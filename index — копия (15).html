@@ -1228,42 +1228,39 @@ function showRebornPrompt() {
     let rebornPossible = false;
     let nextRebornLevel = 0;
 
-    const nextRebornCount = rebornCount; //  Без увеличения
-
-    if (nextRebornCount === 0 && playerLevel >= 10) {
+    if (rebornCount === 0 && playerLevel >= 10) {
         rebornPossible = true;
         nextRebornLevel = 20;
-    } else if (nextRebornCount === 1 && playerLevel >= 20) {
+    } else if (rebornCount === 1 && playerLevel >= 20) {
         rebornPossible = true;
         nextRebornLevel = 30;
-    } else if (nextRebornCount === 2 && playerLevel >= 30) {
+    } else if (rebornCount === 2 && playerLevel >= 30) {
         rebornPossible = true;
         nextRebornLevel = 40;
-    } else if (nextRebornCount >= 3 && playerLevel >= 50) {
+    } else if (rebornCount === 3 && playerLevel >= 40) {
         rebornPossible = true;
         nextRebornLevel = 50;
-    } else { //  ***  ИСПРАВЛЕНИЕ В БЛОКЕ ELSE ***
+    } else if (rebornCount === 4 && playerLevel >= 50) {
+        rebornPossible = true;
+        nextRebornLevel = 50; // 5-е перерождение тоже требует 50 уровень
+    } else if (rebornCount === 5 && playerLevel >= 50) {
+        rebornPossible = true;
+        nextRebornLevel = 50; // 6-е перерождение тоже требует 50 уровень
+    } else if (rebornCount >= 6 && playerLevel >= 50) { // Все последующие перерождения требуют 50 уровень
+        rebornPossible = true;
+        nextRebornLevel = 50;
+    } else {
         rebornPossible = false;
-
-        //  Используем ту  же  логику  расчета, что и  в  начале
-        if (nextRebornCount === 0) { 
-            nextRebornLevel = 10;
-        } else if (nextRebornCount === 1) {
-            nextRebornLevel = 20;
-        } else if (nextRebornCount === 2) {
-            nextRebornLevel = 30;
-        } else {
-            nextRebornLevel = 50;
-        }
+        nextRebornLevel = (rebornCount < 5) ? (rebornCount + 1) * 10 + 10 : 50;
     }
 
-  if (rebornPossible) {
-    document.getElementById('rebornMenu').style.display =  'block'; 
-    document.getElementById('rebornMessage').textContent = `Прогресс уровней, нанятые  герои  и  накопленное золото будут  сброшены. Но вы будете получать награды  за  убийство  монстров в ${1 + rebornCount * 0.1}  раза  выше. Также  будут доступны новые  герои  для найма. Следующее перерождение доступно с уровня ${nextRebornLevel}.`;
-  } else {
-    document.getElementById('errorMessage').style.display =  'block';
-    document.getElementById('errorMessageText').textContent = `Ваш  уровень слишком  низок  для перерождения!  Требуется уровень:  ${nextRebornLevel}.`;
-  }
+    if (rebornPossible) {
+        document.getElementById('rebornMenu').style.display = 'block';
+        document.getElementById('rebornMessage').textContent = `Прогресс уровней, нанятые герои и накопленное золото будут сброшены. Но вы будете получать награды за убийство монстров в ${1 + rebornCount * 0.1} раза выше. Также будут доступны новые герои для найма. Следующее перерождение доступно с уровня ${nextRebornLevel}.`;
+    } else {
+        document.getElementById('errorMessage').style.display = 'block';
+        document.getElementById('errorMessageText').textContent = `Ваш уровень слишком низок для перерождения! Требуется уровень: ${nextRebornLevel}.`;
+    }
 }
 window.showRebornPrompt = showRebornPrompt;
 
