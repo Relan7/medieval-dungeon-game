@@ -1143,6 +1143,9 @@ button.upgrade-button:hover, button.hire-button:hover {
     
     <div class="monster-message" id="monsterMessage"></div>
     <script type="module">
+        let globalChatListener; 
+        let clanChatListener;
+
 let worldBossTimerInterval;
 let timeUntilWorldBoss = 2400; //  Время в секундах (40 минут)
 
@@ -2132,11 +2135,17 @@ async function continueGameSetup() {
     changeScreen('dungeon');
     updateStatusBar();
 
-    //  Подключаемся  к клановому чату, если  игрок  в  клане  
-    if  (currentClan) { 
+    // Проверяем нахождение игрока в клане ПОСЛЕ загрузки прогресса
+    if (await isPlayerInClan(nickname)) {
+        console.log('Игрок в клане:', currentClan);
         listenForClanMessages(currentClan);
+        switchChat('clan'); //  Переключаем  на клановый чат
+    } else {
+        console.log('Игрок не в клане.');
+        listenForGlobalMessages();
+        switchChat('global'); // Переключаем на глобальный  чат
     }
-}
+} 
 window.continueGameSetup = continueGameSetup;
 
 
@@ -2849,22 +2858,47 @@ function drawArena() {
 }
 window.drawArena  =  drawArena;
 
+
 function switchChat(chat) {
-    currentChat = chat; 
-    const chatMessages = document.getElementById('chatMessages'); 
-    chatMessages.innerHTML = ''; // Очищаем сообщения 
-    
-    // Подписываемся на  соответствующий  чат в  Firebase
-    if (chat === 'global') {
-        listenForGlobalMessages();
-    } else  if (chat ===  'clan'  && currentClan) {
-        listenForClanMessages(currentClan); 
-    } else if (chat  === 'clan' && !currentClan) {
-        displayChatMessage({ 
-            nickname:  'System', 
-            text:  'Вы  не  состоите в  клане!'
-        });
+    //  Если  игрок не  в  клане,  принудительно переключаемся  на  глобальный  чат 
+    if (!currentClan)  { 
+        chat = 'global';
     }
+
+    currentChat = chat;
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.innerHTML = ''; // Очищаем сообщения 
+
+    // Отписываемся от предыдущего  слушателя 
+    if (globalChatListener) {
+        off(ref(database, 'chat/messages'), globalChatListener);
+        globalChatListener = null;  // Сбрасываем ссылку 
+        console.log('Отключен  слушатель глобального  чата.'); 
+    }
+    if (clanChatListener)  {
+        off(ref(database, `clans/${currentClan}/chat`),  clanChatListener);
+        clanChatListener  =  null; //  Сбрасываем  ссылку 
+        console.log('Отключен слушатель  кланового  чата.'); 
+    }
+
+    // Подписываемся  на соответствующий чат  в Firebase
+    if (chat  === 'global')  { 
+        console.log("Переключение  на  глобальный чат"); 
+        globalChatListener  =  onValue(ref(database, 'chat/messages'), function(snapshot) {
+            displayMessages(snapshot); 
+        });
+    }  else if  (chat  ===  'clan'  && currentClan)  { 
+        console.log("Переключение  на клановый  чат:", currentClan);
+        clanChatListener  = onValue(ref(database, `clans/${currentClan}/chat`), function(snapshot) {
+            displayMessages(snapshot);
+        });
+    }  else  if (chat  ===  'clan' && !currentClan)  { 
+        console.log("Попытка  переключения  на клановый  чат,  но игрок  не  в  клане.");
+        displayChatMessage({ 
+            nickname: 'System', 
+            text:  'Вы не  состоите  в клане!' 
+        }); 
+    } 
 }
 window.switchChat = switchChat;
 
@@ -3145,50 +3179,72 @@ function updateClanInterface() {
 
 
 // Проверка, находится ли игрок в клане
-async function isPlayerInClan(playerNickname) {
-    console.log("Проверка нахождения игрока", playerNickname, "в клане. Текущий клан:", currentClan);
-    const clansSnapshot = await get(ref(database, 'clans'));
-    if (clansSnapshot.exists()) {
-        const clansData = clansSnapshot.val();
-        for (const clanName in clansData) {
-            console.log('clansData[clanName]:', clansData[clanName]);
-            if (playerNickname in clansData[clanName].members) {
-                // Игрок найден в клане
-                currentClan = clanName;
-                console.log("Игрок найден в клане", currentClan);
-                return currentClan;
+async function isPlayerInClan(playerNickname)  { 
+    console.log("Проверка  нахождения  игрока",  playerNickname,  "в  клане.  Текущий  клан:", currentClan); 
+    const  clansSnapshot  = await  get(ref(database,  'clans'));  //  ***  ДОБАВЛЕН  AWAIT  ***
+    if (clansSnapshot.exists())  {
+        const  clansData  =  clansSnapshot.val();
+        for  (const  clanName in  clansData) { 
+            console.log('clansData[clanName]:',  clansData[clanName]);
+            if (playerNickname in  clansData[clanName].members)  { 
+                //  Игрок найден в  клане
+                currentClan =  clanName;
+                console.log("Игрок найден  в клане", currentClan); 
+                return  currentClan; 
             }
         }
-    }
-    console.log("Игрок не найден ни в одном клане");
-    return currentClan; // Возвращаем  currentClan (null, если не найден)
+    } 
+    console.log("Игрок  не найден  ни в  одном  клане"); 
+    return currentClan;  // Возвращаем  currentClan (null,  если  не найден)
 }
 
 
 
 
 async function joinClan(clanName) {
-    if (Object.keys(clans[clanName].members).length >= clans[clanName].level + 9) {
-        showGameMessage('Клан уже полон!');
-        return;
-    }
+  //  Проверяем,  не  превышает  ли  число участников  лимит 
+  if (Object.keys(clans[clanName].members).length >= clans[clanName].level + 9)  { 
+      showGameMessage('Клан  уже  полон!');
+      return;
+  }
 
-    if (await isPlayerInClan(nickname)) {
-        showGameMessage('Вы уже состоите в клане!');
-        return;
-    }
-    clans[clanName].members[nickname] = { 
-        rank: 'member', 
-        level: currentLevel, 
-        damage: calculateTotalDamage()
-    };
+  //  Проверяем,  не  состоит  ли  игрок  уже  в  клане  
+  if (await  isPlayerInClan(nickname))  { 
+      showGameMessage('Вы уже  состоите  в клане!'); 
+      return;
+  }
 
-    currentClan = clanName;
-    await set(ref(database, 'clans/' + clanName), clans[clanName]); // Сохраняем данные клана
-    updateClanInterface();
-    closeClanListMenu();
-    openClanMenu();
-    listenForClanMessages(currentClan);
+  //  Добавляем  игрока  в  клан  
+  clans[clanName].members[nickname]  = {
+      rank: 'member',
+      level:  currentLevel,
+      damage:  calculateTotalDamage()  
+  }; 
+
+  //  Обновляем currentClan  ДО сохранения  в  Firebase
+  currentClan  =  clanName;  
+
+  try {
+      //  Сохраняем  данные  клана  в  Firebase
+      await set(ref(database,  'clans/'  +  clanName), clans[clanName]);
+
+      //  Обновляем  информацию  о  клане  в  интерфейсе 
+      updateClanInterface();
+
+      //  Закрываем  меню  списка  кланов 
+      closeClanListMenu();
+
+      //  Открываем  меню  клана
+      openClanMenu(); 
+
+      //  Подключаемся к  чату  клана
+      switchChat('clan');  
+      console.log('Игрок  успешно  вступил в  клан',  clanName);
+  } catch  (error)  {
+      // Обработка  ошибки
+      console.error('Ошибка  при  вступлении  в клан:',  error); 
+      showGameMessage('Произошла  ошибка  при вступлении  в  клан.');  
+  }
 }
 window.joinClan = joinClan;
 
