@@ -1014,7 +1014,7 @@ button.skill-button[disabled]::before  {
     <div id="nicknameMenu">
         <h2>Введите свой никнейм</h2>
         <input type="text" id="nicknameInput" placeholder="Ваш никнейм">
-        <button id="startGameButton" onclick="startGame()">Начать игру</button> 
+        <button onclick="startGame()">Начать игру</button>
         <div id="gameVersion">Версия игры: 1.15</div>
     </div>
     <canvas id="gameCanvas" style="display:none;"></canvas>
@@ -2398,11 +2398,7 @@ async function startGame() {
     if (input) {
         nickname = input;
         const dbRef = ref(database, `players/${nickname}/session`);
-    // Показать индикатор загрузки (например,  spinner или  текст)
-    document.getElementById('nicknameInput').disabled =  true; //  Отключить  ввод  
-    document.getElementById('startGameButton').disabled = true; //  Отключить кнопку
-    document.body.style.cursor  =  'wait'; 
-    displayLoadingIndicator(); 
+
         try {
             const sessionSnapshot = await get(dbRef);
             if (sessionSnapshot.exists()) {
@@ -2440,36 +2436,12 @@ async function startGame() {
             //await updateClanList(); 
         } catch (error) {
             console.error('Error starting new session:', error);
-        }finally {
-        // Скрыть индикатор  загрузки  независимо от  результата 
-        hideLoadingIndicator();
-        document.getElementById('nicknameInput').disabled  =  false; 
-        document.getElementById('startGameButton').disabled  =  false;  
-        document.body.style.cursor = 'default'; 
-    }
+        }
     } else {
         alert('Пожалуйста, введите никнейм.');
     }
 }
 window.startGame = startGame; 
-
-
-// Функции для отображения/скрытия  индикатора  загрузки 
-function displayLoadingIndicator() {
-    // Создать  элемент  индикатора  и добавить его  в  DOM 
-    const loadingIndicator = document.createElement('div');
-    loadingIndicator.id = 'loadingIndicator'; 
-    loadingIndicator.textContent = 'Загрузка...'; 
-    document.body.appendChild(loadingIndicator); 
-}
-
-function hideLoadingIndicator() {
-    //  Удалить  индикатор  из DOM 
-    const loadingIndicator  = document.getElementById('loadingIndicator'); 
-    if (loadingIndicator) { 
-        document.body.removeChild(loadingIndicator); 
-    } 
-}
 
 async function continueGameSetup() {
     const data = await loadProgress(nickname);
@@ -2842,7 +2814,6 @@ function watchSessionChanges() {
             endCurrentSession();
             location.reload();  // Перезагрузка страницы для выхода из игры
         }
-        
     });
 }
 window.watchSessionChanges = watchSessionChanges;
