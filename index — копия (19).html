@@ -769,7 +769,7 @@ button.skill-button  {
     border-radius: 8px;  /*  Скругленные  углы */ 
     color:  white; 
     cursor:  pointer; 
-    font-size:  14px; /*  Немного  меньший размер шрифта */
+    font-size:  16px; /*  Немного  меньший размер шрифта */
     font-weight: bold; /*  Жирный  шрифт */ 
     padding: 8px  16px; 
     transition:  transform  0.2s,  box-shadow  0.2s;  
@@ -796,7 +796,7 @@ button.skill-button::before {
     z-index:  1; /*  Поверх  кнопки */ 
     transform-origin: center  left;  /*  Анимация  будет  идти слева  направо */
     transform:  scaleX(0);  /*  Изначально индикатор скрыт */ 
-    
+    transition:  transform  ${hero.skill.cooldown}s  linear; /*  Анимация  cooldown */ 
 }
 
 button.skill-button[disabled]::before  {
@@ -1226,7 +1226,7 @@ let  worldBossWasKilled = false;  // Флаг,  указывающий, был �
     let allHeroes = [
     { name: 'Эльф', level: 1, baseDamage: 5, baseCost: 50, damage: 5, cost: 50, img: 'hero1.png', hired: false, 
       skill: {
-        name: 'Быстрый выстрел',
+        name: 'Стремительный выстрел',
         hitsPerSecond: 5,
         duration: 5,
         cooldown: 60, 
@@ -1564,47 +1564,26 @@ function  updateWorldBossTimer()  {
 
 function activateSkill(hero) {
   if (hero.hired && !hero.skill.onCooldown) {
-    console.log(`Активация скилла "${hero.skill.name}"`); 
-    hero.skill.onCooldown = true;
-    hero.skill.activationTime = Date.now();  //  Сохраняем  время  активации
-
-    let skillHits = 0;
-    const skillInterval = setInterval(() => {
-      if (currentScreen === 'battle' && skillHits < hero.skill.hitsPerSecond * hero.skill.duration) {
-        hitMonster({ clientX: canvas.width / 2, clientY: canvas.height / 2 }); 
-        skillHits++;
-      } else {
-        clearInterval(skillInterval);
-      }
-    }, 1000 / hero.skill.hitsPerSecond);
+    // ... (код активации скилла)
 
     //  Запускаем cooldown
-    const cooldownTime = hero.skill.cooldown * 1000;
     setTimeout(() => {
-        hero.skill.onCooldown = false; 
-        delete hero.skill.activationTime; //  Удаляем  время  активации  после  окончания  cooldown  
+      hero.skill.onCooldown = false; 
 
-        // Обновляем  кнопку  скилла  
-        const heroDiv = document.querySelector(`.hero[alt="${hero.name}"]`); 
-        if (heroDiv) {
-          const skillButton = heroDiv.querySelector('.skill-button');
-          if (skillButton) {
-            skillButton.disabled = false;
-            skillButton.style.transitionDuration = `${hero.skill.cooldown}s`;
-          }
+      //  *** ОБНОВЛЯЕМ СОСТОЯНИЕ  КНОПКИ  СКИЛЛА  ***
+      const heroDiv = document.querySelector(`.hero[alt="${hero.name}"]`); 
+      if (heroDiv) {
+        const skillButton = heroDiv.querySelector('.skill-button'); 
+        if (skillButton) {
+          skillButton.disabled = false; //  Включаем  кнопку  
         }
-
-        // Сохраняем прогресс после  окончания cooldown 
-        saveProgress()
-            .then(() => console.log("Прогресс  сохранен  после  окончания  cooldown."))
-            .catch((error)  => console.error("Ошибка  при сохранении прогресса  после  окончания  cooldown:", error));
-    }, cooldownTime);
-
+      }
+    }, hero.skill.cooldown * 1000); 
   } else if (hero.skill.onCooldown) {
-    const remainingCooldown = Math.ceil((hero.skill.activationTime + hero.skill.cooldown * 1000 - Date.now()) / 1000); 
-    showGameMessage(`Скилл "${hero.skill.name}"  на  перезарядке!  Осталось ${remainingCooldown}  секунд.`);
-  } 
+    showGameMessage(`Скилл "${hero.skill.name}"  на перезарядке!`); 
+  }
 }
+
 
 function updateCooldown(hero, startTime) {
     const cooldownTime = hero.skill.cooldown * 1000; // Время отката в миллисекундах
@@ -1818,11 +1797,7 @@ function migrateHeroData(oldHeroes) {
         damage: calculateHeroStats(oldHero.level  ||  1,  newHero.baseDamage, newHero.baseCost).newDamage, 
         cost: calculateHeroStats(oldHero.level  ||  1,  newHero.baseDamage, newHero.baseCost).newCost, 
         hired: oldHero.hired  || false, 
-        skill: {
-          ...newHero.skill, // Используем новые значения по умолчанию
-          // ...(oldHero.skill || {}), // Копируем старые значения, если они есть
-          remainingCooldown: oldHero.skill?.remainingCooldown || 0 //  Проверка  существования remainingCooldown 
-        }
+        skill: oldHero.skill ||  {  ...newHero.skill  } //  ДОБАВЛЕНО
       };
     }
     return oldHero; 
@@ -2128,13 +2103,13 @@ function startSession(nickname) {
 
 
 
+
 async function saveProgress() {
     if (!nickname || !currentSessionId) {
         console.error('Cannot save progress: no nickname or session ID');
         return;
     }
 
-    //  Подготовка данных  для сохранения
     const progressData = {
         currentLevel: currentLevel,
         gold: gold,
@@ -2142,23 +2117,14 @@ async function saveProgress() {
         weaponPower: weaponPower,
         weaponName: weaponName,
         weaponLevel: weaponLevel || 0,
-        heroes: heroes.map(hero => ({
-            name: hero.name, 
-            level: hero.level,
-            hired: hero.hired, 
-            skill: {
-                ...hero.skill,
-                //  Сохраняем оставшееся  время  cooldown  
-                remainingCooldown: hero.skill.onCooldown ? Math.max(0, hero.skill.activationTime + hero.skill.cooldown * 1000 - Date.now()) : 0  
-            }
-        })), 
+        heroes: heroes,
         levels: levels,
         session: currentSessionId,
         monsterHealth: monsterHealth,
         rewardMultiplier: rewardMultiplier,
-        rebornCount: rebornCount,
-        currentClan: currentClan, 
-        dailyQuests: questCategories 
+        rebornCount: rebornCount, 
+        currentClan: currentClan, // Добавили currentClan 
+        dailyQuests: questCategories //  Добавляем данные ежедневных  заданий
     };
     console.log('Saving progress:', progressData);
     try {
@@ -2274,120 +2240,93 @@ window.loadProgress = loadProgress;
 // Функция для применения загруженного прогресса
 function applyProgress(data) {
     if (data && validateData(data)) {
-        console.log('Applying progress:', data);
-        console.log(`Gold before applying progress: ${gold}`);
-        
         currentLevel = data.currentLevel;
         gold = data.gold;
         playerHealth = data.playerHealth;
         weaponPower = data.weaponPower;
         weaponName = data.weaponName;
         weaponLevel = data.weaponLevel || 0;
-        rebornCount = data.rebornCount || 0; 
-        rewardMultiplier = data.rewardMultiplier || 1;
-        
-        //  Миграция  данных  героев  
-        heroes  =  migrateHeroData(data.heroes);  
-        
-        heroes  = data.heroes.map(hero  => {
+        heroes  = migrateHeroData(data.heroes);
+
+        heroes = data.heroes.map(hero => {
             const baseDamage = hero.baseDamage !== undefined ? hero.baseDamage : 0;
-            const baseCost = hero.baseCost !== undefined ? hero.baseCost : 0; 
-            const level = hero.level || 1; 
-                        // Обновляем название  скилла,  если  необходимо 
-                        if (hero.skill) {
-                const newSkillName = allHeroes.find(h => h.name === hero.name)?.skill.name;
-                if (newSkillName) {
-                    hero.skill.name = newSkillName; 
-                }
-            }
-            //  Проверка  наличия  activationTime  и  расчет  onCooldown
-            if (hero.skill &&  hero.skill.remainingCooldown > 0) { 
-                hero.skill.onCooldown  =  true;
-                hero.skill.activationTime = Date.now() - (hero.skill.cooldown * 1000 - hero.skill.remainingCooldown);  
-                setTimeout(() =>  { 
-                    hero.skill.onCooldown = false;
-                    delete  hero.skill.activationTime;
+            const baseCost = hero.baseCost !== undefined ? hero.baseCost : 0;
+            const level = hero.level || 1;
 
-                    const  heroDiv = document.querySelector(`.hero[alt="${hero.name}"]`);
-                    if (heroDiv) {
-                      const skillButton =  heroDiv.querySelector('.skill-button'); 
-                      if  (skillButton)  {
-                          skillButton.disabled =  false; 
-                      }
-                    }
-                },  hero.skill.remainingCooldown); 
-            } else {
-                hero.skill.onCooldown = false; 
-            } 
-
-            return { 
+            return {
                 ...hero,
-                baseDamage:  baseDamage,
-                baseCost:  baseCost,
-                cost: isNaN(hero.cost) || hero.cost ===  undefined ? baseCost : hero.cost,
-                damage: isNaN(hero.damage)  ||  hero.damage  ===  undefined  ? calculateHeroStats(level, baseDamage,  baseCost).newDamage : hero.damage, 
-                level:  level
-            }; 
+                baseDamage: baseDamage,
+                baseCost: baseCost,
+                cost: isNaN(hero.cost) || hero.cost === undefined ? baseCost : hero.cost,
+                damage: isNaN(hero.damage) || hero.damage === undefined ? calculateHeroStats(level, baseDamage, baseCost).newDamage : hero.damage,
+                level: level
+            };
         });
 
-        levels = data.levels || levels; 
-        monsterHealth = data.monsterHealth || baseMonsterHealth; 
+        levels = data.levels || levels;
+        monsterHealth = data.monsterHealth || baseMonsterHealth;
+        rewardMultiplier = data.rewardMultiplier || 1;
+        rebornCount = data.rebornCount || 0;
 
         // Проверка на наличие данных о клане
-        if (data.currentClan) { 
-            currentClan  =  data.currentClan;
+        if (data.currentClan) {
+            currentClan = data.currentClan;
         }
 
-        //  Обновляем  ссылки на  объекты quest в questCategories
-        if (data.dailyQuests)  { 
-            for (const  category  in data.dailyQuests)  {
-                questCategories[category]  =  data.dailyQuests[category].map((loadedQuest, index) => { 
-                    // Если  квест  уже существует,  обновляем его данные
-                    if  (questCategories[category][index])  {
-                        return { ...questCategories[category][index],  ...loadedQuest }; 
-                    }  else  { 
-                        // Если квеста нет, добавляем его 
-                        return loadedQuest; 
+        // Обновляем  ссылки на  объекты quest  в questCategories
+        if (data.dailyQuests) { 
+            for (const category in  data.dailyQuests) {
+                questCategories[category] = data.dailyQuests[category].map((loadedQuest,  index) => { 
+                    // Если  квест  уже  существует,  обновляем  его  данные
+                    if (questCategories[category][index]) { 
+                        return { ...questCategories[category][index],  ...loadedQuest  }; 
+                    } else  {
+                        // Если  квеста  нет, добавляем  его  
+                        return loadedQuest;
                     } 
-                });
-            } 
-        } 
-
-        // Проверяем  наличие  новой  категории  у старых  игроков 
-        if (!data.dailyQuests  || !data.dailyQuests['Перерождения'])  {
-            // Если категория  отсутствует,  добавляем ее
-            questCategories['Перерождения']  = [
-                { description:  'Переродиться  1  раз', goal: 1,  progress: 0,  reward:  2000,  completed:  false,  claimed: false },
-                { description:  'Переродиться  3 раза', goal:  3,  progress: 0,  reward: 20000,  completed: false,  claimed: false  },
-                { description:  'Переродиться  5 раз', goal:  5, progress: 0,  reward: 100000, completed: false,  claimed: false  } 
-            ]; 
-            console.log('Добавлена  новая категория  "Перерождения" для старого  игрока');
+                }); 
+            }
         }
 
-        // Добавляем новую категорию заданий, если ее нет  у старых  игроков 
-        if (!data.dailyQuests  ||  !data.dailyQuests['Убийство редких монстров'])  {
-            questCategories['Убийство  редких  монстров'] =  [
-                { description: 'Победить 1 Эпического монстра',  goal: 1,  progress: 0, reward: 1000,  completed: false, claimed:  false },
-                { description: 'Победить 2  Эпических монстров',  goal:  2,  progress:  0, reward:  5000,  completed:  false, claimed:  false  },
-                { description: 'Победить 3  Эпических монстров',  goal:  3,  progress: 0, reward: 10000, completed: false,  claimed: false  }, 
-                { description: 'Победить  4 Эпических  монстров',  goal:  4,  progress: 0, reward: 20000,  completed:  false, claimed:  false }, 
-                { description: 'Победить  5  Эпических  монстров',  goal: 5, progress: 0, reward:  50000, completed:  false,  claimed:  false  }
-            ]; 
-            console.log("Добавлена  новая категория  заданий для старого  игрока.");
-        }
+//  Проверяем наличие  новой  категории  у старых игроков
+if  (!data.dailyQuests  || !data.dailyQuests['Перерождения'])  {
+        //  Если категория отсутствует, добавляем ее 
+        questCategories['Перерождения'] = [ 
+            { description: 'Переродиться 1 раз',  goal:  1,  progress: 0,  reward: 2000, completed: false, claimed:  false },
+            { description: 'Переродиться 3 раза', goal:  3, progress: 0,  reward:  20000, completed: false, claimed:  false },
+            { description: 'Переродиться  5  раз', goal:  5,  progress:  0,  reward:  100000, completed:  false,  claimed:  false  }
+        ]; 
+        console.log('Добавлена  новая  категория  "Перерождения" для  старого  игрока');
+    } 
 
-        console.log(`Gold after applying  progress:  ${gold}`);
-        console.log(`currentClan  after applying progress:  ${currentClan}`);
 
-        updateCharacterMenu();  
+
+                                // Добавляем новую категорию заданий, если ее нет у старых игроков
+                             if (!data.dailyQuests || !data.dailyQuests['Убийство редких монстров']) {
+                                 questCategories['Убийство редких монстров'] = [ 
+                                { description: 'Победить 1 Эпического монстра', goal: 1, progress: 0, reward: 1000, completed: false, claimed: false },
+                                { description: 'Победить 2 Эпических монстров', goal: 2, progress: 0, reward: 5000, completed: false, claimed: false },
+                                { description: 'Победить 3 Эпических монстров', goal: 3, progress: 0, reward: 10000, completed: false, claimed: false },
+                                { description: 'Победить 4 Эпических монстров', goal: 4, progress: 0, reward: 20000, completed: false, claimed: false },
+                                { description: 'Победить 5 Эпических монстров', goal: 5, progress: 0, reward: 50000, completed: false, claimed: false }
+                                 ];
+                                 console.log("Добавлена новая категория заданий для старого игрока.");
+                                 }
+
+        console.log('Applying progress:', data);
+        console.log(`Gold after applying progress: ${gold}`);
+        console.log(`currentClan after applying progress: ${currentClan}`);
+
+
+        updateCharacterMenu(); 
         addHeroesToMenu();
         updateTotalDamage(); 
         updateStatusBar();
-    } 
+
+        
+    }
 }
-
 window.applyProgress = applyProgress;
-
 
 async function startGame() {
     const input = document.getElementById('nicknameInput').value;

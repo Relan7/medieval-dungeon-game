@@ -769,7 +769,7 @@ button.skill-button  {
     border-radius: 8px;  /*  Скругленные  углы */ 
     color:  white; 
     cursor:  pointer; 
-    font-size:  14px; /*  Немного  меньший размер шрифта */
+    font-size:  16px; /*  Немного  меньший размер шрифта */
     font-weight: bold; /*  Жирный  шрифт */ 
     padding: 8px  16px; 
     transition:  transform  0.2s,  box-shadow  0.2s;  
@@ -796,7 +796,7 @@ button.skill-button::before {
     z-index:  1; /*  Поверх  кнопки */ 
     transform-origin: center  left;  /*  Анимация  будет  идти слева  направо */
     transform:  scaleX(0);  /*  Изначально индикатор скрыт */ 
-    
+    transition:  transform  ${hero.skill.cooldown}s  linear; /*  Анимация  cooldown */ 
 }
 
 button.skill-button[disabled]::before  {
@@ -1226,7 +1226,7 @@ let  worldBossWasKilled = false;  // Флаг,  указывающий, был �
     let allHeroes = [
     { name: 'Эльф', level: 1, baseDamage: 5, baseCost: 50, damage: 5, cost: 50, img: 'hero1.png', hired: false, 
       skill: {
-        name: 'Быстрый выстрел',
+        name: 'Стремительный выстрел',
         hitsPerSecond: 5,
         duration: 5,
         cooldown: 60, 
@@ -1818,11 +1818,7 @@ function migrateHeroData(oldHeroes) {
         damage: calculateHeroStats(oldHero.level  ||  1,  newHero.baseDamage, newHero.baseCost).newDamage, 
         cost: calculateHeroStats(oldHero.level  ||  1,  newHero.baseDamage, newHero.baseCost).newCost, 
         hired: oldHero.hired  || false, 
-        skill: {
-          ...newHero.skill, // Используем новые значения по умолчанию
-          // ...(oldHero.skill || {}), // Копируем старые значения, если они есть
-          remainingCooldown: oldHero.skill?.remainingCooldown || 0 //  Проверка  существования remainingCooldown 
-        }
+        skill: oldHero.skill ||  {  ...newHero.skill  } //  ДОБАВЛЕНО
       };
     }
     return oldHero; 
@@ -2293,13 +2289,7 @@ function applyProgress(data) {
             const baseDamage = hero.baseDamage !== undefined ? hero.baseDamage : 0;
             const baseCost = hero.baseCost !== undefined ? hero.baseCost : 0; 
             const level = hero.level || 1; 
-                        // Обновляем название  скилла,  если  необходимо 
-                        if (hero.skill) {
-                const newSkillName = allHeroes.find(h => h.name === hero.name)?.skill.name;
-                if (newSkillName) {
-                    hero.skill.name = newSkillName; 
-                }
-            }
+
             //  Проверка  наличия  activationTime  и  расчет  onCooldown
             if (hero.skill &&  hero.skill.remainingCooldown > 0) { 
                 hero.skill.onCooldown  =  true;

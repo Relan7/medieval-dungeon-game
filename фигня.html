@@ -751,58 +751,12 @@ button.upgrade-button:hover, button.hire-button:hover {
   display: none; /* Скрываем по умолчанию */
 }
 #worldBossTimer {
-  position: fixed;
-  top: 10px;  
-  left: 50%; 
-  transform: translateX(-50%); 
-  z-index:  9001;
+  font-size: 20px; 
+  color: white; 
+  text-align:  center;  
+  margin-top:  20px; 
+  display: none; /*  Скрываем  по  умолчанию  */ 
 }
-.hero button {
-  display: block;  /*  Заставляет  каждую кнопку занимать всю ширину */ 
-  width: 100%;     /*  Убедитесь,  что  кнопки занимают 100%  ширины контейнера */ 
-  margin-bottom:  5px;  /*  Добавляем отступ между  кнопками */ 
-}
-
-button.skill-button  { 
-    background: linear-gradient(to  right,  #00c6ff, #0072ff); /*  Сине-голубой  градиент  */ 
-    border:  none; 
-    border-radius: 8px;  /*  Скругленные  углы */ 
-    color:  white; 
-    cursor:  pointer; 
-    font-size:  14px; /*  Немного  меньший размер шрифта */
-    font-weight: bold; /*  Жирный  шрифт */ 
-    padding: 8px  16px; 
-    transition:  transform  0.2s,  box-shadow  0.2s;  
-    box-shadow:  0  3px  12px rgba(0,  198,  255, 0.5); /*  Тень синего цвета */ 
-    position:  relative;  /*  Для позиционирования индикатора  cooldown */ 
-}
-
-/* Эффект  наведения  на кнопку */ 
-button.skill-button:hover { 
-    transform: scale(1.05); /*  Легкое  увеличение  кнопки */ 
-    box-shadow:  0  5px  18px rgba(0, 198, 255, 0.7);  /* Более  яркая тень  при наведении */
-}
-
-/*  Индикатор cooldown */
-button.skill-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left:  0; 
-    width: 100%;
-    height: 100%;
-    background-color:  rgba(0,  0,  0,  0.7); /*  Темно-серый  индикатор */ 
-    border-radius: 8px;  
-    z-index:  1; /*  Поверх  кнопки */ 
-    transform-origin: center  left;  /*  Анимация  будет  идти слева  направо */
-    transform:  scaleX(0);  /*  Изначально индикатор скрыт */ 
-    
-}
-
-button.skill-button[disabled]::before  {
-    transform:  scaleX(1);  /*  Показываем  индикатор  полностью, когда кнопка  отключена  */
-}
-
 /* Медиазапросы для мобильной версии */
 @media (max-width: 768px) {
           
@@ -1007,6 +961,7 @@ button.skill-button[disabled]::before  {
         <button onclick="confirmReborn()">Переродиться</button>
         <button onclick="closeRebornMenu()">Отмена</button>
     </div>
+
 
     <button id="fullscreenButton" onclick="toggleFullscreen()">Полноэкранный режим</button>
     <button id="toggleAutoboyButton" onclick="toggleAutoboy()">Отключить автобой</button>
@@ -1224,96 +1179,16 @@ let  worldBossWasKilled = false;  // Флаг,  указывающий, был �
 
     // Данные о героях
     let allHeroes = [
-    { name: 'Эльф', level: 1, baseDamage: 5, baseCost: 50, damage: 5, cost: 50, img: 'hero1.png', hired: false, 
-      skill: {
-        name: 'Быстрый выстрел',
-        hitsPerSecond: 5,
-        duration: 5,
-        cooldown: 60, 
-        onCooldown: false
-      } 
-    },
-    { name: 'Гном', level: 1, baseDamage: 10, baseCost: 100, damage: 10, cost: 100, img: 'hero2.png', hired: false,
-      skill: {
-        name: 'Молот гнева',
-        hitsPerSecond: 6,
-        duration: 5,
-        cooldown: 60,
-        onCooldown: false 
-      } 
-    },
-    { name: 'хоббит', level: 1, baseDamage: 20, baseCost: 250, damage: 20, cost: 250, img: 'hero3.png', hired: false, 
-      skill: {
-        name: 'Град стрел',
-        hitsPerSecond: 7,
-        duration: 5, 
-        cooldown: 60, 
-        onCooldown: false 
-      }
-    },
-    { name: 'Тор', level: 1, baseDamage: 30, baseCost: 500, damage: 30, cost: 500, img: 'hero4.png', hired: false,
-      skill: { 
-        name: 'Удар грома', 
-        hitsPerSecond: 8, 
-        duration: 5, 
-        cooldown: 60,
-        onCooldown: false
-      }
-    }, 
-    { name: 'Кузнечик', level: 1, baseDamage: 40, baseCost: 1000, damage: 40, cost: 1000, img: 'hero5.png', hired: false,
-      skill: {
-        name: 'Ярость кузнечика',
-        hitsPerSecond: 9, 
-        duration: 5, 
-        cooldown: 60,
-        onCooldown: false
-      }
-    },
-    { name: 'Лесной зверек', level: 1, baseDamage: 60, baseCost: 2000, damage: 60, cost: 2000, img: 'hero6.png', hired: false,
-      skill: {
-        name: 'Звериная атака',
-        hitsPerSecond: 10,
-        duration: 5, 
-        cooldown: 60,
-        onCooldown: false
-      }
-    },
-    { name: 'Дюймовочка', level: 1, baseDamage: 80, baseCost: 4000, damage: 80, cost: 4000, img: 'hero7.png', hired: false,
-      skill: {
-        name: 'Мини-вихрь',
-        hitsPerSecond: 11,
-        duration: 5,
-        cooldown: 60, 
-        onCooldown: false
-      }
-    },
-    { name: 'Зевс', level: 1, baseDamage: 100, baseCost: 8000, damage: 100, cost: 8000, img: 'hero8.png', hired: false,
-      skill: {
-        name: 'Гнев богов',
-        hitsPerSecond: 12, 
-        duration: 5,
-        cooldown: 60,
-        onCooldown: false
-      }
-    },
-    { name: 'Аполлон', level: 1, baseDamage: 120, baseCost: 16000, damage: 120, cost: 16000, img: 'hero9.png', hired: false,
-      skill: {
-        name: 'Солнечный удар',
-        hitsPerSecond: 13,
-        duration: 5,
-        cooldown: 60, 
-        onCooldown: false
-      }
-    },
-    { name: 'Олимп', level: 1, baseDamage: 200, baseCost: 100000, damage: 200, cost: 100000, img: 'hero10.png', hired: false,
-      skill: {
-        name: 'Мощь Олимпа', 
-        hitsPerSecond: 14, 
-        duration: 5,
-        cooldown: 60, 
-        onCooldown: false
-      }
-    }
+    { name: 'Эльф', level: 1, baseDamage: 5, baseCost: 50, damage: 5, cost: 50, img: 'hero1.png', hired: false },
+    { name: 'Гном', level: 1, baseDamage: 10, baseCost: 100, damage: 10, cost: 100, img: 'hero2.png', hired: false },
+    { name: 'хоббит', level: 1, baseDamage: 20, baseCost: 250, damage: 20, cost: 250, img: 'hero3.png', hired: false },
+    { name: 'Тор', level: 1, baseDamage: 30, baseCost: 500, damage: 30, cost: 500, img: 'hero4.png', hired: false },
+    { name: 'Кузнечик', level: 1, baseDamage: 40, baseCost: 1000, damage: 40, cost: 1000, img: 'hero5.png', hired: false },
+    { name: 'Лесной зверек', level: 1, baseDamage: 60, baseCost: 2000, damage: 60, cost: 2000, img: 'hero6.png', hired: false },
+    { name: 'Дюймовочка', level: 1, baseDamage: 80, baseCost: 4000, damage: 80, cost: 4000, img: 'hero7.png', hired: false },
+    { name: 'Зевс', level: 1, baseDamage: 100, baseCost: 8000, damage: 100, cost: 8000, img: 'hero8.png', hired: false },
+    { name: 'Аполлон', level: 1, baseDamage: 120, baseCost: 16000, damage: 120, cost: 16000, img: 'hero9.png', hired: false },
+    { name: 'Олимп', level: 1, baseDamage: 200, baseCost: 100000, damage: 200, cost: 100000, img: 'hero10.png', hired: false }
 ];
 let initialHeroes = allHeroes.slice(0, 5); // Начальные герои
 let heroes = [...initialHeroes];
@@ -1515,135 +1390,9 @@ function updateRareMonsterTimer() {
   }
 }
 
-//  На  сервере
-function  handleWorldBossDeath()  {
-  const  worldBossRef  =  ref(database,  'worldBoss');
-  const  rebornTime  =  Date.now()  +  (timeUntilWorldBoss  *  1000); 
-
-  set(worldBossRef,  {
-    health:  0,
-    rebornTime:  rebornTime, 
-    isAlive:  false
-  });
-
-  setTimeout(()  =>  {
-    resetWorldBossHealth(); 
-    set(worldBossRef,  {
-      health:  worldBossMaxHealth, 
-      rebornTime:  null, //  Устанавливаем rebornTime в null
-      isAlive:  true    //  Устанавливаем isAlive в true 
-    });
-  },  timeUntilWorldBoss  *  1000);
-}
-
-function  updateWorldBossTimer()  {
-    const  worldBossRef =  ref(database, 'worldBoss');
-    onValue(worldBossRef, (snapshot)  =>  { 
-      const  data =  snapshot.val();
-
-      if (data.rebornTime)  { 
-        //  Вычисляем  оставшееся время  в секундах  
-        const timeUntilWorldBoss  =  Math.max(0, Math.floor((data.rebornTime - Date.now())  /  1000)); 
-
-        const minutes = Math.floor(timeUntilWorldBoss  / 60);
-        const  seconds = timeUntilWorldBoss  %  60; 
-
-        const  worldBossTimerElement =  document.getElementById('worldBossTimer'); 
-        worldBossTimerElement.textContent  =  `Осталось  ${minutes}m  ${seconds}s  до появления  мирового  босса`; 
-
-        //  Логируем координаты  и размеры
-        const  rect  =  worldBossTimerElement.getBoundingClientRect(); 
-        console.log(`worldBossTimer coordinates:  x=${rect.left},  y=${rect.top}`);
-        console.log(`worldBossTimer size: width=${rect.width},  height=${rect.height}`);  
-      } else {
-        //  Босс жив, таймер не  отображается  
-        document.getElementById('worldBossTimer').style.display  =  'none'; 
-      }
-    }); 
-}
-
-function activateSkill(hero) {
-  if (hero.hired && !hero.skill.onCooldown) {
-    console.log(`Активация скилла "${hero.skill.name}"`); 
-    hero.skill.onCooldown = true;
-    hero.skill.activationTime = Date.now();  //  Сохраняем  время  активации
-
-    let skillHits = 0;
-    const skillInterval = setInterval(() => {
-      if (currentScreen === 'battle' && skillHits < hero.skill.hitsPerSecond * hero.skill.duration) {
-        hitMonster({ clientX: canvas.width / 2, clientY: canvas.height / 2 }); 
-        skillHits++;
-      } else {
-        clearInterval(skillInterval);
-      }
-    }, 1000 / hero.skill.hitsPerSecond);
-
-    //  Запускаем cooldown
-    const cooldownTime = hero.skill.cooldown * 1000;
-    setTimeout(() => {
-        hero.skill.onCooldown = false; 
-        delete hero.skill.activationTime; //  Удаляем  время  активации  после  окончания  cooldown  
-
-        // Обновляем  кнопку  скилла  
-        const heroDiv = document.querySelector(`.hero[alt="${hero.name}"]`); 
-        if (heroDiv) {
-          const skillButton = heroDiv.querySelector('.skill-button');
-          if (skillButton) {
-            skillButton.disabled = false;
-            skillButton.style.transitionDuration = `${hero.skill.cooldown}s`;
-          }
-        }
-
-        // Сохраняем прогресс после  окончания cooldown 
-        saveProgress()
-            .then(() => console.log("Прогресс  сохранен  после  окончания  cooldown."))
-            .catch((error)  => console.error("Ошибка  при сохранении прогресса  после  окончания  cooldown:", error));
-    }, cooldownTime);
-
-  } else if (hero.skill.onCooldown) {
-    const remainingCooldown = Math.ceil((hero.skill.activationTime + hero.skill.cooldown * 1000 - Date.now()) / 1000); 
-    showGameMessage(`Скилл "${hero.skill.name}"  на  перезарядке!  Осталось ${remainingCooldown}  секунд.`);
-  } 
-}
-
-function updateCooldown(hero, startTime) {
-    const cooldownTime = hero.skill.cooldown * 1000; // Время отката в миллисекундах
-    const elapsedTime = Date.now() - startTime; // Прошедшее время с момента активации
-    const remainingTime = Math.max(0, cooldownTime - elapsedTime); // Оставшееся время отката
-
-    const cooldownPercentage = (remainingTime / cooldownTime) * 100; // Процент отката
-
-    // Поиск кнопки скилла для героя
-    const heroDiv = document.querySelector(`.hero[alt="${hero.name}"]`);
-    
-    // Проверяем, найден ли heroDiv
-    if (heroDiv) {
-        const skillButton = heroDiv.querySelector('.skill-button');
-        
-        // Проверяем, найдена ли skillButton
-        if (skillButton) {
-            skillButton.disabled = true; // Кнопка остается отключенной во время отката
-
-            skillButton.querySelector('::before').style.transform = `scaleX(${1 - cooldownPercentage / 100})`;
 
 
 
-            if (remainingTime > 0) {
-                // Продолжаем обновлять индикатор отката
-                requestAnimationFrame(() => updateCooldown(hero, startTime));
-            } else {
-                // Откат завершен
-                hero.skill.onCooldown = false;
-                skillButton.disabled = false; // Разблокируем кнопку
-                skillButton.style.transitionDuration = ''; // Сбрасываем transitionDuration
-            }
-        } else {
-            console.error("skillButton не найден для героя:", hero.name);
-        }
-    } else {
-        console.error("heroDiv не найден для героя:", hero.name);
-    }
-}
 
 
 //  Функция для открытия меню ежедневных заданий  
@@ -1808,25 +1557,19 @@ window.showGameMessage = showGameMessage;
 
 // Функция для миграции данных героев
 function migrateHeroData(oldHeroes) {
-  return oldHeroes.map(oldHero => {
-    const newHero = allHeroes.find(hero => hero.name === oldHero.name); 
-    if (newHero) {
-      //  Копируем  данные  и добавляем  skill,  если  его нет  у  старого героя
-      return {
-        ...newHero, 
-        level: oldHero.level ||  1, 
-        damage: calculateHeroStats(oldHero.level  ||  1,  newHero.baseDamage, newHero.baseCost).newDamage, 
-        cost: calculateHeroStats(oldHero.level  ||  1,  newHero.baseDamage, newHero.baseCost).newCost, 
-        hired: oldHero.hired  || false, 
-        skill: {
-          ...newHero.skill, // Используем новые значения по умолчанию
-          // ...(oldHero.skill || {}), // Копируем старые значения, если они есть
-          remainingCooldown: oldHero.skill?.remainingCooldown || 0 //  Проверка  существования remainingCooldown 
+    return oldHeroes.map(oldHero => {
+        const newHero = allHeroes.find(hero => hero.name === oldHero.name);
+        if (newHero) {
+            return {
+                ...newHero,
+                level: oldHero.level,
+                damage: calculateHeroStats(oldHero.level, newHero.baseDamage, newHero.baseCost).newDamage,
+                cost: calculateHeroStats(oldHero.level, newHero.baseDamage, newHero.baseCost).newCost,
+                hired: oldHero.hired,
+            };
         }
-      };
-    }
-    return oldHero; 
-  });
+        return oldHero;
+    });
 }
 window.migrateHeroData = migrateHeroData;
 
@@ -1840,11 +1583,10 @@ window.migrateHeroData = migrateHeroData;
 function createHeroElement(hero) {
     const heroDiv = document.createElement('div');
     heroDiv.className = `hero ${hero.hired ? 'hired' : 'not-hired'}`;
-    heroDiv.setAttribute('alt', hero.name);
 
     const heroImg = document.createElement('img');
     heroImg.src = hero.img;
-    heroImg.alt = hero.name; 
+    heroImg.alt = hero.name;
     heroDiv.appendChild(heroImg);
 
     const heroName = document.createElement('p');
@@ -1864,18 +1606,6 @@ function createHeroElement(hero) {
     heroCost.textContent = `Стоимость: ${upgradeCost}`;
     heroDiv.appendChild(heroCost);
 
-    // Кнопка для скилла
-    const skillButton = document.createElement('button');
-    skillButton.classList.add('skill-button'); 
-    skillButton.textContent = hero.skill ? hero.skill.name : 'Скилл недоступен';
-    skillButton.disabled = !hero.hired || hero.skill.onCooldown; // Отключена, если герой не нанят
-    skillButton.onclick = () => {
-        activateSkill(hero);
-        skillButton.disabled = true; //  Отключаем  кнопку  после  активации 
-    };
-    heroDiv.appendChild(skillButton);
-
-    // Кнопка "Нанять/Улучшить"
     const hireButton = document.createElement('button');
     hireButton.className = hero.hired ? 'upgrade-button' : 'hire-button'; // Присваиваем класс кнопке
     hireButton.textContent = hero.hired ? 'Улучшить' : 'Нанять';
@@ -1973,22 +1703,17 @@ function hireOrUpgradeHero(hero, heroDiv, hireButton) {
         const stats = calculateHeroStats(hero.level, hero.baseDamage, hero.baseCost);
         hero.damage = stats.newDamage;
         hero.cost = calculateHeroStats(hero.level + 1, hero.baseDamage, hero.baseCost).newCost; 
+        totalDamage += hero.damage;
         console.log(`Герой ${hero.name} нанят: уровень ${hero.level}, урон ${hero.damage}, следующая стоимость улучшения ${hero.cost}`);
         heroDiv.classList.remove('not-hired');
         heroDiv.classList.add('hired');
         hireButton.textContent = 'Улучшить';
-        updateHeroElement(hero, heroDiv);
+        updateHeroElement(hero, heroDiv); 
 
-        // Обновление состояния кнопки скилла 
-        const skillButton = heroDiv.querySelector('.skill-button');
-        if (skillButton) {
-            skillButton.disabled = !hero.hired || hero.skill.onCooldown;
-        }
-
-        // Обновление информации в клане
+        // Обновляем информацию в клане
         updateClanMemberData(nickname, {
-            level: currentLevel,
-            damage: calculateTotalDamage()
+            level: currentLevel, 
+            damage: calculateTotalDamage()  
         });
     } else if (hero.hired) {
         // Улучшение героя
@@ -1999,23 +1724,20 @@ function hireOrUpgradeHero(hero, heroDiv, hireButton) {
         if (gold >= upgradeCost) {
             console.log(`Герой ${hero.name} улучшается за ${upgradeCost} золота`);
             spendGold(upgradeCost);
+            totalDamage -= hero.damage;
             hero.level++;
             hero.damage = stats.newDamage;
-            hero.cost = calculateHeroStats(hero.level + 1, hero.baseDamage, hero.baseCost).newCost;
+            hero.cost = calculateHeroStats(hero.level + 1, hero.baseDamage, hero.baseCost).newCost; 
+            totalDamage += hero.damage;
             console.log(`Герой ${hero.name} улучшен: уровень ${hero.level}, урон ${hero.damage}, следующая стоимость улучшения ${hero.cost}`);
-            updateHeroElement(hero, heroDiv);
+            hireButton.textContent = 'Улучшить';
+            updateHeroElement(hero, heroDiv); 
 
-            // Обновление состояния кнопки скилла
-            const skillButton = heroDiv.querySelector('.skill-button');
-            if (skillButton) {
-                skillButton.disabled = !hero.hired || hero.skill.onCooldown;
-            }
-
-            // Обновление информации в клане
+            // Обновляем информацию в клане
             updateClanMemberData(nickname, {
                 level: currentLevel,
                 damage: calculateTotalDamage()
-            });
+            }); 
         } else {
             console.log('Недостаточно золота для улучшения!');
         }
@@ -2023,9 +1745,12 @@ function hireOrUpgradeHero(hero, heroDiv, hireButton) {
         console.log('Недостаточно золота для найма!');
     }
 
-    updateTotalDamage(); // Добавьте эту строку, если вы хотите обновлять totalDamage в реальном времени 
+    updateTotalDamage();
     localGoldUpdated = true;
     updateStatusBar();
+    // saveGoldToDatabase().then(() => {
+    //     console.log(`Золото сохранено в базе данных: ${gold}`);
+    // });
     savePlayerData();
     console.log(`Конец функции hireOrUpgradeHero для ${hero.name}, уровень: ${hero.level}, золото: ${gold}`);
 }
@@ -2128,13 +1853,13 @@ function startSession(nickname) {
 
 
 
+
 async function saveProgress() {
     if (!nickname || !currentSessionId) {
         console.error('Cannot save progress: no nickname or session ID');
         return;
     }
 
-    //  Подготовка данных  для сохранения
     const progressData = {
         currentLevel: currentLevel,
         gold: gold,
@@ -2142,23 +1867,14 @@ async function saveProgress() {
         weaponPower: weaponPower,
         weaponName: weaponName,
         weaponLevel: weaponLevel || 0,
-        heroes: heroes.map(hero => ({
-            name: hero.name, 
-            level: hero.level,
-            hired: hero.hired, 
-            skill: {
-                ...hero.skill,
-                //  Сохраняем оставшееся  время  cooldown  
-                remainingCooldown: hero.skill.onCooldown ? Math.max(0, hero.skill.activationTime + hero.skill.cooldown * 1000 - Date.now()) : 0  
-            }
-        })), 
+        heroes: heroes,
         levels: levels,
         session: currentSessionId,
         monsterHealth: monsterHealth,
         rewardMultiplier: rewardMultiplier,
-        rebornCount: rebornCount,
-        currentClan: currentClan, 
-        dailyQuests: questCategories 
+        rebornCount: rebornCount, 
+        currentClan: currentClan, // Добавили currentClan 
+        dailyQuests: questCategories //  Добавляем данные ежедневных  заданий
     };
     console.log('Saving progress:', progressData);
     try {
@@ -2274,120 +1990,92 @@ window.loadProgress = loadProgress;
 // Функция для применения загруженного прогресса
 function applyProgress(data) {
     if (data && validateData(data)) {
-        console.log('Applying progress:', data);
-        console.log(`Gold before applying progress: ${gold}`);
-        
         currentLevel = data.currentLevel;
         gold = data.gold;
         playerHealth = data.playerHealth;
         weaponPower = data.weaponPower;
         weaponName = data.weaponName;
         weaponLevel = data.weaponLevel || 0;
-        rebornCount = data.rebornCount || 0; 
-        rewardMultiplier = data.rewardMultiplier || 1;
-        
-        //  Миграция  данных  героев  
-        heroes  =  migrateHeroData(data.heroes);  
-        
-        heroes  = data.heroes.map(hero  => {
+
+        heroes = data.heroes.map(hero => {
             const baseDamage = hero.baseDamage !== undefined ? hero.baseDamage : 0;
-            const baseCost = hero.baseCost !== undefined ? hero.baseCost : 0; 
-            const level = hero.level || 1; 
-                        // Обновляем название  скилла,  если  необходимо 
-                        if (hero.skill) {
-                const newSkillName = allHeroes.find(h => h.name === hero.name)?.skill.name;
-                if (newSkillName) {
-                    hero.skill.name = newSkillName; 
-                }
-            }
-            //  Проверка  наличия  activationTime  и  расчет  onCooldown
-            if (hero.skill &&  hero.skill.remainingCooldown > 0) { 
-                hero.skill.onCooldown  =  true;
-                hero.skill.activationTime = Date.now() - (hero.skill.cooldown * 1000 - hero.skill.remainingCooldown);  
-                setTimeout(() =>  { 
-                    hero.skill.onCooldown = false;
-                    delete  hero.skill.activationTime;
+            const baseCost = hero.baseCost !== undefined ? hero.baseCost : 0;
+            const level = hero.level || 1;
 
-                    const  heroDiv = document.querySelector(`.hero[alt="${hero.name}"]`);
-                    if (heroDiv) {
-                      const skillButton =  heroDiv.querySelector('.skill-button'); 
-                      if  (skillButton)  {
-                          skillButton.disabled =  false; 
-                      }
-                    }
-                },  hero.skill.remainingCooldown); 
-            } else {
-                hero.skill.onCooldown = false; 
-            } 
-
-            return { 
+            return {
                 ...hero,
-                baseDamage:  baseDamage,
-                baseCost:  baseCost,
-                cost: isNaN(hero.cost) || hero.cost ===  undefined ? baseCost : hero.cost,
-                damage: isNaN(hero.damage)  ||  hero.damage  ===  undefined  ? calculateHeroStats(level, baseDamage,  baseCost).newDamage : hero.damage, 
-                level:  level
-            }; 
+                baseDamage: baseDamage,
+                baseCost: baseCost,
+                cost: isNaN(hero.cost) || hero.cost === undefined ? baseCost : hero.cost,
+                damage: isNaN(hero.damage) || hero.damage === undefined ? calculateHeroStats(level, baseDamage, baseCost).newDamage : hero.damage,
+                level: level
+            };
         });
 
-        levels = data.levels || levels; 
-        monsterHealth = data.monsterHealth || baseMonsterHealth; 
+        levels = data.levels || levels;
+        monsterHealth = data.monsterHealth || baseMonsterHealth;
+        rewardMultiplier = data.rewardMultiplier || 1;
+        rebornCount = data.rebornCount || 0;
 
         // Проверка на наличие данных о клане
-        if (data.currentClan) { 
-            currentClan  =  data.currentClan;
+        if (data.currentClan) {
+            currentClan = data.currentClan;
         }
 
-        //  Обновляем  ссылки на  объекты quest в questCategories
-        if (data.dailyQuests)  { 
-            for (const  category  in data.dailyQuests)  {
-                questCategories[category]  =  data.dailyQuests[category].map((loadedQuest, index) => { 
-                    // Если  квест  уже существует,  обновляем его данные
-                    if  (questCategories[category][index])  {
-                        return { ...questCategories[category][index],  ...loadedQuest }; 
-                    }  else  { 
-                        // Если квеста нет, добавляем его 
-                        return loadedQuest; 
+        // Обновляем  ссылки на  объекты quest  в questCategories
+        if (data.dailyQuests) { 
+            for (const category in  data.dailyQuests) {
+                questCategories[category] = data.dailyQuests[category].map((loadedQuest,  index) => { 
+                    // Если  квест  уже  существует,  обновляем  его  данные
+                    if (questCategories[category][index]) { 
+                        return { ...questCategories[category][index],  ...loadedQuest  }; 
+                    } else  {
+                        // Если  квеста  нет, добавляем  его  
+                        return loadedQuest;
                     } 
-                });
-            } 
-        } 
-
-        // Проверяем  наличие  новой  категории  у старых  игроков 
-        if (!data.dailyQuests  || !data.dailyQuests['Перерождения'])  {
-            // Если категория  отсутствует,  добавляем ее
-            questCategories['Перерождения']  = [
-                { description:  'Переродиться  1  раз', goal: 1,  progress: 0,  reward:  2000,  completed:  false,  claimed: false },
-                { description:  'Переродиться  3 раза', goal:  3,  progress: 0,  reward: 20000,  completed: false,  claimed: false  },
-                { description:  'Переродиться  5 раз', goal:  5, progress: 0,  reward: 100000, completed: false,  claimed: false  } 
-            ]; 
-            console.log('Добавлена  новая категория  "Перерождения" для старого  игрока');
+                }); 
+            }
         }
 
-        // Добавляем новую категорию заданий, если ее нет  у старых  игроков 
-        if (!data.dailyQuests  ||  !data.dailyQuests['Убийство редких монстров'])  {
-            questCategories['Убийство  редких  монстров'] =  [
-                { description: 'Победить 1 Эпического монстра',  goal: 1,  progress: 0, reward: 1000,  completed: false, claimed:  false },
-                { description: 'Победить 2  Эпических монстров',  goal:  2,  progress:  0, reward:  5000,  completed:  false, claimed:  false  },
-                { description: 'Победить 3  Эпических монстров',  goal:  3,  progress: 0, reward: 10000, completed: false,  claimed: false  }, 
-                { description: 'Победить  4 Эпических  монстров',  goal:  4,  progress: 0, reward: 20000,  completed:  false, claimed:  false }, 
-                { description: 'Победить  5  Эпических  монстров',  goal: 5, progress: 0, reward:  50000, completed:  false,  claimed:  false  }
-            ]; 
-            console.log("Добавлена  новая категория  заданий для старого  игрока.");
-        }
+//  Проверяем наличие  новой  категории  у старых игроков
+if  (!data.dailyQuests  || !data.dailyQuests['Перерождения'])  {
+        //  Если категория отсутствует, добавляем ее 
+        questCategories['Перерождения'] = [ 
+            { description: 'Переродиться 1 раз',  goal:  1,  progress: 0,  reward: 2000, completed: false, claimed:  false },
+            { description: 'Переродиться 3 раза', goal:  3, progress: 0,  reward:  20000, completed: false, claimed:  false },
+            { description: 'Переродиться  5  раз', goal:  5,  progress:  0,  reward:  100000, completed:  false,  claimed:  false  }
+        ]; 
+        console.log('Добавлена  новая  категория  "Перерождения" для  старого  игрока');
+    } 
 
-        console.log(`Gold after applying  progress:  ${gold}`);
-        console.log(`currentClan  after applying progress:  ${currentClan}`);
 
-        updateCharacterMenu();  
+
+                                // Добавляем новую категорию заданий, если ее нет у старых игроков
+                             if (!data.dailyQuests || !data.dailyQuests['Убийство редких монстров']) {
+                                 questCategories['Убийство редких монстров'] = [ 
+                                { description: 'Победить 1 Эпического монстра', goal: 1, progress: 0, reward: 1000, completed: false, claimed: false },
+                                { description: 'Победить 2 Эпических монстров', goal: 2, progress: 0, reward: 5000, completed: false, claimed: false },
+                                { description: 'Победить 3 Эпических монстров', goal: 3, progress: 0, reward: 10000, completed: false, claimed: false },
+                                { description: 'Победить 4 Эпических монстров', goal: 4, progress: 0, reward: 20000, completed: false, claimed: false },
+                                { description: 'Победить 5 Эпических монстров', goal: 5, progress: 0, reward: 50000, completed: false, claimed: false }
+                                 ];
+                                 console.log("Добавлена новая категория заданий для старого игрока.");
+                                 }
+
+        console.log('Applying progress:', data);
+        console.log(`Gold after applying progress: ${gold}`);
+        console.log(`currentClan after applying progress: ${currentClan}`);
+
+
+        updateCharacterMenu(); 
         addHeroesToMenu();
         updateTotalDamage(); 
         updateStatusBar();
-    } 
+
+        
+    }
 }
-
 window.applyProgress = applyProgress;
-
 
 async function startGame() {
     const input = document.getElementById('nicknameInput').value;
@@ -3006,49 +2694,52 @@ window.spendGold = spendGold;
 
 
 
-function startWorldBossTimer() {
-    worldBossTimerInterval =  setInterval(updateWorldBossTimer, 1000);
+function updateWorldBossTimer() {
+    console.log("updateWorldBossTimer: timeUntilWorldBoss  = ", timeUntilWorldBoss);
+  timeUntilWorldBoss--;
+  
+
+  const minutes =  Math.floor(timeUntilWorldBoss / 60);
+  const seconds  = timeUntilWorldBoss %  60;
+
+  document.getElementById('worldBossTimer').textContent = 
+      `Осталось  ${minutes}m ${seconds}s  до появления мирового  босса`; 
+
+  if (timeUntilWorldBoss  <=  0)  { 
+    console.log("Таймер  остановлен.");
+    clearInterval(worldBossTimerInterval);
+    //document.getElementById('worldBossTimer').style.display  = 'none'; 
+    resetWorldBossHealth(); 
+  } 
 }
-
-
 
 
 
 function resetWorldBossHealth() {
-  //  Если босс уже был убит хотя бы раз, увеличиваем его здоровье
-  if (worldBossWasKilled) {
-    worldBossMaxHealth *= 1.2; // Увеличиваем максимальное здоровье на 20% 
-    showGameMessage("Мировой босс стал сильнее! Его здоровье увеличено на 20%.");
+  //  Если босс уже  был убит хотя бы раз, увеличиваем  его  здоровье 
+  if  (worldBossWasKilled) {
+    worldBossMaxHealth *= 1.2; //  Увеличиваем  максимальное здоровье на 20% 
+    showGameMessage("Мировой  босс стал  сильнее!  Его  здоровье  увеличено  на 20%.");
   }
+  worldBossHealth =  worldBossMaxHealth; //  Устанавливаем текущее  здоровье  равным максимальному
+  worldBossWasKilled  =  false; //  Сбрасываем флаг 
 
-  worldBossHealth = worldBossMaxHealth; // Устанавливаем текущее здоровье равным максимальному
-  worldBossWasKilled = false; // Сбрасываем флаг 
+   //  Скрываем  таймер  и  показываем  полоску  здоровья
+   
+  document.getElementById('monsterHealthContainer').style.display = 'block'; 
 
-  // Скрываем таймер и показываем полоску здоровья
-  document.getElementById('worldBossTimer').style.display = 'none'; 
-  document.getElementById('monsterHealthContainer').style.display = 'block';
-
-  // Устанавливаем isAlive в true в базе данных
-  const worldBossRef = ref(database, 'worldBoss');
-  set(worldBossRef, {
-    health: worldBossHealth, 
-    rebornTime: null,
-    isAlive: true
-  });
-
-  syncWorldBossHealth();
-  console.log("World Boss Health has been reset to", worldBossHealth);
+  syncWorldBossHealth(); 
+  console.log("World Boss Health has been  reset  to",  worldBossHealth);
   updateWorldBossHealthDisplay();
   drawWorldBossBattle(); 
 }
-
-
 function getTimeUntilNextHour() {
     const now = new Date();
     const nextHour = new Date(now.getTime() + (60 - now.getMinutes()) * 60 * 1000);
     nextHour.setMinutes(0, 0, 0);
     return nextHour - now;
 }
+
 function startHourlyReset() {
     const timeUntilNextHour = getTimeUntilNextHour();
     
@@ -4920,33 +4611,44 @@ function updateDamageList() {
     });
 }
 
-function hitWorldBoss(playerName, damage) {
-    if (worldBossHealth <= 0) return; // Проверка, чтобы не засчитывать урон после смерти босса
+function  hitWorldBoss(playerName,  damage)  { 
+    if (worldBossHealth  <= 0) return;  // Проверка, чтобы не  засчитывать  урон  после  смерти босса
 
-    if (!playersDamage[playerName]) {
-        playersDamage[playerName] = 0;
+    if (!playersDamage[playerName])  {
+        playersDamage[playerName] =  0;
     }
-    playersDamage[playerName] += damage;
-    worldBossHealth -= damage;
-    if (worldBossHealth < 0) worldBossHealth = 0;
-    updateWorldBossHealthDisplay();
-    updateDamageList();
-    syncWorldBossHealth();
-    syncPlayersDamage();
-    updateMonsterHealthDisplay(); //  Добавьте  вызов  здесь
+    playersDamage[playerName]  +=  damage; 
+    worldBossHealth -= damage; 
 
-    if (worldBossHealth <= 0) {
-        worldBossWasKilled = true; // Устанавливаем  флаг, что босс был  убит 
-        // Вызов функции отправки наград при смерти босса
+    //  Обновляем  флаг worldBossWasKilled ДО  того, как  здоровье может  стать  отрицательным 
+    if  (worldBossHealth  <=  0) {
+        worldBossHealth =  0; 
+        worldBossWasKilled = true;  // Устанавливаем  флаг, что босс  был  убит  
+    }
+
+    updateWorldBossHealthDisplay(); 
+    updateDamageList(); 
+    syncWorldBossHealth(); 
+    syncPlayersDamage();
+    updateMonsterHealthDisplay();
+
+    // Проверяем  worldBossHealth  ПОСЛЕ того,  как  он  обновлен
+    if (worldBossHealth  <=  0)  { 
+        //  Вызов функции отправки  наград  при  смерти  босса 
         sendRewards();
-  
-    document.getElementById('monsterHealthContainer').style.display = 'none';
-    document.getElementById('worldBossTimer').style.display  =  'block'; //  Показываем  таймер 
-    startWorldBossTimer(); //  Запускаем  таймер 
+
+        document.getElementById('monsterHealthContainer').style.display = 'none';
+        document.getElementById('worldBossTimer').style.display  =  'block';  // Показываем таймер
     }
 }
 
 
+function  startWorldBossTimer() { 
+    console.log("Функция  startWorldBossTimer  вызвана.");
+    timeUntilWorldBoss = getTimeUntilNextHour(); //  Вычисляем время  до  следующего часа 
+    console.log("timeUntilWorldBoss:",  timeUntilWorldBoss); 
+    worldBossTimerInterval = setInterval(updateWorldBossTimer, 1000); 
+}
 
 function updateWorldBossHealthDisplay() {
     //console.log(`Updating World Boss Health Display: ${worldBossHealth}`);
@@ -4959,94 +4661,72 @@ function startBossBattle() {
 }
 
 function changeScreen(screen) {
-  console.log(`Changing screen to: ${screen}`);
-  currentScreen = screen;
-
-  // Скрываем меню магазина
-  document.getElementById('shopMenu').style.display = 'none';
-
-  // Управляем видимостью элементов в зависимости от экрана
-  document.getElementById('monsterHealthDisplay').style.display = (screen === 'dungeon') ? 'block' : 'none';
-  document.getElementById('crosshair').style.display = 'none';
-  document.getElementById('mailButton').style.display = (screen === 'castle') ? 'block' : 'none';
-  crosshair.style.display = (screen === 'battle' || screen === 'worldBoss') ? 'block' : 'none';
-  document.getElementById('rebornButton').style.display = (screen === 'dungeon') ? 'block' : 'none';
-  document.getElementById('pvpButton').style.display = 'none';
-  document.getElementById('pvpLastBattles').style.display = 'none';
-  document.getElementById('dailyQuestsMenu').style.display = 'none';
-
-  // Скрываем полоску здоровья монстра, если не на экране dungeon или battle
-  if (screen !== 'dungeon' && screen !== 'battle') {
-    document.getElementById('monsterHealthContainer').style.display = 'none';
-    updateStatusBar();
-  }
-
-  // Логика для экрана мирового босса
-  if (screen === 'worldBoss') {
-    document.getElementById('worldBossScreen').style.display = 'block';
-    document.getElementById('statusBar').style.display = 'block';
-    updateStatusBar();
-
-    // Проверяем состояние босса перед отображением
-    const worldBossRef = ref(database, 'worldBoss');
-
-    // Отключаем предыдущий слушатель
-    off(worldBossRef); 
-
-    get(worldBossRef).then((snapshot) => {
-      const data = snapshot.val();
-
-      if (data.isAlive) {
-        // Босс жив, отображаем полоску здоровья
-        document.getElementById('monsterHealthContainer').style.display = 'block';
-        document.getElementById('worldBossTimer').style.display = 'none';
-      } else {
-        // Босс мертв, отображаем таймер
+    console.log(`Changing screen to: ${screen}`);
+    currentScreen = screen;
+    document.getElementById('shopMenu').style.display = 'none';
+    //document.getElementById('statusBar').style.display = 'none';
+    document.getElementById('monsterHealthDisplay').style.display = (screen === 'dungeon') ? 'block' : 'none';
+    document.getElementById('crosshair').style.display = 'none';
+    document.getElementById('mailButton').style.display = (screen === 'castle') ? 'block' : 'none';
+    crosshair.style.display = (screen === 'battle' || screen === 'worldBoss') ? 'block' : 'none';
+    document.getElementById('rebornButton').style.display = (screen === 'dungeon') ? 'block' : 'none'; // Отображаем кнопку только на экране "battle"
+    document.getElementById('pvpButton').style.display = 'none'; // Скрываем кнопку по умолчанию
+    document.getElementById('pvpLastBattles').style.display  =  'none';
+    document.getElementById('dailyQuestsMenu').style.display  = 'none'; //  Скрываем меню  квестов 
+    // Hide the monster health bar when changing screens
+    if (screen !== 'dungeon' && screen !== 'battle') {  
         document.getElementById('monsterHealthContainer').style.display = 'none';
-        document.getElementById('worldBossTimer').style.display = 'block';
-      }
+        updateStatusBar();
+    }
+    if (screen === 'worldBoss') {
+        document.getElementById('worldBossScreen').style.display = 'block';
+        document.getElementById('statusBar').style.display = 'block';
+        updateStatusBar();
+        drawWorldBossBattle();
+        showWorldBossHealthBar();
+    } else {
+        document.getElementById('worldBossScreen').style.display = 'none';
+    }
 
-      drawWorldBossBattle();
-      updateWorldBossTimer(); // Запускаем обновление таймера
-    });
-  } else {
-    document.getElementById('worldBossScreen').style.display = 'none';
-  }
-
-  // Логика для других экранов
-  if (screen === 'raid') {
-    drawMenu();
-  } else if (screen === 'dungeon') {
-    showHealthBar();
-    drawDungeonEntrance();
-    document.getElementById('statusBar').style.display = 'block';
-  } else if (screen === 'arena') {
-    drawArena();
-    displayLastPvpBattles();
-    document.getElementById('pvpLastBattles').style.display = 'block';
-    document.getElementById('pvpButton').style.display = 'block';
-  } else if (screen === 'castle') {
-    drawCastle();
-  } else if (screen === 'shop') {
-    drawShop();
-  } else if (screen === 'battle') {
-    loadProgress(nickname).then(data => {
-      console.log('Data after loading progress:', data);
-      if (data) {
-        currentLevel = data.currentLevel;
-        gold = data.gold;
-        playerHealth = data.playerHealth;
-        weaponPower = data.weaponPower;
-        weaponName = data.weaponName;
-        weaponLevel = data.weaponLevel;
-        levels = data.levels || levels;
-        updateCharacterMenu();
-      }
-      document.getElementById('statusBar').style.display = 'block';
-      updateStatusBar();
-      startLevel(currentLevel);
-    });
-  }
+    if (screen === 'raid') {
+        drawMenu();
+    } else if (screen === 'dungeon') {
+        showHealthBar(); // Показать полоску здоровья на экране dungeon
+        drawDungeonEntrance();
+        document.getElementById('statusBar').style.display = 'block';
+        //updateStatusBar();
+    } else if (screen === 'arena') {
+        drawArena(); 
+        displayLastPvpBattles();  //  Отображаем  последние  битвы  
+        document.getElementById('pvpLastBattles').style.display  =  'block'; 
+        document.getElementById('pvpButton').style.display  =  'block'; 
+        arena();
+        
+        
+    } else if (screen === 'castle') {
+        drawCastle();
+    } else if (screen === 'shop') {
+        drawShop();
+    } else if (screen === 'battle') {
+        loadProgress(nickname).then(data => {
+            console.log('Data after loading progress:', data);
+            if (data) {
+                currentLevel = data.currentLevel;
+                gold = data.gold;
+                playerHealth = data.playerHealth;
+                weaponPower = data.weaponPower;
+                weaponName = data.weaponName;
+                weaponLevel = data.weaponLevel;
+                levels = data.levels || levels;
+                updateCharacterMenu();
+            }
+            document.getElementById('statusBar').style.display = 'block';
+            updateStatusBar();
+            startLevel(currentLevel); // Инициализация уровня перед отрисовкой боя
+        });
+    } else if (screen === 'levels') {
+        // drawLevelsScreen();
+    }
 }
 
 window.changeScreen = changeScreen;
@@ -5164,6 +4844,34 @@ function updateStatusBar() {
     //console.log('Status bar updated'); // Логирование обновления статус бара
 }
 window.updateStatusBar = updateStatusBar;
+
+
+
+
+
+
+
+//         function toggleTopPlayers() {
+//     const menu = document.getElementById('topPlayersMenu');
+//     if (menu.style.display === 'block') {
+//         menu.style.display = 'none';
+//     } else {
+//         displayTopPlayers().then(topPlayers => {
+//             let topListHTML = '<h2>Топ игроки</h2>';
+//             // Преобразование объекта в массив и сортировка по уровню
+//             const sortedPlayers = Object.values(topPlayers).sort((a, b) => b.level - a.level);
+//             sortedPlayers.forEach(player => {
+//                 topListHTML += `<p>${player.nickname} - Уровень ${player.level}</p>`;
+//             });
+//             document.getElementById('topPlayersMenu').innerHTML = topListHTML;
+//             menu.style.display = 'block';
+//         });
+//     }
+// }
+
+
+//         window.toggleTopPlayers = toggleTopPlayers;
+
 
 
         canvas.addEventListener('click', function(event) {
