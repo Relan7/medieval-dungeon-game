@@ -740,7 +740,10 @@ button.upgrade-button:hover, button.hire-button:hover {
   height: 100%;
   background: purple; /* Фиолетовый цвет для полоски здоровья редкого монстра */
 }
-
+button.upgrade-button:active {
+    background: linear-gradient(to right, #23c85f, #212a78); /*  Красный  градиент */
+    transform: scale(0.95);
+}
 #rareMonsterTimer {
   position: absolute;
   top: 80px; /* Под полоской здоровья монстра */
@@ -2030,11 +2033,9 @@ hireButton.style.background = 'linear-gradient(to  right,  #23c85f,  #212a78)'; 
             }, 2000); //  2 секунды  
         } else {
             console.log('Недостаточно золота для улучшения!');
-            showGameMessage("Недостаточно золота!");
         }
     } else {
         console.log('Недостаточно золота для найма!');
-        showGameMessage("Недостаточно золота для найма!");
     }
 
     updateTotalDamage(); // Добавьте эту строку, если вы хотите обновлять totalDamage в реальном времени 

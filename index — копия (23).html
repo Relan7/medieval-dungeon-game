@@ -450,7 +450,7 @@ button.upgrade-button, button.hire-button {
     cursor: pointer;
     font-size: 18px; /* Увеличенный размер шрифта */
     padding: 10px 20px;
-    transition: background 0.3s ease; /* Добавьте плавный переход для background */ 
+    transition: transform 0.2s, box-shadow 0.2s;
     box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4); /* Тень для кнопок */
 }
 
@@ -2016,25 +2016,11 @@ function hireOrUpgradeHero(hero, heroDiv, hireButton) {
                 level: currentLevel,
                 damage: calculateTotalDamage()
             });
-
-            //  Изменить текст кнопки на  "Улучшено!" 
- hireButton.textContent  = 'Улучшено!';
-
-//  Изменить  цвет  кнопки
-hireButton.style.background = 'linear-gradient(to  right,  #23c85f,  #212a78)'; //  Зелёный градиент
-
-            //  Вернуть исходный  цвет  и  текст  через  2  секунды
-            setTimeout(() =>  {
-                hireButton.textContent =  'Улучшить';
-                hireButton.style.background = 'linear-gradient(to  right,  #ff416c,  #ff4b2b)'; //  Исходный градиент
-            }, 2000); //  2 секунды  
         } else {
             console.log('Недостаточно золота для улучшения!');
-            showGameMessage("Недостаточно золота!");
         }
     } else {
         console.log('Недостаточно золота для найма!');
-        showGameMessage("Недостаточно золота для найма!");
     }
 
     updateTotalDamage(); // Добавьте эту строку, если вы хотите обновлять totalDamage в реальном времени 
