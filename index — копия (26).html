@@ -202,11 +202,6 @@ body, html {
             display: none;
             z-index: 2001;
         }
-        .hero { 
-    /* ...  другие стили  */ 
-    opacity: 1; 
-}
-
         .hero img {
         width: 175px;
         height: 242px;
@@ -777,11 +772,9 @@ button.skill-button  {
     font-size:  14px; /*  Немного  меньший размер шрифта */
     font-weight: bold; /*  Жирный  шрифт */ 
     padding: 8px  16px; 
-    transition:  transform  0.2s,  box-shadow 0.2s,  opacity  0.3s  ease; /*  ДОБАВЛЕНО  opacity */
+    transition:  transform  0.2s,  box-shadow  0.2s;  
     box-shadow:  0  3px  12px rgba(0,  198,  255, 0.5); /*  Тень синего цвета */ 
     position:  relative;  /*  Для позиционирования индикатора  cooldown */ 
-    opacity: 1;
-    
 }
 
 /* Эффект  наведения  на кнопку */ 
@@ -801,68 +794,53 @@ button.skill-button::before {
     background-color:  rgba(0,  0,  0,  0.7); /*  Темно-серый  индикатор */ 
     border-radius: 8px;  
     z-index:  1; /*  Поверх  кнопки */ 
-    opacity:  0; /*  Изначально  скрываем  с  помощью  opacity  */
-    transform:  none;  /*  Убираем  transform  */ 
-    transition: opacity  0.3s  ease; /*  Анимируем  opacity  */ 
+    transform-origin: center  left;  /*  Анимация  будет  идти слева  направо */
+    transform:  scaleX(0);  /*  Изначально индикатор скрыт */ 
     
 }
 
 button.skill-button[disabled]::before  {
-    opacity:  1;  /* Показываем  с помощью  opacity  */ 
+    transform:  scaleX(1);  /*  Показываем  индикатор  полностью, когда кнопка  отключена  */
 }
 
 #skillBook { 
-    position: fixed; 
-    top: 20%;  
-    left:  20%;  
-    background:  rgba(0,  0,  0,  0.8); 
+    position:  fixed;  
+    top:  20%;  /*  Примерный отступ  сверху */
+    left:  20%;  /*  Примерный  отступ  слева  */ 
+    background:  rgba(0,  0,  0,  0.8);  
     color:  white;  
     padding:  10px;  
-    border-radius:  5px;  
-    z-index: 1001;
+    border-radius:  5px; 
+    z-index:  1001;  
 }
-#skillButtonsContainer { 
-    display:  flex; 
+
+#skillButtonsContainer  { 
+    display: flex; 
     flex-wrap:  wrap;
+    /* ...  другие стили  для расположения  кнопок */  
 }
 
-#skillButtonsContainer img.skill-button  { 
-    width: 64px;  /*  Примерный  размер  */  
-    height: 64px;  
-    margin: 5px;  
-    cursor:  pointer;  
-    border-radius: 5px;
+#skillButtonsContainer img.skill-button {
+    width: 64px; /*  Примерный  размер  */ 
+    height:  64px;
+    margin:  5px; 
+    cursor: pointer;
+    border-radius:  5px;  /* Необязательно,  для  скругления  углов */  
+
+    /*  Добавляем  эффект  отключения  кнопки  */ 
     opacity: 1; 
-    transition: opacity 0.3s ease;
-    position:  relative;  /*  ДОБАВЛЕНО  */
-} 
-
-#skillButtonsContainer  img.skill-button[disabled] { 
-    opacity: 0.5;
-    cursor:  default; 
+    transition: opacity 0.3s  ease;
 }
 
-#skillButtonsContainer  img.skill-button:hover  { 
-    transform:  scale(1.1);  
-} 
-button.skill-button.onCooldown {
-    opacity: 0.5; /*  Затемняем кнопку  */ 
+#skillButtonsContainer img.skill-button[disabled] {
+    opacity: 0.5;  
+    cursor:  default;
 }
 
-button.skill-button.onCooldown::before, 
-#skillButtonsContainer img.skill-button.onCooldown::before  { 
-    content:  '';  
-    position: absolute; 
-    top:  0;
-    left:  0;  
-    width: 100%;  
-    height: 100%;  
-    background-color: rgba(0, 0, 0,  0.7); /*  Серый полупрозрачный  фон  */ 
-    border-radius:  8px; /*  Соответствует border-radius кнопки  */
-    z-index:  9999; /*  Увеличиваем  z-index  */
-    opacity: 1;  /*  Показываем  индикатор cooldown  */
-    transition: opacity 0.3s ease;  /*  Анимируем opacity  */
+#skillButtonsContainer img.skill-button:hover  {
+    transform:  scale(1.1); 
 }
+
 /* Медиазапросы для мобильной версии */
 @media (max-width: 768px) {
           
@@ -904,7 +882,6 @@ button.skill-button.onCooldown::before,
         display: none; /* Скрываем по умолчанию */
         transform: scale(0.6); /* Уменьшить масштаб до 30% */
         transform-origin: top left; /* Указать точку начала масштабирования */
-        opacity:  1;
     }
     .health-bar {
         display: none; /* Скрываем по умолчанию */
@@ -1604,80 +1581,48 @@ function  handleWorldBossDeath()  {
 
 function duplicateSkillButtons() {
   const skillButtonsContainer = document.getElementById('skillButtonsContainer');
-  skillButtonsContainer.innerHTML = ''; // Очищаем контейнер перед добавлением кнопок
+  skillButtonsContainer.innerHTML = ''; //  Очищаем  контейнер перед  добавлением  кнопок
 
   heroes.forEach(hero => {
     if (hero.hired) {
-      // Создаем новую кнопку скилла
+      // Создаем новую  кнопку  скилла
       const skillButton = document.createElement('img');
-      skillButton.src = hero.img; // Используем изображение героя в качестве иконки
+      skillButton.src = hero.img; //  Используем  изображение  героя  в  качестве  иконки 
       skillButton.alt = hero.skill.name;
-      skillButton.classList.add('skill-button');
-      skillButton.title = hero.skill.name; // Добавляем подсказку с названием скилла
-      skillButton.disabled = hero.skill.onCooldown; 
+      skillButton.classList.add('skill-button'); 
+      skillButton.title = hero.skill.name; //  Добавляем подсказку  с  названием  скилла 
+      skillButton.disabled = hero.skill.onCooldown;  
 
-      // Добавляем обработчик события click 
+      //  Добавляем обработчик события click  
       skillButton.addEventListener('click', () => {
-        activateSkill(hero);
-        // Отключаем все кнопки этого скилла (в книге и у героя)
-        disableSkillButtons(hero); 
+        activateSkill(hero); 
+        // Отключаем  все  кнопки  этого  скилла  (в  книге  и  у  героя)
+        disableSkillButtons(hero);  
       });
 
-      // Добавляем класс 'onCooldown' если скилл на перезарядке
-      if (hero.skill.onCooldown) {
-        skillButton.classList.add('onCooldown');
-      }
-
-      // Добавляем кнопку в контейнер
+      //  Добавляем  кнопку  в контейнер
       skillButtonsContainer.appendChild(skillButton); 
     }
   });
 }
 
-
 //  Функция для отключения  всех  кнопок  скилла  героя
-function disableSkillButtons(hero) {
-  // Отключаем кнопку в меню героя и добавляем класс .onCooldown 
+function  disableSkillButtons(hero) {
+  //  Отключаем  кнопку в меню  героя  
   const heroDiv = document.querySelector(`.hero[alt="${hero.name}"]`);
-
-  // Объявляем bookButton здесь 
-  const bookButton = document.querySelector(`#skillButtonsContainer img[alt="${hero.skill.name}"]`);
-
-   //  Отключаем  кнопку в  меню героя  и  добавляем  класс  .onCooldown  
-   if (heroDiv) { 
-      const skillButton = heroDiv.querySelector('.skill-button'); 
-      if (skillButton) {
-          // --- LOGGING START ---
-          console.log(`Disabling hero skill button for ${hero.name}, adding .onCooldown`);
-          // Логируем прозрачность родителя
-          console.log(`Hero div opacity: ${heroDiv.style.opacity}`);
-          // --- LOGGING END ---
-
-          skillButton.classList.add('onCooldown'); 
-
-          // Добавляем задержку перед отключением
-          setTimeout(() => {
-            skillButton.disabled = true;
-          }, 100); 
-        } 
+  if (heroDiv)  {
+    const skillButton  = heroDiv.querySelector('.skill-button');
+    if (skillButton)  { 
+        skillButton.disabled  = true; 
+    }
   }
 
-   // Отключаем  кнопку в книге  скиллов  и добавляем  класс .onCooldown
-  if  (bookButton) {
-    // --- LOGGING START ---
-    console.log(`Disabling skill book button for ${hero.name}, adding .onCooldown`);
-    // --- LOGGING END ---
-      
-    //  Сначала  добавляем класс .onCooldown: 
-    bookButton.classList.add('onCooldown');
-
-    //  Потом  отключаем кнопку
-    setTimeout(() => {
-        bookButton.disabled = true;
-    },  10);  // Можно  увеличить задержку, если  необходимо
-  } 
+  //  Отключаем  кнопку в книге  скиллов
+  const bookButton = document.querySelector(`#skillButtonsContainer img[alt="${hero.skill.name}"]`);
+  if (bookButton)  { 
+      bookButton.disabled  = true;
+  }
 }
-
 
 function  updateWorldBossTimer()  {
     const  worldBossRef =  ref(database, 'worldBoss');
@@ -1706,62 +1651,47 @@ function  updateWorldBossTimer()  {
 }
 
 function activateSkill(hero) {
-if (hero.hired && !hero.skill.onCooldown) {
-    console.log(`Активация скилла "${hero.skill.name}"`);
+  if (hero.hired && !hero.skill.onCooldown) {
+    console.log(`Активация скилла "${hero.skill.name}"`); 
     hero.skill.onCooldown = true;
-    // Обновляем  книгу  скиллов  
-    duplicateSkillButtons(); //  **ДОБАВЛЕНО** 
-    hero.skill.activationTime = Date.now();
-
-    // --- LOGGING START ---
-    let skillStartTime = Date.now();
-    console.log(`Skill "${hero.skill.name}" activated at ${skillStartTime}`);
-    // --- LOGGING END ---
+    hero.skill.activationTime = Date.now();  //  Сохраняем  время  активации
 
     let skillHits = 0;
     const skillInterval = setInterval(() => {
       if (currentScreen === 'battle' && skillHits < hero.skill.hitsPerSecond * hero.skill.duration) {
-        hitMonster({ clientX: canvas.width / 2, clientY: canvas.height / 2 });
+        hitMonster({ clientX: canvas.width / 2, clientY: canvas.height / 2 }); 
         skillHits++;
       } else {
         clearInterval(skillInterval);
       }
     }, 1000 / hero.skill.hitsPerSecond);
 
+    //  Запускаем cooldown
     const cooldownTime = hero.skill.cooldown * 1000;
-
     setTimeout(() => {
-      hero.skill.onCooldown = false;
-      delete hero.skill.activationTime;
+        hero.skill.onCooldown = false; 
+        delete hero.skill.activationTime; //  Удаляем  время  активации  после  окончания  cooldown  
 
-      // 1. Обновляем кнопку в меню героя
-      const heroDiv = document.querySelector(`.hero[alt="${hero.name}"]`);
-      if (heroDiv) {
-        const skillButton = heroDiv.querySelector('.skill-button');
-        if (skillButton) {
-          skillButton.disabled = false;
-          skillButton.classList.remove('onCooldown');
-
-          // --- LOGGING START ---
-          let skillEndTime = Date.now();
-          console.log(`Skill "${hero.skill.name}" cooldown finished at ${skillEndTime}, duration: ${skillEndTime - skillStartTime}ms`);
-          console.log(`Skill button styles:`, skillButton.style);
-          // --- LOGGING END ---
+        // Обновляем  кнопку  скилла  
+        const heroDiv = document.querySelector(`.hero[alt="${hero.name}"]`); 
+        if (heroDiv) {
+          const skillButton = heroDiv.querySelector('.skill-button');
+          if (skillButton) {
+            skillButton.disabled = false;
+            skillButton.style.transitionDuration = `${hero.skill.cooldown}s`;
+          }
         }
-      }
 
-      // 2. Обновляем книгу скиллов
-      duplicateSkillButtons();
-
-      // Сохраняем прогресс
-      saveProgress()
-        .then(() => console.log("Прогресс сохранен после окончания cooldown."))
-        .catch((error) => console.error("Ошибка при сохранении прогресса после окончания cooldown:", error));
+        // Сохраняем прогресс после  окончания cooldown 
+        saveProgress()
+            .then(() => console.log("Прогресс  сохранен  после  окончания  cooldown."))
+            .catch((error)  => console.error("Ошибка  при сохранении прогресса  после  окончания  cooldown:", error));
     }, cooldownTime);
+
   } else if (hero.skill.onCooldown) {
-    const remainingCooldown = Math.ceil((hero.skill.activationTime + hero.skill.cooldown * 1000 - Date.now()) / 1000);
-    showGameMessage(`Скилл "${hero.skill.name}" на перезарядке! Осталось ${remainingCooldown} секунд.`);
-  }
+    const remainingCooldown = Math.ceil((hero.skill.activationTime + hero.skill.cooldown * 1000 - Date.now()) / 1000); 
+    showGameMessage(`Скилл "${hero.skill.name}"  на  перезарядке!  Осталось ${remainingCooldown}  секунд.`);
+  } 
 }
 
 function updateCooldown(hero, startTime) {
@@ -1793,7 +1723,7 @@ function updateCooldown(hero, startTime) {
                 // Откат завершен
                 hero.skill.onCooldown = false;
                 skillButton.disabled = false; // Разблокируем кнопку
-                
+                skillButton.style.transitionDuration = ''; // Сбрасываем transitionDuration
             }
         } else {
             console.error("skillButton не найден для героя:", hero.name);
@@ -2026,18 +1956,11 @@ function createHeroElement(hero) {
     const skillButton = document.createElement('button');
     skillButton.classList.add('skill-button'); 
     skillButton.textContent = hero.skill ? hero.skill.name : 'Скилл недоступен';
-        //  Лог  состояния  onCooldown  при  создании кнопки  
-        console.log(`${hero.name} skill button created, onCooldown:  ${hero.skill.onCooldown}`);
     skillButton.disabled = !hero.hired || hero.skill.onCooldown; // Отключена, если герой не нанят
     skillButton.onclick = () => {
-    activateSkill(hero);
-    // Сначала добавляем класс onCooldown
-    skillButton.classList.add('onCooldown'); 
-    // Затем отключаем кнопку с задержкой
-    setTimeout(() => {
-        skillButton.disabled = true;
-    }, 300); // 300 мс - примерное время анимации opacity
-};
+        activateSkill(hero);
+        skillButton.disabled = true; //  Отключаем  кнопку  после  активации 
+    };
     heroDiv.appendChild(skillButton);
 
     // Кнопка "Нанять/Улучшить"
@@ -2498,12 +2421,6 @@ function applyProgress(data) {
                           skillButton.disabled =  false; 
                       }
                     }
-                                        //  3.  Обновляем  кнопку  в книге  скиллов  
-               const bookButton  = document.querySelector(`#skillButtonsContainer img[alt="${hero.skill.name}"]`);
-               if (bookButton) { 
-                   bookButton.disabled =  true;  
-                   bookButton.classList.add('onCooldown');  
-               } 
                 },  hero.skill.remainingCooldown); 
             } else {
                 hero.skill.onCooldown = false; 
@@ -2574,7 +2491,6 @@ function applyProgress(data) {
         updateStatusBar();
     } 
 }
-
 
 window.applyProgress = applyProgress;
 
