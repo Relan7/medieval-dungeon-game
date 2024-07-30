@@ -419,7 +419,21 @@ body, html {
     padding: 10px;
     display: none; /* Скрыть по умолчанию */
 }
+#chatContainer button {
+  background-color: rgba(0, 0, 0, 0.8); /* Полупрозрачный фон */
+  border: 2px solid white; /* Белая обводка */
+  color: white; 
+  padding: 8px 16px; 
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s; /* Переходы для эффекта наведения */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Тень для текста */
+}
 
+#chatContainer button:hover {
+  transform: scale(1.05); /* Легкое увеличение при наведении */
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Светлая тень при наведении */
+}
 #chatMessages {
     flex-grow: 1;
     overflow-y: auto;
