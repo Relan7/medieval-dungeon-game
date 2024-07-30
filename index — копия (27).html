@@ -780,7 +780,7 @@ button.skill-button  {
     transition:  transform  0.2s,  box-shadow 0.2s,  opacity  0.3s  ease; /*  ДОБАВЛЕНО  opacity */
     box-shadow:  0  3px  12px rgba(0,  198,  255, 0.5); /*  Тень синего цвета */ 
     position:  relative;  /*  Для позиционирования индикатора  cooldown */ 
-    opacity: 1!important;
+    opacity: 1;
     
 }
 
@@ -801,20 +801,20 @@ button.skill-button::before {
     background-color:  rgba(0,  0,  0,  0.7); /*  Темно-серый  индикатор */ 
     border-radius: 8px;  
     z-index:  1; /*  Поверх  кнопки */ 
-    opacity:  0!important; /*  Изначально  скрываем  с  помощью  opacity  */
+    opacity:  0; /*  Изначально  скрываем  с  помощью  opacity  */
     transform:  none;  /*  Убираем  transform  */ 
-    transition: opacity  0.3s  ease!important; /*  Анимируем  opacity  */ 
+    transition: opacity  0.3s  ease; /*  Анимируем  opacity  */ 
     
 }
 
 button.skill-button[disabled]::before  {
-    opacity:  1!important;  /* Показываем  с помощью  opacity  */ 
+    opacity:  1;  /* Показываем  с помощью  opacity  */ 
 }
 
 #skillBook { 
     position: fixed; 
-    top: 73%;  
-    left:  31%;  
+    top: 20%;  
+    left:  20%;  
     background:  rgba(0,  0,  0,  0.8); 
     color:  white;  
     padding:  10px;  
@@ -864,6 +864,15 @@ button.skill-button[disabled]::before  {
     opacity: 1;  /*  Показываем  индикатор cooldown  */
     transition: opacity 0.3s ease;  /*  Анимируем opacity  */
 }
+@keyframes cooldown {
+    0% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 /* Медиазапросы для мобильной версии */
 @media (max-width: 768px) {
           
@@ -1128,7 +1137,7 @@ button.skill-button[disabled]::before  {
     </div>
     
 
-    <button class="skill-button" disabled>Skill</button>
+    
 
 
     <!-- Добавляем кнопку с изображением письма -->
@@ -2556,7 +2565,7 @@ function applyProgress(data) {
 
         // Добавляем новую категорию заданий, если ее нет  у старых  игроков 
         if (!data.dailyQuests  ||  !data.dailyQuests['Убийство редких монстров'])  {
-            questCategories['Убийство редких монстров'] =  [
+            questCategories['Убийство  редких  монстров'] =  [
                 { description: 'Победить 1 Эпического монстра',  goal: 1,  progress: 0, reward: 1000,  completed: false, claimed:  false },
                 { description: 'Победить 2  Эпических монстров',  goal:  2,  progress:  0, reward:  5000,  completed:  false, claimed:  false  },
                 { description: 'Победить 3  Эпических монстров',  goal:  3,  progress: 0, reward: 10000, completed: false,  claimed: false  }, 
