@@ -1411,14 +1411,14 @@ let talents = {
     name: 'Ярость Стихий', 
     description: 'Увеличивает урон от всех атак.',
     level: 0,
-    bonus: 100, 
+    baseBonus: 100, //  можно менять в будущем 
     cost: 100
   },
   resilience: { // Стойкость
     name: 'Древняя Стойкость',
     description: 'Укрепляет жизненную силу, увеличивая максимальное здоровье.',
     level: 0,
-    bonus: 500, 
+    baseBonus: 1500,  //  можно менять в будущем 
     cost: 100 
   }
 };
@@ -1602,9 +1602,9 @@ function updateTalentsMenu() {
 }
 
 // Функция для расчета бонуса таланта
-function calculateTalentBonus(talentId, level) {
-  const talent = talents[talentId];
-  return level * talent.bonus;
+function  calculateTalentBonus(talentId,  level)  { 
+  const talent  =  talents[talentId]; 
+  return level  *  talent.baseBonus;  //  Используем baseBonus 
 }
 
 // Функция для расчета стоимости улучшения таланта
@@ -2703,7 +2703,9 @@ function applyProgress(data) {
         rewardMultiplier = data.rewardMultiplier || 1;
         chaosEssence = data.chaosEssence || 0;
         talents = data.talents ||  talents;
-        
+        //  Проверяем  наличие baseBonus  
+        talents.resilience.baseBonus =  1500;  //  Или  любое  другое  значение,  которое  вы  хотите  установить
+    playerHealth = calculateTotalHealth();  // Пересчитываем здоровье
         //  Миграция  данных  героев  
         heroes = migrateHeroData(data.heroes);  
         
@@ -4317,7 +4319,7 @@ async function registerForPvp() {
   console.log("Ожидание завершения регистрации...");
   await Promise.resolve(registrationPromise);
   console.log("Регистрация разблокирована.");
-
+  updateTotalDamage(); // Обновляем totalDamage перед  регистрацией
   playerHealth = calculateTotalHealth(); // Вычисляем  здоровье,  учитывая таланты 
   playerRef = ref(database, 'pvpQueue/' + nickname);
   console.log(`Регистрация игрока ${nickname} с данными: здоровье ${playerHealth}, урон ${totalDamage}`);
