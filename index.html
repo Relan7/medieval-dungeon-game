@@ -956,8 +956,8 @@ button.skill-button[disabled]::before  {
   border-radius: 5px; 
   z-index: 2001; 
 }
-#talentsMenu .close-btn,  
-#dailyQuestsMenu .close-btn {
+ .close-btn  
+{
   position: absolute;
   top: 10px;
   right: 10px;
@@ -966,19 +966,15 @@ button.skill-button[disabled]::before  {
   padding: 5px; /*  Настройте отступ, если нужно */
   cursor: pointer;
 }
-
-#talentsMenu .close-btn img,
-#dailyQuestsMenu .close-btn img {
+.close-btn img {
   width: 2vw; /*  Настройте размер изображения */
   height: auto;
 }
-#talentsMenu .close-btn:hover,
-#dailyQuestsMenu .close-btn:hover {
+.close-btn:hover {
   transform: scale(1.3); /* Увеличение при наведении */
 }
 
-#talentsMenu .close-btn:active,
-#dailyQuestsMenu .close-btn:active {
+.close-btn:active {
   transform: scale(0.95); /* Уменьшение при нажатии */
 }
 
@@ -1160,7 +1156,7 @@ button.skill-button[disabled]::before  {
           </button>
         <div id="talentsContainer"></div> 
         <p>Эссенция Хаоса: <span id="talentsChaosEssence"></span></p> 
-        <!-- <button onclick="closeTalentsMenu()">Закрыть</button> -->
+        
     </div>
 
     <div id="skillBook"> 
@@ -1182,7 +1178,7 @@ button.skill-button[disabled]::before  {
         </div>
     
         <ul  id="dailyQuestsList"></ul> 
-        <!-- <button onclick="closeDailyQuestsMenu()">Закрыть</button> -->
+       
     </div>
 
 <!-- Кнопка  для ежедневных  заданий --> 
@@ -1207,7 +1203,10 @@ button.skill-button[disabled]::before  {
         <p>Собрано: <span id="clanCurrentDonations"></span> золота</p> 
         <input type="number" id="clanDonateAmount" placeholder="Введите сумму" min="1">
         <button onclick="donateToClan()">Пожертвовать</button> 
-        <button onclick="closeClanDonateMenu()">Закрыть</button> 
+        <button class="close-btn" onclick="closeClanDonateMenu()">
+            <img src="close_button_image.png" alt="Закрыть">
+          </button>
+        <!-- <button onclick="closeClanDonateMenu()">Закрыть</button>  -->
     </div>
 
     <div id="clanMenu">
@@ -1216,7 +1215,11 @@ button.skill-button[disabled]::before  {
         <ul id="clanMembers"></ul>
         <button onclick="leaveClan()">Покинуть клан</button>
         <button onclick="upgradeClan()">Улучшить клан</button>
-        <button onclick="openClanDonateMenu()">Пожертвовать</button> <button onclick="closeClanMenu()">Закрыть</button>
+        <button class="close-btn" onclick="closeClanMenu()">
+            <img src="close_button_image.png" alt="Закрыть">
+          </button>
+        <button onclick="openClanDonateMenu()">Пожертвовать</button> 
+        <!-- <button onclick="closeClanMenu()">Закрыть</button> -->
     </div>
 
     <div id="rebornMenu" style="display:  none;">
