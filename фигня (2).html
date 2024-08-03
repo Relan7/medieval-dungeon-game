@@ -34,7 +34,7 @@ body, html {
             bottom: 0;
             left: 210px;
             width: 100%;
-            height: 8vh;
+            height: 60px;
             background: #333;
             color: white;
             display: flex;
@@ -106,7 +106,7 @@ body, html {
         #characterMenu {
     position: fixed;
     top: 0px;
-    right: 0px;
+    right: 1px;
     background: rgba(0, 0, 0, 0.8);
     color: white;
     padding: 10px;
@@ -114,14 +114,9 @@ body, html {
     display: block; 
     font-size: 16px;
     text-align: center;
-    width: 15vw;
-    height: 53vh;
-    /* overflow: auto;  */
-}
-#characterMenu img { 
-    width: 100%; 
-  height: 100%; 
-  object-fit: cover; 
+    max-width: calc(100vw - 20px); 
+    max-height: calc(100vh - 120px); 
+    overflow: auto; 
 }
 
 #leftCharacterMenu {
@@ -135,7 +130,7 @@ body, html {
         display: block;
         font-size: 16px;
         text-align: center;
-        max-width: 15vw;
+        max-width: calc(100vw - 20px);
         max-height: calc(100vh - 20px);
         overflow: auto;
         display: none; /* Скрываем по умолчанию */
@@ -228,7 +223,7 @@ body, html {
         .status-bar {
             position: fixed;
             top: 10px;
-            left: 16.5vw;
+            left: 300px;
             background: rgba(0, 0, 0, 0.5);
             color: white;
             padding: 10px;
@@ -472,7 +467,7 @@ body, html {
 
 #chatContainer {
     position: fixed;
-    bottom: 8vh;
+    bottom: 60px;
     left: 210px;
     width: 300px;
     max-height: 400px;
@@ -791,7 +786,7 @@ button.upgrade-button:hover, button.hire-button:hover {
 }
 #dailyQuestsButton {
     position: fixed; /* Фиксированное положение относительно окна браузера */
-    top: calc(53vh + 20px); /* 40vh (высота #characterMenu) + 10px (отступ) */
+    top: 445px; /* Отступ от верхнего края экрана, соответствующий высоте #characterMenu */
     right: 1px; /* Совпадает с правым отступом #characterMenu */
     cursor: pointer;
 }
@@ -893,8 +888,8 @@ button.skill-button[disabled]::before  {
 
 #skillBook { 
     position: fixed; 
-    bottom: 8vh;  
-    left:  41vw;  
+    top: 73%;  
+    left:  31%;  
     background:  rgba(0,  0,  0,  0.8); 
     color:  white;  
     padding:  10px;  
@@ -946,7 +941,7 @@ button.skill-button[disabled]::before  {
 }
 #talentsButton {
     position: fixed; /* Фиксированное положение относительно окна браузера */
-    top: calc(53vh + 20px + 5vh + 20px);
+    top: 495px; /* Отступ от верхнего края экрана, соответствующий высоте #characterMenu */
     right: 1px; /* Совпадает с правым отступом #characterMenu */
     cursor: pointer;
 }
@@ -1420,6 +1415,7 @@ let currentChat = 'global'; // Текущий чат (глобальный по 
 let worldBossMaxHealth  =  1000000; // Максимальное  здоровье  босса
 let worldBossHealth  =  worldBossMaxHealth; 
 let  worldBossWasKilled = false;  // Флаг,  указывающий, был ли босс убит в текущем  цикле
+let hasCompletedTutorial = false; // Флаг для отслеживания прохождения обучения
 
 let talents = {
   fury: { // Ярость 
@@ -1580,6 +1576,78 @@ const rareMonsterImages = [
     'rare_monster3.png',
     
 ];
+
+// Функция для отображения туториала
+function showTutorial() {
+  // 1. Create the dimmed background
+  const backgroundOverlay = document.createElement('div');
+  backgroundOverlay.id = 'tutorialBackgroundOverlay';
+  backgroundOverlay.style.position = 'fixed';
+  backgroundOverlay.style.top = '0';
+  backgroundOverlay.style.left = '0';
+  backgroundOverlay.style.width = '100%';
+  backgroundOverlay.style.height = '100%';
+  backgroundOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+  backgroundOverlay.style.zIndex = '9999'; // Lower z-index than the leftCharacterMenu
+  //backgroundOverlay.style.pointerEvents = 'none';  // Remove this line
+
+  // 2. Create the message
+  const message = document.createElement('p');
+  message.textContent = 'Нажмите кнопку "Нанять", чтобы нанять героя!';
+  message.style.position = 'fixed';
+  message.style.top = '30%'; 
+  message.style.left = '50%';
+  message.style.transform = 'translateX(-50%)';
+  message.style.zIndex = '10001'; 
+  message.style.color = 'white';
+  message.style.fontSize = '24px';
+  message.style.textAlign = 'center';
+  message.style.padding = '20px';
+
+  // 3. Create and position the arrow
+  const arrow = document.createElement('img');
+  arrow.src = 'arrow.png';
+  arrow.style.position = 'fixed';
+  arrow.style.width = '50px';
+  arrow.style.height = '50px';
+  arrow.style.zIndex = '10001';
+
+  // Highlight the first "Hire" button
+  const firstHireButton = document.querySelector('.hire-button'); 
+  if (firstHireButton) {
+    firstHireButton.style.outline = '3px solid yellow'; 
+    firstHireButton.style.boxShadow = '0 0 10px yellow';
+
+    // Calculate arrow position
+    const hireButtonRect = firstHireButton.getBoundingClientRect();
+    arrow.style.top = `${hireButtonRect.top - 80}px`;
+    arrow.style.left = `${hireButtonRect.left - (arrow.width / 2)}px`; // Corrected line
+
+    // Remove highlight after clicking the button
+    firstHireButton.addEventListener('click', () => {
+      firstHireButton.style.outline = 'none';
+      firstHireButton.style.boxShadow = 'none';
+    }, { once: true });
+  }
+
+  // 4. Append elements to the body
+  document.body.appendChild(backgroundOverlay); 
+  document.body.appendChild(message);
+  document.body.appendChild(arrow);
+
+  // 5. Remove tutorial elements after clicking any "Hire" button
+  const hireButtons = document.querySelectorAll('.hire-button');
+  hireButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      document.body.removeChild(backgroundOverlay);
+      document.body.removeChild(message);
+      document.body.removeChild(arrow);
+      hasCompletedTutorial = true;
+      saveProgress();
+    }, { once: true });
+  });
+}
+
 
 // Функция для открытия меню талантов
 function openTalentsMenu() {
@@ -2589,6 +2657,7 @@ async function saveProgress() {
         currentClan: currentClan, 
         chaosEssence: chaosEssence,
         talents: talents,
+        hasCompletedTutorial: hasCompletedTutorial, // Сохраняем флаг
         dailyQuests: questCategories 
     };
     console.log('Saving progress:', progressData);
@@ -2657,7 +2726,7 @@ async  function loadProgress(nickname)  {
 
             //  Миграция  данных героев
             data.heroes =  migrateHeroData(data.heroes); 
-
+            hasCompletedTutorial = data.hasCompletedTutorial || false;
             //  Загружаем  данные  ежедневных заданий
             if (data.dailyQuests)  {
                 questCategories =  data.dailyQuests;
@@ -2936,7 +3005,10 @@ async function continueGameSetup() {
     changeScreen('dungeon');
     updateStatusBar();
     duplicateSkillButtons();
-
+// Проверяем, нужно ли показывать туториал
+if (!hasCompletedTutorial) {
+    showTutorial();
+  }
     // Проверяем нахождение игрока в клане ПОСЛЕ загрузки прогресса
     if (await isPlayerInClan(nickname)) {
         console.log('Игрок в клане:', currentClan);
@@ -5385,7 +5457,7 @@ function showHitAnimation() {
 
 function drawBattle(offsetX = 0, offsetY = 0) { 
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-    ctx.drawImage(battleBackgroundImage, 0, 0, canvas.width, canvas.height); // Draw background
+    ctx.drawImage(battleBackgroundImage, 0, 0); // Draw background
 
     if (currentScreen === 'worldBoss') {
         // ... (existing world boss drawing logic) ...
