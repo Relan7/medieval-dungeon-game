@@ -32,24 +32,25 @@ body, html {
         #bottomMenu {
             position: fixed;
             bottom: 0;
-            left: 210px;
+            left: 16vw;
             width: 100%;
             height: 8vh;
             background: #333;
             color: white;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;  /*  Изменено  justify-content  */ 
             align-items: center;
-            font-size: 18px;
+            font-size: 1.5vw;
+            
         }
         #bottomMenu div {
   background: url('stone_texture.png'); /* Текстура камня */
   border: 3px outset #b38f66; /* "Выпуклая" обводка под бронзу */
   color: #f0f0f0;
-  padding: 10px 20px;
+  padding: 0.5vh 1vw;
   font-family: 'Cinzel', serif; /* Фэнтезийный шрифт */
   font-size: 20px; 
-  margin: 0 5px; /* Отступы между кнопками */
+  margin: 0 1vw; /* Отступы между кнопками */
   cursor: pointer;
   text-shadow: 2px 2px 3px black;
   transition: all 0.3s ease;
@@ -57,7 +58,8 @@ body, html {
   align-items: center;      /* Вертикальное центрирование */
   justify-content: center;  /* Горизонтальное центрирование */
   text-align: center;       /* Дополнительное центрирование текста */
-  flex-grow:  1;  /*  Добавляем  flex-grow  */
+  min-width: 10vw; /*  Минимальная  ширина  кнопки  */
+  /* max-width: 5vw; */
 }
 
 #bottomMenu div:hover {
@@ -112,7 +114,7 @@ body, html {
     padding: 10px;
     border-radius: 5px;
     display: block; 
-    font-size: 16px;
+    font-size: 1.2vw;
     text-align: center;
     width: 15vw;
     height: 53vh;
@@ -133,9 +135,9 @@ body, html {
         padding: 10px;
         border-radius: 5px;
         display: block;
-        font-size: 16px;
+        font-size: 1.2vw;
         text-align: center;
-        max-width: 15vw;
+        width: 15vw;
         max-height: calc(100vh - 20px);
         overflow: auto;
         display: none; /* Скрываем по умолчанию */
@@ -166,13 +168,13 @@ body, html {
             color: white;
             border: none;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 0.8vw;
             z-index: 1000;
         }
 
 
 
-        #shopMenu {
+        /* #shopMenu {
             position: fixed;
             top: 50px;
             left: 50%;
@@ -224,7 +226,7 @@ body, html {
             background: #fff;
             border: none;
             cursor: pointer;
-        }
+        } */
         .status-bar {
             position: fixed;
             top: 10px;
@@ -233,7 +235,7 @@ body, html {
             color: white;
             padding: 10px;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 1.2vw;
         }
         .status-bar p {
             margin: 8px 0;
@@ -341,7 +343,7 @@ body, html {
             border: none;
             cursor: pointer;
         }
-        .close-btn {
+        /* .close-btn {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -349,7 +351,7 @@ body, html {
             border: none;
             padding: 5px;
             cursor: pointer;
-        }
+        } */
         .monster-message {
             position: fixed;
             top: 20%;
@@ -460,7 +462,7 @@ body, html {
     left: 50%;
     transform: translateX(-50%);
     color: white;
-    font-size: 32px;
+    font-size: 2.4vw;
     line-height: 50px; /* Высота строки совпадает с высотой контейнера */
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Тень для текста */
     font-weight: bold; /* Жирный текст */
@@ -473,7 +475,7 @@ body, html {
 #chatContainer {
     position: fixed;
     bottom: 8vh;
-    left: 210px;
+    left: 16vw;
     width: 300px;
     max-height: 400px;
     background: rgba(0, 0, 0, 0.8);
@@ -490,7 +492,7 @@ body, html {
   border: 2px solid white; /* Белая обводка */
   color: white; 
   padding: 8px 16px; 
-  font-size: 16px;
+  font-size: 1.2vw;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s; /* Переходы для эффекта наведения */
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Тень для текста */
@@ -553,7 +555,7 @@ button.upgrade-button:hover, button.hire-button:hover {
     color: white;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1.2vw;
     z-index: 1000;
     display: none; /* Скрываем по умолчанию */
 }
@@ -802,10 +804,10 @@ button.upgrade-button:hover, button.hire-button:hover {
 }
 .daily-quests-text {
     display: inline-block;
-    padding: 10px 20px;
+    padding: 0.8vh 1.6vw;
     background-color: rgba(0, 0, 0, 0.8); /* Полупрозрачный фон */
     color: white; /* Цвет текста */
-    font-size: 18px; /* Размер шрифта */
+    font-size: 1.2vw;
     font-weight: bold; /* Жирный текст */
     border: 2px solid white; /* Белая рамка */
     border-radius: 10px; /* Скругленные углы */
@@ -946,7 +948,7 @@ button.skill-button[disabled]::before  {
 }
 #talentsButton {
     position: fixed; /* Фиксированное положение относительно окна браузера */
-    top: calc(53vh + 20px + 5vh + 20px);
+    top: calc(53vh + 20px + 6vh );
     right: 1px; /* Совпадает с правым отступом #characterMenu */
     cursor: pointer;
 }
@@ -1116,10 +1118,7 @@ button.skill-button[disabled]::before  {
     flex-grow: 1;
     overflow-y: auto;
     }
-    #shopMenu {
-        width: 90%;
-        left: 5%;
-    }
+
     #clanListMenu, #clanMenu {
   display: none; 
   position: fixed; 
@@ -1222,7 +1221,7 @@ button.skill-button[disabled]::before  {
         <div onclick="changeScreen('castle')">Замок</div>
         <div onclick="openClanListMenu()">Кланы</div>
         <div onclick="changeScreen('worldBoss')">Мировой Босс</div>
-        <div onclick="toggleShop()">Магазин</div>
+        <!-- <div onclick="toggleShop()">Магазин</div> -->
         <!-- <div onclick="toggleTopPlayers()">Топ игроки</div> -->
        
     </div>
@@ -1318,7 +1317,7 @@ button.skill-button[disabled]::before  {
         
         
     </div>
-    <div id="shopMenu">
+    <!-- <div id="shopMenu">
         <button class="close-btn" onclick="toggleShop()">X</button>
         <h2>Магазин</h2>
         <p>Золото: <span id="shopGold"></span></p>
@@ -1350,7 +1349,7 @@ button.skill-button[disabled]::before  {
             </div>
             
         </div>
-    </div>
+    </div> -->
     <!-- <div id="topPlayersMenu">
         <button onclick="toggleTopPlayers()">Закрыть</button>
     </div> -->
@@ -1385,12 +1384,12 @@ button.skill-button[disabled]::before  {
     
     
     <div class="crosshair" id="crosshair"></div>
-    <div id="itemDetail">
+    <!-- <div id="itemDetail">
         <img id="itemDetailImage" src="" alt="Item Detail">
         <p id="itemDetailName"></p>
         <button onclick="buyItem()">Купить</button>
         <button onclick="closeItemDetail()">Закрыть</button>
-    </div>
+    </div> -->
     <div id="continuePrompt">
         <img id="victoryImage" src="win2.png" alt="Вы победили" style="display: none; width: 10px; height: 10px; position: relative; z-index: 3000;">
         <p>Shap в печали, что вы его бьете :(</p>
@@ -3209,12 +3208,12 @@ let isUpdating = false;
 }
         window.drawStars = drawStars;
 
-        function toggleShop() {
-            const shopMenu = document.getElementById('shopMenu');
-            shopMenu.style.display = shopMenu.style.display === 'block' ? 'none' : 'block';
-            updateShop();
-        }
-        window.toggleShop = toggleShop; // Добавляем в глобальную область видимости
+        // function toggleShop() {
+        //     const shopMenu = document.getElementById('shopMenu');
+        //     shopMenu.style.display = shopMenu.style.display === 'block' ? 'none' : 'block';
+        //     updateShop();
+        // }
+        // window.toggleShop = toggleShop; // Добавляем в глобальную область видимости
 
         function drawShop() {
             document.getElementById('shopGold').textContent = gold;
@@ -3584,7 +3583,7 @@ function startHourlyReset() {
         window.upgradeWeapon = upgradeWeapon;
 
         function continueGame() {
-    document.getElementById('shopMenu').style.display = 'none';
+    // document.getElementById('shopMenu').style.display = 'none';
     if (currentLevel < 10000) {
         currentLevel++;
         initializeMonster(baseMonsterHealth * Math.pow(1.1, currentLevel - 1));
@@ -5480,7 +5479,7 @@ function changeScreen(screen) {
   currentScreen = screen;
 
   // Скрываем меню магазина
-  document.getElementById('shopMenu').style.display = 'none';
+//   document.getElementById('shopMenu').style.display = 'none';
 
   // Управляем видимостью элементов в зависимости от экрана
   document.getElementById('monsterHealthDisplay').style.display = (screen === 'dungeon') ? 'block' : 'none';
