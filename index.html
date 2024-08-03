@@ -1866,7 +1866,7 @@ function duplicateSkillButtons() {
       skillButton.src = hero.img; // Используем изображение героя в качестве иконки
       skillButton.alt = hero.skill.name;
       skillButton.classList.add('skill-button');
-      skillButton.title = hero.skill.name; // Добавляем подсказку с названием скилла
+      skillButton.title = `${hero.skill.hitsPerSecond}  выстрелов  в  секунду  в  течение  ${hero.skill.duration}  секунд`;
       skillButton.disabled = hero.skill.onCooldown; 
 
       // Добавляем обработчик события click 
