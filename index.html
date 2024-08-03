@@ -5532,6 +5532,14 @@ function changeScreen(screen) {
     showHealthBar();
     drawDungeonEntrance();
     document.getElementById('statusBar').style.display = 'block';
+  // Автоматический переход на экран battle через 1 секунды
+  setTimeout(() => {
+      if (currentScreen === 'dungeon') { // Проверяем, что игрок все еще на dungeon
+        const event = { clientX: canvas.width / 2, clientY: canvas.height / 2 }; // Создаем фиктивное событие клика по центру
+        canvas.dispatchEvent(new MouseEvent('click', event)); // Вызываем событие клика
+      }
+    }, 1000);
+
   } else if (screen === 'arena') {
     drawArena();
     displayLastPvpBattles();
