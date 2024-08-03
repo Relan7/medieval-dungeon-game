@@ -343,15 +343,7 @@ body, html {
             border: none;
             cursor: pointer;
         }
-        /* .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #fff;
-            border: none;
-            padding: 5px;
-            cursor: pointer;
-        } */
+
         .monster-message {
             position: fixed;
             top: 20%;
@@ -964,6 +956,31 @@ button.skill-button[disabled]::before  {
   border-radius: 5px; 
   z-index: 2001; 
 }
+#talentsMenu .close-btn,  
+#dailyQuestsMenu .close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none; /* Убираем фон */
+  border: none;
+  padding: 5px; /*  Настройте отступ, если нужно */
+  cursor: pointer;
+}
+
+#talentsMenu .close-btn img,
+#dailyQuestsMenu .close-btn img {
+  width: 2vw; /*  Настройте размер изображения */
+  height: auto;
+}
+#talentsMenu .close-btn:hover,
+#dailyQuestsMenu .close-btn:hover {
+  transform: scale(1.3); /* Увеличение при наведении */
+}
+
+#talentsMenu .close-btn:active,
+#dailyQuestsMenu .close-btn:active {
+  transform: scale(0.95); /* Уменьшение при нажатии */
+}
 
 .talent {
   margin-bottom: 15px;
@@ -1136,13 +1153,15 @@ button.skill-button[disabled]::before  {
     </style>
 </head>
 <body>
-
     <div id="talentsMenu">
         <h2>Древние Знания</h2>
+        <button class="close-btn" onclick="closeTalentsMenu()">
+            <img src="close_button_image.png" alt="Закрыть">
+          </button>
         <div id="talentsContainer"></div> 
         <p>Эссенция Хаоса: <span id="talentsChaosEssence"></span></p> 
-        <button onclick="closeTalentsMenu()">Закрыть</button>
-      </div>
+        <!-- <button onclick="closeTalentsMenu()">Закрыть</button> -->
+    </div>
 
     <div id="skillBook"> 
         <h3>Книга  скиллов</h3> 
@@ -1153,6 +1172,9 @@ button.skill-button[disabled]::before  {
 
     <div id="dailyQuestsMenu" style="display: none;">
         <h2>Ежедневные задания</h2>
+        <button class="close-btn" onclick="closeDailyQuestsMenu()">
+            <img src="close_button_image.png" alt="Закрыть">
+          </button>
     
         <!--  Кнопки  для  переключения  категорий -->
         <div  id="dailyQuestCategories">
@@ -1160,7 +1182,7 @@ button.skill-button[disabled]::before  {
         </div>
     
         <ul  id="dailyQuestsList"></ul> 
-        <button onclick="closeDailyQuestsMenu()">Закрыть</button>
+        <!-- <button onclick="closeDailyQuestsMenu()">Закрыть</button> -->
     </div>
 
 <!-- Кнопка  для ежедневных  заданий --> 
